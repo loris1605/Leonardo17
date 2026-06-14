@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Runtime.Loader;
 using Splat;
 
-namespace Leonardo16
+namespace App
 {
     public static class ModuleLoader
     {
@@ -57,10 +57,10 @@ namespace Leonardo16
                 // 1. Determina il percorso della DLL nella cartella dell'applicazione
                 string assemblyPath = Path.Combine(AppContext.BaseDirectory, "Connection.dll");
 
-                if (!File.Exists(assemblyPath))
-                {
-                    throw new FileNotFoundException($"Impossibile trovare il modulo di connessione: {assemblyPath}");
-                }
+                //if (!File.Exists(assemblyPath))
+                //{
+                //    throw new FileNotFoundException($"Impossibile trovare il modulo di connessione: {assemblyPath}");
+                //}
 
                 // 2. Carica l'Assembly in memoria dinamicamente
                 Assembly connectionAssembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);

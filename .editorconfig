@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# CA1822: Contrassegnare i membri come static
+dotnet_diagnostic.CA1822.severity = none
