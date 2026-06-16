@@ -2,9 +2,7 @@
 using Soci.Core.Repository;
 using System.Diagnostics;
 
-#pragma warning disable IDE0130 // La parola chiave namespace non corrisponde alla struttura di cartelle
 namespace Soci.ViewModels
-#pragma warning restore IDE0130 // La parola chiave namespace non corrisponde alla struttura di cartelle
 {
     public interface IPersonAddViewModel : IRoutableViewModel, ISociCrudViewModel { }
 
@@ -14,9 +12,7 @@ namespace Soci.ViewModels
         private ISociPersonRepository Q;
 
         public PersonAddViewModel(ISociScreen host, 
-                                  ISociPersonRepository Repository,
-                                  int idDaModificare = 0,
-                                  int idRitorno = 0) : base()
+                                  ISociPersonRepository Repository) : base()
         {
             Q = Repository ?? throw new ArgumentNullException(nameof(Repository));
             _host = host ?? throw new ArgumentNullException(nameof(host));

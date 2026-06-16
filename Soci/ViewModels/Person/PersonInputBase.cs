@@ -61,7 +61,7 @@ namespace Soci.ViewModels
             
         }
 
-       
+
 
         public void SetIdDaModificare(int id)
         {
@@ -130,13 +130,10 @@ namespace Soci.ViewModels
         {
             if (_host is not null)
             {
-                
-                if (_host.InputRouter.NavigationStack.Count == 0) return;
-
                 _isClosing = true;
 
                 _inputBack.OnNext(value); // Notifica l'esterno che Back è stato premuto con il valore specificato
-                _inputBack.OnCompleted(); // Completa l'osservabile per evitare memory leak e notificare che non ci saranno più eventi
+                _inputBack.OnCompleted();
                 await Task.CompletedTask;
                 
             }

@@ -9,7 +9,7 @@
              KeyboardNavigation.TabNavigation="Cycle"
              Background="Transparent"
              x:CompileBindings="False"
-             x:Class="Leonardo.InputSaveBox"
+             x:Class="Views.InputSaveBox"
              x:Name="Root">
 
     <Grid x:Name="ButtonGrid">

@@ -66,22 +66,59 @@ namespace Soci
                 return new PersonAddViewModel(screen, repository);
             }, typeof(IPersonAddViewModel));
 
+            Locator.CurrentMutable.Register(() =>
+            {
+                var screen = Locator.Current.GetService<ISociScreen>();
+                var repository = Locator.Current.GetService<ISociPersonRepository>();
+                return new PersonDelViewModel(screen, repository);
+            }, typeof(IPersonDelViewModel));
 
-            //Locator.CurrentMutable.Register(() => new PersonAddViewModel(Locator.Current.GetService<IPersonRepository>())
-            //                                                                , typeof(IPersonAddViewModel));
-            //Locator.CurrentMutable.Register(() => new PersonDelViewModel(Locator.Current.GetService<IPersonRepository>())
-            //                                                                , typeof(IPersonDelViewModel));
-            //Locator.CurrentMutable.Register(() => new PersonUpdViewModel(Locator.Current.GetService<IPersonRepository>())
-            //                                                                , typeof(IPersonUpdViewModel));
+            Locator.CurrentMutable.Register(() =>
+            {
+                var screen = Locator.Current.GetService<ISociScreen>();
+                var repository = Locator.Current.GetService<ISociPersonRepository>();
+                return new PersonUpdViewModel(screen, repository);
+            }, typeof(IPersonUpdViewModel));
+
+            Locator.CurrentMutable.Register(() =>
+            {
+                var screen = Locator.Current.GetService<ISociScreen>();
+                var repository = Locator.Current.GetService<ISociPersonRepository>();
+                return new CodiceSocioAddViewModel(screen, repository);
+            }, typeof(ICodiceSocioAddViewModel));
+
+            Locator.CurrentMutable.Register(() =>
+            {
+                var screen = Locator.Current.GetService<ISociScreen>();
+                var repository = Locator.Current.GetService<ISociPersonRepository>();
+                return new CodiceSocioDelViewModel(screen, repository);
+            }, typeof(ICodiceSocioDelViewModel));
+
+            Locator.CurrentMutable.Register(() =>
+            {
+                var screen = Locator.Current.GetService<ISociScreen>();
+                var repository = Locator.Current.GetService<ISociPersonRepository>();
+                return new CodiceSocioUpdViewModel(screen, repository);
+            }, typeof(ICodiceSocioUpdViewModel));
+
+            Locator.CurrentMutable.Register(() =>
+            {
+                var screen = Locator.Current.GetService<ISociScreen>();
+                var repository = Locator.Current.GetService<ISociPersonRepository>();
+                return new TesseraAddViewModel(screen, repository);
+            }, typeof(ITesseraAddViewModel));
+
+            Locator.CurrentMutable.Register(() =>
+            {
+                var screen = Locator.Current.GetService<ISociScreen>();
+                var repository = Locator.Current.GetService<ISociPersonRepository>();
+                return new TesseraDelViewModel(screen, repository);
+            }, typeof(ITesseraDelViewModel));
+
+
             //Locator.CurrentMutable.Register(() => new PersonSearchViewModel(Locator.Current.GetService<IPersonRepository>())
             //                                                                , typeof(IPersonSearchViewModel));
 
-            //Locator.CurrentMutable.Register(() => new CodiceSocioAddViewModel(Locator.Current.GetService<IPersonRepository>())
-            //                                                                , typeof(ICodiceSocioAddViewModel));
-            //Locator.CurrentMutable.Register(() => new CodiceSocioDelViewModel(Locator.Current.GetService<IPersonRepository>())
-            //                                                                , typeof(ICodiceSocioDelViewModel));
-            //Locator.CurrentMutable.Register(() => new CodiceSocioUpdViewModel(Locator.Current.GetService<IPersonRepository>())
-            //                                                                , typeof(ICodiceSocioUpdViewModel));
 
             //Locator.CurrentMutable.Register(() => new TesseraAddViewModel(Locator.Current.GetService<IPersonRepository>())
             //                                                                , typeof(ITesseraAddViewModel));
@@ -94,14 +131,15 @@ namespace Soci
             Locator.CurrentMutable.Register(() => new SociView(), typeof(IViewFor<SociViewModel>));
             Locator.CurrentMutable.Register(() => new PersonGroupView(), typeof(IViewFor<PersonGroupViewModel>));
 
-            //Locator.CurrentMutable.Register(() => new PersonInputView(), typeof(IViewFor<PersonAddViewModel>));
-            //Locator.CurrentMutable.Register(() => new PersonInputView(), typeof(IViewFor<PersonDelViewModel>));
-            //Locator.CurrentMutable.Register(() => new PersonInputView(), typeof(IViewFor<PersonUpdViewModel>));
+            Locator.CurrentMutable.Register(() => new PersonInputView(), typeof(IViewFor<PersonAddViewModel>));
+            Locator.CurrentMutable.Register(() => new PersonInputView(), typeof(IViewFor<PersonDelViewModel>));
+            Locator.CurrentMutable.Register(() => new PersonInputView(), typeof(IViewFor<PersonUpdViewModel>));
+
             //Locator.CurrentMutable.Register(() => new PersonSearchView(), typeof(IViewFor<PersonSearchViewModel>));
 
-            //Locator.CurrentMutable.Register(() => new SocioInputView(), typeof(IViewFor<CodiceSocioAddViewModel>));
-            //Locator.CurrentMutable.Register(() => new SocioInputView(), typeof(IViewFor<CodiceSocioDelViewModel>));
-            //Locator.CurrentMutable.Register(() => new SocioInputView(), typeof(IViewFor<CodiceSocioUpdViewModel>));
+            Locator.CurrentMutable.Register(() => new SocioInputView(), typeof(IViewFor<CodiceSocioAddViewModel>));
+            Locator.CurrentMutable.Register(() => new SocioInputView(), typeof(IViewFor<CodiceSocioDelViewModel>));
+            Locator.CurrentMutable.Register(() => new SocioInputView(), typeof(IViewFor<CodiceSocioUpdViewModel>));
 
             //Locator.CurrentMutable.Register(() => new TesseraInputView(), typeof(IViewFor<TesseraAddViewModel>));
             //Locator.CurrentMutable.Register(() => new TesseraInputView(), typeof(IViewFor<TesseraDelViewModel>));

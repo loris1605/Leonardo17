@@ -6,7 +6,7 @@ using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using ViewModels;
 
-namespace Leonardo;
+namespace Views;
 
 public partial class InputSaveBox : ReactiveUserControl<ViewModelBase>
 {
