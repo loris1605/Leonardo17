@@ -1,12 +1,17 @@
-﻿using App;
+﻿using Contracts;
 using Core.Repository;
+using Leonardo17;
 using Microsoft.EntityFrameworkCore;
 using Models.Context;
+using Models.Tables;
 using ReactiveUI;
+using Splat;
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 
@@ -20,11 +25,14 @@ namespace ViewModels
                                                    IActivatableViewModel,
                                                    IMainWindowViewModel          
 
-        {
+    {
+
         readonly int _currentVersion = 1; // Versione attuale del database, da aggiornare quando si modificano le entità
         private readonly ISettingRepository _settingRepository;
         //private readonly IServiceProvider _sp;
         private bool _isInitialized;
+
+        private CompositeDisposable _connectionDisposables;
 
         // Iniettiamo le interfacce dei ViewModel per la navigazione
 
@@ -39,7 +47,7 @@ namespace ViewModels
                 //_sp = sp ?? throw new ArgumentNullException(nameof(sp));
 
             // Spostiamo la logica di navigazione all'attivazione
-            this.WhenActivated((CompositeDisposable disposables) =>
+            this.WhenActivated(disposables =>
             {
                 if (!_isInitialized)
                 {
@@ -47,6 +55,12 @@ namespace ViewModels
                     // Eseguiamo l'inizializzazione in modo che non blocchi l'attivazione della View
                     Task.Run(async () => await InitializeNavigation());
                 }
+
+                Disposable.Create(() =>
+                {
+                    
+                }).DisposeWith(disposables);
+
             });
         }
 
@@ -68,40 +82,7 @@ namespace ViewModels
                 }
                 else
                 {
-                    await Task.Run(() => ModuleLoader.EnsureConnectionModuleLoaded());
-
-                    var tcs = new TaskCompletionSource();
-
-                    // 3. Risoluzione ViewModel e navigazione sul Main Thread
-                    //RxSchedulers.MainThreadScheduler.Schedule(() =>
-                    //{
-                    //    try
-                    //    {
-                    //        // Nascendo qui dentro, il costruttore del ConnectionViewModel 
-                    //        // viene eseguito sul thread UI, azzerando l'errore Cross-Thread!
-                    //        var connectionVM = Locator.Current.GetService<IConnectionViewModel>();
-
-                    //        if (connectionVM != null)
-                    //        {
-                    //            // Eseguiamo la navigazione e segnaliamo il completamento del Task
-                    //            Router.NavigateAndReset.Execute(connectionVM)
-                    //                .Subscribe(_ => tcs.SetResult(), ex => tcs.SetException(ex));
-                    //        }
-                    //        else
-                    //        {
-                    //            Debug.WriteLine(">>> [ERROR] Impossibile risolvere IConnectionViewModel.");
-                    //            tcs.SetResult();
-                    //        }
-                    //    }
-                    //    catch (Exception ex)
-                    //    {
-                    //        tcs.SetException(ex);
-                    //    }
-
-                    //});
-
-                    // Attendiamo che il thread della UI abbia finito l'operazione
-                    await tcs.Task;
+                    await GoToConnection();
 
                 }
             }
@@ -135,6 +116,55 @@ namespace ViewModels
 
     public partial class MainWindowViewModel
     {
+        private async Task GoToConnection()
+        {
+            _connectionDisposables?.Dispose();
+            _connectionDisposables = [];
+
+            await Task.Run(() => ModuleLoader.EnsureConnectionModuleLoaded());
+            var tcs = new TaskCompletionSource();
+            // 3. Risoluzione ViewModel e navigazione sul Main Thread
+            RxSchedulers.MainThreadScheduler.Schedule(() =>
+            {
+                try
+                {
+                    // Nascendo qui dentro, il costruttore del ConnectionViewModel 
+                    // viene eseguito sul thread UI, azzerando l'errore Cross-Thread!
+                    var connectionVM = Locator.Current.GetService<IConnectionViewModel>();
+                    if (connectionVM != null)
+                    {
+                        connectionVM.ConnectionToLogin
+                            .ObserveOn(RxSchedulers.MainThreadScheduler)
+                            .Subscribe(async _ =>
+                            {
+                                // Quando riceviamo il segnale di richiesta Add da parte del gruppo, navighiamo alla schermata di input
+                                await GoToLogin();
+                            }).DisposeWith(_connectionDisposables);
+
+                        // Eseguiamo la navigazione e segnaliamo il completamento del Task
+                        Router.NavigateAndReset.Execute(connectionVM)
+                            .Subscribe(
+                                _ => tcs.SetResult(),
+                                ex => {
+                                    _connectionDisposables?.Dispose();
+                                    tcs.SetException(ex);
+                                })
+                            .DisposeWith(_connectionDisposables); // Corretto: inserito il DisposeWith
+                    }
+                    else
+                    {
+                        Debug.WriteLine(">>> [ERROR] Impossibile risolvere IConnectionViewModel.");
+                        tcs.SetResult();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    tcs.SetException(ex);
+                }
+            });
+            // Attendiamo che il thread della UI abbia finito l'operazione
+            await tcs.Task;
+        }
         private async Task GoToLogin()
         {
             await Task.Run(() => ModuleLoader.EnsureLoginModuleLoaded());
@@ -142,45 +172,61 @@ namespace ViewModels
             var tcs = new TaskCompletionSource();
 
             // 3. Risoluzione ViewModel e navigazione sul Main Thread
-            //RxSchedulers.MainThreadScheduler.Schedule(() =>
-            //{
-            //    try
-            //    {
-            //        // Nascendo qui dentro, il costruttore del LoginViewModel 
-            //        // viene eseguito sul thread UI, azzerando l'errore Cross-Thread!
-            //        var loginVM = Locator.Current.GetService<ILoginViewModel>();
+            RxSchedulers.MainThreadScheduler.Schedule(() =>
+            {
+                try
+                {
+                    // Nascendo qui dentro, il costruttore del LoginViewModel 
+                    // viene eseguito sul thread UI, azzerando l'errore Cross-Thread!
+                    var loginVM = Locator.Current.GetService<ILoginViewModel>();
 
-            //        if (loginVM != null)
-            //        {
-            //            loginVM.LoginSuccesso
-            //                .Take(1) // Prendiamo solo il primo evento di successo
-            //                .ObserveOn(RxSchedulers.MainThreadScheduler)
-            //                .Subscribe(async _ =>
-            //                {
-            //                    // Quando riceviamo il segnale di login riuscito, navighiamo al Menu
-            //                    await GoToMenu();
-            //                });
+                    if (loginVM != null)
+                    {
+                        var loginDisposables = new CompositeDisposable();
+
+                        loginVM.LoginSuccesso
+                            .Take(1) // Prendiamo solo il primo evento di successo
+                            .ObserveOn(RxSchedulers.MainThreadScheduler)
+                            .Subscribe(async _ =>
+                            {
+                                // Scarichiamo le risorse del Login prima di andare al Menu
+                                loginDisposables.Dispose();
+
+                                // Ripristinata la navigazione reale verso il menu
+                                await GoToMenu();
+                            }).DisposeWith(loginDisposables);
 
 
-            //            // Eseguiamo la navigazione e segnaliamo il completamento del Task
-            //            Router.NavigateAndReset.Execute(loginVM)
-            //                .Subscribe(_ => tcs.SetResult(), ex => tcs.SetException(ex));
-            //        }
-            //        else
-            //        {
-            //            Debug.WriteLine(">>> [ERROR] Impossibile risolvere ILoginViewModel.");
-            //            tcs.SetResult();
-            //        }
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        tcs.SetException(ex);
-            //    }
+                        // Eseguiamo la navigazione e segnaliamo il completamento del Task
+                        Router.NavigateAndReset.Execute(loginVM)
+                        .Subscribe(
+                            _ => tcs.SetResult(),
+                            ex => {
+                                loginDisposables.Dispose(); // In caso di errore svuotiamo le risorse
+                                tcs.SetException(ex);
+                            })
+                        .DisposeWith(loginDisposables);
+                    }
+                    else
+                    {
+                        Debug.WriteLine(">>> [ERROR] Impossibile risolvere ILoginViewModel.");
+                        tcs.SetResult();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    tcs.SetException(ex);
+                }
 
-            //});
+                
+
+            });
+
+
 
             // Attendiamo che il thread della UI abbia finito l'operazione
             await tcs.Task;
+
         }
 
         private async Task GoToMenu()
@@ -189,47 +235,73 @@ namespace ViewModels
 
             var tcs = new TaskCompletionSource();
 
-            //try
-            //{
-            //    // Nascendo qui dentro, il costruttore del MenuViewModel 
-            //    // viene eseguito sul thread UI, azzerando l'errore Cross-Thread!
-            //    var menuVM = Locator.Current.GetService<IMenuViewModel>();
+            try
+            {
+                // Nascendo qui dentro, il costruttore del MenuViewModel 
+                // viene eseguito sul thread UI, azzerando l'errore Cross-Thread!
+                var menuVM = Locator.Current.GetService<IMenuViewModel>();
 
-            //    if (menuVM != null)
-            //    {
-            //        menuVM.MenuToLogin
-            //            .Take(1) // Prendiamo solo il primo evento di successo
-            //            .ObserveOn(RxSchedulers.MainThreadScheduler)
-            //            .Subscribe(async _ =>
-            //            {
-            //                // Quando riceviamo il segnale di login riuscito, navighiamo al Menu
-            //                await GoToLogin();
-            //            });
+                if (menuVM != null)
+                {
+                    var menuDisposables = new CompositeDisposable();
 
-            //        menuVM.MenuToSoci
-            //            .Take(1) // Prendiamo solo il primo evento di successo
-            //            .ObserveOn(RxSchedulers.MainThreadScheduler)
-            //            .Subscribe(async _ =>
-            //            {
-            //                // Quando riceviamo il segnale di login riuscito, navighiamo al Menu
-            //                await GoToSoci();
-            //            });
+                    menuVM.MenuToLogin
+                        .Take(1) // Prendiamo solo il primo evento di successo
+                            .ObserveOn(RxSchedulers.MainThreadScheduler)
+                            .Subscribe(async _ =>
+                            {
+                                // Scarichiamo le risorse del Login prima di andare al Menu
+                                menuDisposables.Dispose();
+
+                                // Ripristinata la navigazione reale verso il menu
+                                await GoToLogin();
+                            }).DisposeWith(menuDisposables);
+
+                    menuVM.MenuToSoci
+                        .Take(1) // Prendiamo solo il primo evento di successo
+                            .ObserveOn(RxSchedulers.MainThreadScheduler)
+                            .Subscribe(async _ =>
+                            {
+                                // Scarichiamo le risorse del Login prima di andare al Menu
+                                menuDisposables.Dispose();
+
+                                // Ripristinata la navigazione reale verso il menu
+                                await GoToSoci();
+                            }).DisposeWith(menuDisposables);
+
+                    menuVM.MenuToConnection
+                        .Take(1) // Prendiamo solo il primo evento di successo
+                            .ObserveOn(RxSchedulers.MainThreadScheduler)
+                            .Subscribe(async _ =>
+                            {
+                                // Scarichiamo le risorse del Login prima di andare al Menu
+                                menuDisposables.Dispose();
+
+                                // Ripristinata la navigazione reale verso il menu
+                                await GoToConnection();
+                            }).DisposeWith(menuDisposables);
 
 
-            //        // Eseguiamo la navigazione e segnaliamo il completamento del Task
-            //        Router.NavigateAndReset.Execute(menuVM)
-            //            .Subscribe(_ => tcs.SetResult(), ex => tcs.SetException(ex));
-            //    }
-            //    else
-            //    {
-            //        Debug.WriteLine(">>> [ERROR] Impossibile risolvere IMenuViewModel.");
-            //        tcs.SetResult();
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    tcs.SetException(ex);
-            //}
+                    // Eseguiamo la navigazione e segnaliamo il completamento del Task
+                    Router.NavigateAndReset.Execute(menuVM)
+                        .Subscribe(
+                            _ => tcs.SetResult(),
+                            ex => {
+                                menuDisposables .Dispose(); // In caso di errore svuotiamo le risorse
+                                tcs.SetException(ex);
+                            })
+                        .DisposeWith(menuDisposables);
+                }
+                else
+                {
+                    Debug.WriteLine(">>> [ERROR] Impossibile risolvere IMenuViewModel.");
+                    tcs.SetResult();
+                }
+            }
+            catch (Exception ex)
+            {
+                tcs.SetException(ex);
+            }
 
             await tcs.Task;
         }
@@ -241,42 +313,57 @@ namespace ViewModels
             var tcs = new TaskCompletionSource();
 
             // 3. Risoluzione ViewModel e navigazione sul Main Thread
-            //RxSchedulers.MainThreadScheduler.Schedule(() =>
-            //{
-            //    try
-            //    {
-            //        // Nascendo qui dentro, il costruttore del LoginViewModel 
-            //        // viene eseguito sul thread UI, azzerando l'errore Cross-Thread!
-            //        var sociVM = Locator.Current.GetService<ISociViewModel>();
+            RxSchedulers.MainThreadScheduler.Schedule(() =>
+            {
+                try
+                {
+                    // Nascendo qui dentro, il costruttore del LoginViewModel 
+                    // viene eseguito sul thread UI, azzerando l'errore Cross-Thread!
+                    var sociVM = Locator.Current.GetService<ISociViewModel>();
 
-            //        if (sociVM != null)
-            //        {
-            //            sociVM.SociToMenu
-            //            .Take(1) // Prendiamo solo il primo evento di successo
-            //            .ObserveOn(RxSchedulers.MainThreadScheduler)
-            //            .Subscribe(async _ =>
-            //            {
-            //                // Quando riceviamo il segnale di uscita riuscito, navighiamo al Menu
-            //                await GoToMenu();
-            //            });
+                    if (sociVM != null)
+                    {
+                        var sociDisposables = new CompositeDisposable();
+
+                        sociVM.SociToMenu
+                            .Take(1) // Prendiamo solo il primo evento di successo
+                            .ObserveOn(RxSchedulers.MainThreadScheduler)
+                            .Subscribe(async _ =>
+                            {
+                                // Scarichiamo le risorse del Soci prima di andare al Menu
+                                sociDisposables.Dispose();
+
+                                // Ripristinata la navigazione reale verso il menu
+                                await GoToMenu();
+                            }).DisposeWith(sociDisposables);
 
 
-            //            // Eseguiamo la navigazione e segnaliamo il completamento del Task
-            //            Router.NavigateAndReset.Execute(sociVM)
-            //                .Subscribe(_ => tcs.SetResult(), ex => tcs.SetException(ex));
-            //        }
-            //        else
-            //        {
-            //            Debug.WriteLine(">>> [ERROR] Impossibile risolvere ISociViewModel.");
-            //            tcs.SetResult();
-            //        }
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        tcs.SetException(ex);
-            //    }
+                        // Eseguiamo la navigazione e segnaliamo il completamento del Task
+                        Router.NavigateAndReset.Execute(sociVM)
+                        .Subscribe(
+                            _ => tcs.SetResult(),
+                            ex => {
+                                sociDisposables.Dispose(); // In caso di errore svuotiamo le risorse
+                                tcs.SetException(ex);
+                            })
+                        .DisposeWith(sociDisposables);
+                    }
+                    else
+                    {
+                        Debug.WriteLine(">>> [ERROR] Impossibile risolvere ISociViewModel.");
+                        tcs.SetResult();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    tcs.SetException(ex);
+                }
 
-            //});
+
+
+            });
+
+
 
             // Attendiamo che il thread della UI abbia finito l'operazione
             await tcs.Task;

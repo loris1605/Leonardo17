@@ -55,12 +55,9 @@ namespace Leonardo17
                 // Equivale a sp.GetRequiredService<IMainWindowViewModel>()
                 var mainWindowVm = Locator.Current.GetService<IMainWindowViewModel>();
 
-                if (mainWindowVm == null)
-                {
-                    throw new InvalidOperationException("IMainWindowViewModel non è registrato in Splat.");
-                }
-
-                return (IScreen)mainWindowVm;
+                return mainWindowVm == null
+                    ? throw new InvalidOperationException("IMainWindowViewModel non è registrato in Splat.")
+                    : (IScreen)mainWindowVm;
             });
 
 

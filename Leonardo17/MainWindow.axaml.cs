@@ -3,6 +3,7 @@ using ReactiveUI.Avalonia;
 using Splat;
 using System;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Reactive.Disposables;
 using System.Reactive.Disposables.Fluent;
 using System.Threading.Tasks;
@@ -18,12 +19,15 @@ namespace Views
 
             ViewModel = Locator.Current.GetService<IMainWindowViewModel>() as MainWindowViewModel;
 
+
             if (ViewModel == null)
             {
                 throw new InvalidOperationException("Impossibile risolvere MainWindowViewModel da Splat.");
             }
 
-            DataContext = ViewModel;
+            Debug.WriteLine(">>> [MAIN] MainWindow inizializzata con ViewModel: " + ViewModel.GetType().Name);
+
+
 
             this.WhenActivated(disposables =>
             {
