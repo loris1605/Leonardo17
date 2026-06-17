@@ -211,56 +211,7 @@ namespace Soci.ViewModels
         }
 
 
-        protected IObservable<Unit> NavigateToReset(IRoutableViewModel vm)
-        {
-            if (_host == null) return Observable.Return(Unit.Default);
 
-            _isClosing = true; // Impedisce la navigazione multipla
-
-            return _host.GroupRouter.NavigateAndReset.Execute(vm).Select(_ => Unit.Default);
-        }
-
-        protected IObservable<Unit> NavigateToInput(IRoutableViewModel vm)
-        {
-            return Observable.Start(() => _host.GroupEnabled = false, RxSchedulers.MainThreadScheduler)
-                .SelectMany(_ => _host.InputRouter.Navigate.Execute(vm))
-                .Select(_ => Unit.Default);
-        }
-
-        protected async Task NavigateTo<T>(Action<T> configure = null) where T : class // Assumi che abbiano un'interfaccia base per SetHost
-        {
-            // 1. Blocchiamo la UI
-            _isClosing = true;
-
-            var viewModel = Locator.Current.GetService<T>();
-            if (viewModel != null)
-            {
-                try
-                {
-                    // 2. Configurazione (SetHost e altro)
-                    // Assicurati che le tue interfacce derivino da una base o usa dynamic
-                    (viewModel as dynamic).SetHost(_host);
-                    configure?.Invoke(viewModel);
-
-                    // 3. Navigazione sul Main Thread
-                    await Observable.Start(async () =>
-                    {
-                        _isClosing = false;
-                        await NavigateToInput(viewModel as IRoutableViewModel);
-                    }, RxSchedulers.MainThreadScheduler);
-                }
-                catch (Exception ex)
-                {
-                    _isClosing = false;
-                    Debug.WriteLine($"ERRORE durante la navigazione a {typeof(T).Name}: {ex.Message}");
-                }
-            }
-            else
-            {
-                _isClosing = false;
-                Debug.WriteLine($"ERRORE CRITICO: {typeof(T).Name} non risolto.");
-            }
-        }
 
         protected async override Task OnAdding()
         {

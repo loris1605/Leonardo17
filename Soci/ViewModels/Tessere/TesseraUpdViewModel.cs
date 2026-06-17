@@ -5,18 +5,17 @@ using System.Diagnostics;
 
 namespace Soci.ViewModels
 {
-    public interface ICodiceSocioUpdViewModel : IRoutableViewModel, ISociCrudViewModel { }
+    public interface ITesseraUpdViewModel : IRoutableViewModel, ISociCrudViewModel { }
 
-    public class CodiceSocioUpdViewModel : CodiceSocioInputBase, ICodiceSocioUpdViewModel
+    public class TesseraUpdViewModel : TesseraInputBase, ITesseraUpdViewModel
     {
         private ISociPersonRepository Q;
-        
-
-        public CodiceSocioUpdViewModel(ISociScreen host, ISociPersonRepository Repository) : base()
+                
+        public TesseraUpdViewModel(ISociScreen host, ISociPersonRepository Repository = null) : base()
         {
+            FieldVisibile = true;
             FieldsEnabled = true;
             FieldsVisibile = true;
-            FieldVisibile = false;
 
             Q = Repository ?? throw new ArgumentNullException(nameof(Repository));
             _host = host ?? throw new ArgumentNullException(nameof(host));
@@ -29,72 +28,65 @@ namespace Soci.ViewModels
 
         protected override async Task OnLoading()
         {
-            var data = await Q.FirstSocio(_idDaModificare, Token);
-            Token.ThrowIfCancellationRequested();
+            var data = await Q.FirstTessera(_idDaModificare, Token);
 
             if (data == null)
             {
-                InfoLabel = "Errore: Socio non trovato nel database.";
+                InfoLabel = "Errore: Tesera non trovata nel database.";
                 FieldsEnabled = false;
-                await SetFocus(EscFocus);
             }
             else
             {
                 BindingT = new SociPersonMap(data);
-                Titolo = "Modifica Codice Socio per ";
+                Titolo = "Modifica Tessera : " + GetNumeroTessera;
                 Titolo1 = "per " + GetNomeCognome;
-                await SetFocus(NumeroSocioFocus);
             }
-            
+    
+            await SetFocus(NumeroTesseraFocus);
         }
 
-        protected override async Task OnSaving()
+        protected async override Task OnSaving()
         {
-            _isClosing = true;
-            if (BindingT == null || BindingT.Id == 0)
-            {
-                _isClosing = false;
-                InfoLabel = "Errore: Socio non valido.";
-                await SetFocus(EscFocus);
-                return;
-            }
 
-            InfoLabel = "Aggiornamento in corso...";
+            if (BindingT is null) return;
+
+            _isClosing = true;
 
             try
             {
-                if (int.TryParse(GetNumeroSocio, out int numeroSocio))
+                if (int.TryParse(GetNumeroTessera, out int numeroTessera))
                 {
                     // 2. Se la conversione riesce, controlliamo il valore
-                    if (numeroSocio <= 0) { _isClosing = false; }
+                    if (numeroTessera <= 0) { _isClosing = false; }
                     else
                     {
-                        if (await Q.EsisteNumeroSocioUpd(BindingT.ToDto(), Token))
+                        if (await Q.EsisteNumeroTesseraUpd(BindingT.ToDto(), Token))
                         {
                             _isClosing = false;
-                            InfoLabel = "Codice Socio già in uso";
-                            await SetFocus(NumeroSocioFocus);
+                            InfoLabel = "Tessera già in uso";
+                            await SetFocus(NumeroTesseraFocus);
                             return;
                         }
                     }
+
                 }
                 else
                 {
                     // 3. Se è stringa vuota o contiene lettere, finisce qui senza crash
                     // (In questo caso considerala come se fosse <= 0)
                     _isClosing = false;
-                    InfoLabel = "Codice Socio non può essere zero";
-                    await SetFocus(NumeroSocioFocus);
+                    InfoLabel = "Numero Tessera non può essere zero";
+                    await SetFocus(NumeroTesseraFocus);
                     return;
                 }
 
-                InfoLabel = "";
+                InfoLabel = "Aggiornamento in corso...";
 
-                if (!await Q.UpdSocio(BindingT.ToDto(), Token))
+                if (!await Q.UpdTessera(BindingT.ToDto(), Token))
                 {
                     _isClosing = false;
                     InfoLabel = "Errore Db modifica person";
-                    await SetFocus(NumeroSocioFocus);
+                    await OnNumeroTesseraFocus();
                     return;
                 }
 
@@ -104,18 +96,19 @@ namespace Soci.ViewModels
             {
                 Debug.WriteLine("Salvataggio annullato.");
                 _isClosing = false;
+                await SetFocus(NumeroTesseraFocus);
+                return;
             }
             catch (Exception ex)
             {
                 _isClosing = false;
                 InfoLabel = $"Errore: {ex.Message}";
-                await SetFocus(EscFocus);
+                await SetFocus(NumeroTesseraFocus);
+                return;
             }
-
+  
             
-
         }
-
 
     }
 }

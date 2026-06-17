@@ -173,8 +173,7 @@ namespace Soci.ViewModels
         private readonly Subject<int> _inputBack = new();
         public IObservable<int> InputBack => _inputBack.AsObservable();
 
-        private readonly Subject<List<SociPersonMap>> _inputBackFiltered = new();
-        public IObservable<List<SociPersonMap>> InputBackFiltered => _inputBackFiltered.AsObservable();
+        
 
 
     }

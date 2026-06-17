@@ -250,6 +250,79 @@ namespace Soci.ViewModels
             await tcs.Task;
         }
 
+        private async Task GoToSearch()
+        {
+            var tcs = new TaskCompletionSource();
+            // 3. Risoluzione ViewModel e navigazione sul Main Thread
+            RxSchedulers.MainThreadScheduler.Schedule(() =>
+            {
+
+                try
+                {
+
+                    var vm = Locator.Current.GetService<IPersonSearchViewModel>();
+
+                    if (vm != null)
+                    {
+                        
+
+                        var disposables = new CompositeDisposable();
+                        vm.InputEsc
+                            .ObserveOn(RxSchedulers.MainThreadScheduler)
+                            .Subscribe(_ =>
+                            {
+                                // Quando riceviamo il segnale di login riuscito, navighiamo al Menu
+                                InputRouter?.NavigationStack.Clear();
+                                GroupEnabled = true; // Riabilitiamo il gruppo per permettere nuove navigazioni
+                            }).DisposeWith(disposables);
+                        vm.InputBack
+                            .ObserveOn(RxSchedulers.MainThreadScheduler)
+                            .Take(1)
+                            .Subscribe(value =>
+                            {
+                                try
+                                {
+                                    InputRouter.NavigateBack.Execute();
+                                    AggiornaGridByInt(value);
+
+                                }
+                                catch (Exception ex)
+                                {
+                                    Debug.WriteLine($"Errore navigazione: {ex.Message}");
+                                    _isClosing = false;
+                                }
+                                // Quando riceviamo il segnale di login riuscito, navighiamo al Menu
+                                InputRouter?.NavigationStack.Clear();
+                                GroupEnabled = true; // Riabilitiamo il gruppo per permettere nuove navigazioni
+                            }).DisposeWith(disposables);
+
+                        InputRouter.NavigateAndReset.Execute(vm)
+                        .Subscribe(
+                            _ => tcs.SetResult(),
+                            ex => {
+                                disposables.Dispose(); // In caso di errore svuotiamo le risorse
+                                tcs.SetException(ex);
+                            })
+                        .DisposeWith(disposables);
+
+
+                    }
+                    else
+                    {
+                        Debug.WriteLine(">>> [ERROR] Il ViewModel passato a GoToInput è nullo.");
+                        tcs.SetResult();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Errore durante la navigazione: {ex.Message}");
+                    tcs.SetException(ex);
+                }
+            });
+
+            await tcs.Task;
+        }
+
         private async Task SetEvents(IPersonGroupViewModel personVM, CompositeDisposable disposables)
         {
             personVM.GroupToPersonAdd
@@ -261,14 +334,14 @@ namespace Soci.ViewModels
                                 await GoToInput(Locator.Current.GetService<IPersonAddViewModel>());
                             }).DisposeWith(disposables);
 
-            //personVM.GroupToPersonSearch
-            //                .ObserveOn(RxSchedulers.MainThreadScheduler)
-            //                .Subscribe(async _ =>
-            //                {
-            //                    // Quando riceviamo il segnale di richiesta Add da parte del gruppo, navighiamo alla schermata di input
-            //                    GroupEnabled = false; // Disabilitiamo il gruppo per evitare navigazioni multiple
-            //                    await GoToInput(Locator.Current.GetService<IPersonSearchViewModel>());
-            //                }).DisposeWith(disposables);
+            personVM.GroupToPersonSearch
+                            .ObserveOn(RxSchedulers.MainThreadScheduler)
+                            .Subscribe(async _ =>
+                            {
+                                // Quando riceviamo il segnale di richiesta Add da parte del gruppo, navighiamo alla schermata di input
+                                GroupEnabled = false; // Disabilitiamo il gruppo per evitare navigazioni multiple
+                                await GoToSearch();
+                            }).DisposeWith(disposables);
 
             personVM.GroupToPersonDel
                 .ObserveOn(RxSchedulers.MainThreadScheduler)
@@ -313,6 +386,33 @@ namespace Soci.ViewModels
                     // Quando riceviamo il segnale di richiesta Upd da parte del gruppo, navighiamo alla schermata di input
                     GroupEnabled = false; // Disabilitiamo il gruppo per evitare navigazioni multiple
                     await GoToInput(Locator.Current.GetService<ICodiceSocioUpdViewModel>(), dati.id, dati.idRitorno);
+                }).DisposeWith(disposables);
+
+            personVM.GroupToTesseraAdd
+                .ObserveOn(RxSchedulers.MainThreadScheduler)
+                .Subscribe(async dati =>
+                {
+                    // Quando riceviamo il segnale di richiesta Add da parte del gruppo, navighiamo alla schermata di input
+                    GroupEnabled = false; // Disabilitiamo il gruppo per evitare navigazioni multiple
+                    await GoToInput(Locator.Current.GetService<ITesseraAddViewModel>(), dati.id, dati.idRitorno);
+                }).DisposeWith(disposables);
+
+            personVM.GroupToTesseraDel
+                .ObserveOn(RxSchedulers.MainThreadScheduler)
+                .Subscribe(async dati =>
+                {
+                    // Quando riceviamo il segnale di richiesta Del da parte del gruppo, navighiamo alla schermata di input
+                    GroupEnabled = false; // Disabilitiamo il gruppo per evitare navigazioni multiple
+                    await GoToInput(Locator.Current.GetService<ITesseraDelViewModel>(), dati.id, dati.idRitorno);
+                }).DisposeWith(disposables);
+
+            personVM.GroupToTesseraUpd
+                .ObserveOn(RxSchedulers.MainThreadScheduler)
+                .Subscribe(async dati =>
+                {
+                    // Quando riceviamo il segnale di richiesta Upd da parte del gruppo, navighiamo alla schermata di input
+                    GroupEnabled = false; // Disabilitiamo il gruppo per evitare navigazioni multiple
+                    await GoToInput(Locator.Current.GetService<ITesseraUpdViewModel>(), dati.id, dati.idRitorno);
                 }).DisposeWith(disposables);
 
 

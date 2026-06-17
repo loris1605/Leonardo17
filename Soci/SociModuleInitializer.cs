@@ -115,6 +115,13 @@ namespace Soci
                 return new TesseraDelViewModel(screen, repository);
             }, typeof(ITesseraDelViewModel));
 
+            Locator.CurrentMutable.Register(() =>
+            {
+                var screen = Locator.Current.GetService<ISociScreen>();
+                var repository = Locator.Current.GetService<ISociPersonRepository>();
+                return new TesseraUpdViewModel(screen, repository);
+            }, typeof(ITesseraUpdViewModel));
+
 
             //Locator.CurrentMutable.Register(() => new PersonSearchViewModel(Locator.Current.GetService<IPersonRepository>())
             //                                                                , typeof(IPersonSearchViewModel));
@@ -141,9 +148,9 @@ namespace Soci
             Locator.CurrentMutable.Register(() => new SocioInputView(), typeof(IViewFor<CodiceSocioDelViewModel>));
             Locator.CurrentMutable.Register(() => new SocioInputView(), typeof(IViewFor<CodiceSocioUpdViewModel>));
 
-            //Locator.CurrentMutable.Register(() => new TesseraInputView(), typeof(IViewFor<TesseraAddViewModel>));
-            //Locator.CurrentMutable.Register(() => new TesseraInputView(), typeof(IViewFor<TesseraDelViewModel>));
-            //Locator.CurrentMutable.Register(() => new TesseraInputView(), typeof(IViewFor<TesseraUpdViewModel>));
+            Locator.CurrentMutable.Register(() => new TesseraInputView(), typeof(IViewFor<TesseraAddViewModel>));
+            Locator.CurrentMutable.Register(() => new TesseraInputView(), typeof(IViewFor<TesseraDelViewModel>));
+            Locator.CurrentMutable.Register(() => new TesseraInputView(), typeof(IViewFor<TesseraUpdViewModel>));
 
             System.Diagnostics.Debug.WriteLine("***** [DLL-INIT] Soci Registrazioni Splat completate in modalità Lazy *****");
         }

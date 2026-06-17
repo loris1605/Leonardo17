@@ -60,7 +60,7 @@ namespace Soci.ViewModels
                 if (int.TryParse(GetNumeroSocio, out int numeroSocio))
                 {
                     // 2. Se la conversione riesce, controlliamo il valore
-                    if (numeroSocio <= 0) { }
+                    if (numeroSocio <= 0) { _isClosing = false; }
                     else
                     {
                         if (await Q.EsisteNumeroSocio(BindingT.NumeroSocio, Token))
