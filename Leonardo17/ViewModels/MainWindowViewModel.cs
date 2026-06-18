@@ -3,7 +3,6 @@ using Core.Repository;
 using Leonardo17;
 using Microsoft.EntityFrameworkCore;
 using Models.Context;
-using Models.Tables;
 using ReactiveUI;
 using Splat;
 using System;
@@ -96,7 +95,7 @@ namespace ViewModels
         
 
         // Modificato in statico o assicurati che l'istanza di AppDbContext sia configurata correttamente
-        private async Task VerificaNecessitaAggiornamento()
+        private static async Task VerificaNecessitaAggiornamento()
         {
             // Nota: AppDbContext andrebbe idealmente iniettato tramite una Factory (IDbContextFactory)
             // per evitare problemi di scope, specialmente in app desktop.
@@ -228,7 +227,6 @@ namespace ViewModels
             await tcs.Task;
 
         }
-
         private async Task GoToMenu()
         {
             await Task.Run(() => ModuleLoader.EnsureMenuModuleLoaded());
@@ -305,7 +303,6 @@ namespace ViewModels
 
             await tcs.Task;
         }
-
         private async Task GoToSoci()
         {
             await Task.Run(() => ModuleLoader.EnsureSociModuleLoaded());
@@ -359,13 +356,56 @@ namespace ViewModels
                     tcs.SetException(ex);
                 }
 
-
-
             });
 
 
 
             // Attendiamo che il thread della UI abbia finito l'operazione
+            await tcs.Task;
+        }
+
+        private async Task GoToConfigurazione()
+        {
+            await Task.Run(() => ModuleLoader.EnsureConfigurazioneModuleLoaded());
+            var tcs = new TaskCompletionSource();
+            // 3. Risoluzione ViewModel e navigazione sul Main Thread
+            RxSchedulers.MainThreadScheduler.Schedule(() =>
+            {
+                try
+                {
+                    var configurazioneVM = Locator.Current.GetService<IConfigurazioneViewModel>();
+                    if (configurazioneVM != null)
+                    {
+                        var configurazioneDisposables = new CompositeDisposable();
+                        configurazioneVM.ConfigurazioneToMenu
+                            .Take(1)
+                            .ObserveOn(RxSchedulers.MainThreadScheduler)
+                            .Subscribe(async _ =>
+                            {
+                                configurazioneDisposables.Dispose();
+                                await GoToMenu();
+                            }).DisposeWith(configurazioneDisposables);
+                        Router.NavigateAndReset.Execute(configurazioneVM)
+                        .Subscribe(
+                            _ => tcs.SetResult(),
+                            ex =>
+                            {
+                                configurazioneDisposables.Dispose();
+                                tcs.SetException(ex);
+                            })
+                        .DisposeWith(configurazioneDisposables);
+                    }
+                    else
+                    {
+                        Debug.WriteLine(">>> [ERROR] Impossibile risolvere IConfigurazioneViewModel.");
+                        tcs.SetResult();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    tcs.SetException(ex);
+                }
+            });
             await tcs.Task;
         }
     }

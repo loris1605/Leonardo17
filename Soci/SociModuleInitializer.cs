@@ -84,6 +84,13 @@ namespace Soci
             {
                 var screen = Locator.Current.GetService<ISociScreen>();
                 var repository = Locator.Current.GetService<ISociPersonRepository>();
+                return new PersonSearchViewModel(screen, repository);
+            }, typeof(IPersonSearchViewModel));
+
+            Locator.CurrentMutable.Register(() =>
+            {
+                var screen = Locator.Current.GetService<ISociScreen>();
+                var repository = Locator.Current.GetService<ISociPersonRepository>();
                 return new CodiceSocioAddViewModel(screen, repository);
             }, typeof(ICodiceSocioAddViewModel));
 
@@ -123,17 +130,6 @@ namespace Soci
             }, typeof(ITesseraUpdViewModel));
 
 
-            //Locator.CurrentMutable.Register(() => new PersonSearchViewModel(Locator.Current.GetService<IPersonRepository>())
-            //                                                                , typeof(IPersonSearchViewModel));
-
-
-            //Locator.CurrentMutable.Register(() => new TesseraAddViewModel(Locator.Current.GetService<IPersonRepository>())
-            //                                                                , typeof(ITesseraAddViewModel));
-            //Locator.CurrentMutable.Register(() => new TesseraDelViewModel(Locator.Current.GetService<IPersonRepository>())
-            //                                                                , typeof(ITesseraDelViewModel));
-            //Locator.CurrentMutable.Register(() => new TesseraUpdViewModel(Locator.Current.GetService<IPersonRepository>())
-            //                                                                , typeof(ITesseraUpdViewModel));
-
             //// Registriamo la View associata all'interfaccia e alla classe concreta per il Router
             Locator.CurrentMutable.Register(() => new SociView(), typeof(IViewFor<SociViewModel>));
             Locator.CurrentMutable.Register(() => new PersonGroupView(), typeof(IViewFor<PersonGroupViewModel>));
@@ -142,7 +138,7 @@ namespace Soci
             Locator.CurrentMutable.Register(() => new PersonInputView(), typeof(IViewFor<PersonDelViewModel>));
             Locator.CurrentMutable.Register(() => new PersonInputView(), typeof(IViewFor<PersonUpdViewModel>));
 
-            //Locator.CurrentMutable.Register(() => new PersonSearchView(), typeof(IViewFor<PersonSearchViewModel>));
+            Locator.CurrentMutable.Register(() => new PersonSearchView(), typeof(IViewFor<PersonSearchViewModel>));
 
             Locator.CurrentMutable.Register(() => new SocioInputView(), typeof(IViewFor<CodiceSocioAddViewModel>));
             Locator.CurrentMutable.Register(() => new SocioInputView(), typeof(IViewFor<CodiceSocioDelViewModel>));

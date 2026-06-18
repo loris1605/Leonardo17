@@ -275,7 +275,7 @@ namespace Soci.ViewModels
                                 InputRouter?.NavigationStack.Clear();
                                 GroupEnabled = true; // Riabilitiamo il gruppo per permettere nuove navigazioni
                             }).DisposeWith(disposables);
-                        vm.InputBack
+                        vm.InputBackFiltered
                             .ObserveOn(RxSchedulers.MainThreadScheduler)
                             .Take(1)
                             .Subscribe(value =>
@@ -283,7 +283,7 @@ namespace Soci.ViewModels
                                 try
                                 {
                                     InputRouter.NavigateBack.Execute();
-                                    AggiornaGridByInt(value);
+                                    AggiornaGridByObject(value);
 
                                 }
                                 catch (Exception ex)
