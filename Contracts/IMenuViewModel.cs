@@ -8,6 +8,6 @@ namespace Contracts
         IObservable<Unit> MenuToLogin { get; }
         IObservable<Unit> MenuToSoci { get; }
         IObservable<Unit> MenuToConnection { get; }
-
+        IObservable<Unit> MenuToConfigurazione { get; }
     }
 }

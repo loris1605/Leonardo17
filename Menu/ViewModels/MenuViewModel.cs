@@ -85,10 +85,10 @@ namespace Menu.ViewModels
 
             // Inizializzazione dei Comandi
             SelezionaPostazioneCommand = ReactiveCommand.CreateFromTask<int>(GoToCassa, canNavigate);
-            LogoutCommand = ReactiveCommand.CreateFromTask(GoToLogin, canNavigate);
-            ConnectionCommand = ReactiveCommand.CreateFromTask(GoToConnection, canNavigate);
-            ConfigurazioneCommand = ReactiveCommand.CreateFromTask(GoToConfigurazione, canNavigate);
-            SociCommand = ReactiveCommand.CreateFromTask(GoToSoci, canNavigate);
+            LogoutCommand = ReactiveCommand.CreateFromTask(() => GoTo(_menuToLogin), canNavigate);
+            ConnectionCommand = ReactiveCommand.CreateFromTask(() => GoTo(_menuToConnection), canNavigate);
+            ConfigurazioneCommand = ReactiveCommand.CreateFromTask(() => GoTo(_menuToConfigurazione), canNavigate);
+            SociCommand = ReactiveCommand.CreateFromTask(() => GoTo(_menuToSoci), canNavigate);
             ApriGiornataCommand = ReactiveCommand.CreateFromTask(ExecuteOpenGiornata, canApriFinal);
 
             //4.Gestione centralizzata delle Eccezioni(Ciclo di vita del ViewModel)
@@ -124,7 +124,7 @@ namespace Menu.ViewModels
                 ApriPostazioneEnabled = false;
             }
         }
-        protected override async Task OnEsc() => await GoToLogin();
+        protected override async Task OnEsc() => await GoTo(_menuToLogin);
         protected override void OnFinalDestruction()
         {
             CassaPostazioniDataSource?.Clear();
@@ -143,6 +143,9 @@ namespace Menu.ViewModels
 
         private readonly Subject<Unit> _menuToConnection = new();
         public IObservable<Unit> MenuToConnection => _menuToConnection.AsObservable();
+
+        private readonly Subject<Unit> _menuToConfigurazione = new();
+        public IObservable<Unit> MenuToConfigurazione => _menuToConfigurazione.AsObservable();
 
         private void AttivaPermessi()
         {
@@ -233,61 +236,15 @@ namespace Menu.ViewModels
             await Task.CompletedTask;
         }
 
-        private async Task GoToLogin()
+        private async Task GoTo(Subject<Unit> navigationSubject)
         {
             _isClosing = true; // Impedisce ulteriori interazioni durante la navigazione
-            _menuToLogin.OnNext(Unit.Default);
-            _menuToLogin.OnCompleted(); // Completa il flusso per notificare l'esterno
-
+            navigationSubject.OnNext(Unit.Default);
+            navigationSubject.OnCompleted(); // Completa il flusso per notificare l'esterno
             await Task.CompletedTask;
         }
 
-        private async Task GoToConnection()
-        {
-            _isClosing = true; // Impedisce ulteriori interazioni durante la navigazione
-            _menuToLogin.OnNext(Unit.Default);
-            _menuToConnection.OnCompleted(); // Completa il flusso per notificare l'esterno
-            await Task.CompletedTask;
-            
-        }
-
-        private async Task GoToConfigurazione()
-        {
-            _isClosing = true; // Impedisce ulteriori interazioni durante la navigazione
-            //var configurazioneVm = Locator.Current.GetService<IConfigurazioneViewModel>();
-            //if (configurazioneVm != null)
-            //{
-            //    // 2. Impostiamo l'host (lo screen principale)
-            //    configurazioneVm.SetHost(_host);
-            //    try
-            //    {
-            //        // 3. Eseguiamo la navigazione FORZANDOLA sul Main Thread della UI
-            //        await _host.Router.NavigateAndReset.Execute(configurazioneVm);
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        _isClosing = false;
-            //        Debug.WriteLine($"ERRORE durante la navigazione alla Configurazione: {ex.Message}");
-            //    }
-            //}
-            //else
-            //{
-            //    _isClosing = false; // Permette all'utente di riprovare se il DI fallisce
-            //    Debug.WriteLine("ERRORE CRITICO: IConfigurazioneViewModel non è stato risolto dal Locator.");
-            //}
-            await Task.CompletedTask;
-        }
-
-        private async Task GoToSoci()
-        {
-            _isClosing = true; // Impedisce ulteriori interazioni durante la navigazione
-            _menuToSoci.OnNext(Unit.Default);
-            _menuToSoci.OnCompleted(); // Completa il flusso per notificare l'esterno
-
-            await Task.CompletedTask;
-
-            
-        }
+        
 
         private async Task ExecuteOpenGiornata()
         {

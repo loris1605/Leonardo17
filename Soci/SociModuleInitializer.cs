@@ -34,12 +34,6 @@ namespace Soci
                 return new SociViewModel(screen);
             }, typeof(ISociViewModel));
 
-            Locator.CurrentMutable.Register(() =>
-            {
-                var screen = Locator.Current.GetService<IScreen>();
-                return new SociViewModel(screen);
-            }, typeof(ISociViewModel));
-
             Locator.CurrentMutable.RegisterLazySingleton<ISociScreen>(() =>
             {
                 // Equivale a sp.GetRequiredService<ISociViewModel>()

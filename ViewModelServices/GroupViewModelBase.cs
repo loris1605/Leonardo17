@@ -4,9 +4,7 @@ using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Linq;
 
-#pragma warning disable IDE0130 // La parola chiave namespace non corrisponde alla struttura di cartelle
 namespace ViewModels
-#pragma warning restore IDE0130 // La parola chiave namespace non corrisponde alla struttura di cartelle
 {
     public interface IGroupViewModelBase
     {

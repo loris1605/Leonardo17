@@ -15,9 +15,4 @@
     <ProjectReference Include="..\ViewServices\ViewServices.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="ViewModels\Operatore\" />
-    <Folder Include="Views\" />
-  </ItemGroup>
-
 </Project>

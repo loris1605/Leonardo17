@@ -1,12 +1,15 @@
 ﻿using Contracts;
 using ReactiveUI;
 using Splat;
+using System;
 using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
 using ViewModels;
 
 namespace Configurazione.ViewModels
@@ -63,6 +66,8 @@ namespace Configurazione.ViewModels
         private readonly Subject<Unit> _configurazioneToMenu = new();
         public IObservable<Unit> ConfigurazioneToMenu => _configurazioneToMenu.AsObservable();
 
+        private readonly CompositeDisposable _navigationDisposables = [];
+
         // ---------------------------------------------------------------------
         // 3. Ciclo di Vita (Override dei Metodi Virtuali della Base)
         // ---------------------------------------------------------------------
@@ -70,6 +75,7 @@ namespace Configurazione.ViewModels
         protected override void OnFinalDestruction()
         {
             // Svuotiamo gli stack di navigazione dei router interni per liberare le View collegate
+            _navigationDisposables.Dispose();
             GroupRouter?.NavigationStack.Clear();
             InputRouter?.NavigationStack.Clear();
             _host = null;
@@ -132,49 +138,198 @@ namespace Configurazione.ViewModels
     {
         private async Task GoToOperatoreGroup()
         {
+            // 1. Puliamo subito i vecchi disposable (previene i memory leak delle vecchie view)
+            _navigationDisposables.Clear();
 
-            var tcs = new TaskCompletionSource();
+            // 2. SOLUZIONE DOPPIO CLICK: Spegniamo subito l'interattività della view corrente
+            GroupEnabled = false;
+            await Task.Delay(200); // Assorbe il click "fantasma" hardware
+            GroupEnabled = true;   // Riabilitiamo per la nuova schermata in arrivo
 
-            // 3. Risoluzione ViewModel e navigazione sul Main Thread
-            RxSchedulers.MainThreadScheduler.Schedule(() =>
+            try
             {
-                try
+                // Risolviamo il ViewModel (può stare fuori dal thread UI, alleggerendolo)
+                var groupVM = Locator.Current.GetService<IOperatoreGroupViewModel>();
+
+                if (groupVM != null)
                 {
-                    // Nascendo qui dentro, il costruttore del LoginViewModel 
-                    // viene eseguito sul thread UI, azzerando l'errore Cross-Thread!
-                    //var groupVM = Locator.Current.GetService<IPersonGroupViewModel>();
+                    // Colleghiamo l'evento del nuovo ViewModel al ciclo di vita controllato della classe
+                    groupVM.OperatoreToPostazioni
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async _ =>
+                        {
+                            GroupEnabled = false;
+                            await GoToPostazioneGroup();
+                        })
+                        .DisposeWith(_navigationDisposables);
 
-                    //if (groupVM != null)
-                    //{
-                    //    var personDisposables = new CompositeDisposable();
+                    groupVM.OperatoreToSettori
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async _ =>
+                        {
+                            GroupEnabled = false;
+                            await GoToSettoreGroup();
+                        })
+                        .DisposeWith(_navigationDisposables);
 
-                    //    SetEvents(groupVM, personDisposables).Wait();
+                    // 3. NAVIGAZIONE SUL MAIN THREAD (Senza usare ScheduleAsync)
+                    var tcs = new TaskCompletionSource();
 
+                    RxSchedulers.MainThreadScheduler.Schedule(() =>
+                    {
+                        // Avviamo il comando sincrono del router di ReactiveUI 
+                        // e usiamo la Subscribe per intercettare il completamento
+                        Router.NavigateAndReset.Execute(groupVM)
+                            .Subscribe(
+                                _ => tcs.SetResult(), // Navigazione completata con successo
+                                ex => tcs.SetException(ex) // Errore catturato
+                            );
+                    });
 
-                        // Eseguiamo la navigazione e segnaliamo il completamento del Task
-                        //Router.NavigateAndReset.Execute(groupVM)
-                        //.Subscribe(
-                        //    _ => tcs.SetResult(),
-                        //    ex => {
-                        //        personDisposables.Dispose(); // In caso di errore svuotiamo le risorse
-                        //        tcs.SetException(ex);
-                        //    })
-                        //.DisposeWith(personDisposables);
-                    //}
-                    //else
-                    //{
-                    //    Debug.WriteLine(">>> [ERROR] Impossibile risolvere IPersonGroupViewModel.");
-                    //    tcs.SetResult();
-                    //}
+                    // Attendiamo in modo asincrono puro che la UI abbia finito lo switch visivo
+                    await tcs.Task;
                 }
-                catch (Exception ex)
+                else
                 {
-                    tcs.SetException(ex);
+                    Debug.WriteLine(">>> [ERROR] Impossibile risolvere IOperatoreGroupViewModel.");
                 }
-
-            });
-
-            await tcs.Task;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($">>> [EXCEPTION] Errore durante la navigazione: {ex.Message}");
+                throw;
+            }
         }
+
+        private async Task GoToPostazioneGroup()
+        {
+            // 1. Puliamo subito i vecchi disposable (previene i memory leak delle vecchie view)
+            _navigationDisposables.Clear();
+
+            // 2. SOLUZIONE DOPPIO CLICK: Spegniamo subito l'interattività della view corrente
+            GroupEnabled = false;
+            await Task.Delay(200); // Assorbe il click "fantasma" hardware
+            GroupEnabled = true;   // Riabilitiamo per la nuova schermata in arrivo
+
+            try
+            {
+                // Risolviamo il ViewModel (può stare fuori dal thread UI, alleggerendolo)
+                var groupVM = Locator.Current.GetService<IPostazioneGroupViewModel>();
+
+                if (groupVM != null)
+                {
+                    // Colleghiamo l'evento del nuovo ViewModel al ciclo di vita controllato della classe
+                    groupVM.PostazioniToOperatori
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async _ =>
+                        {
+                            GroupEnabled = false;
+                            await GoToOperatoreGroup();
+                        })
+                        .DisposeWith(_navigationDisposables);
+
+                    groupVM.PostazioniToSettori
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async _ =>
+                        {
+                            GroupEnabled = false;
+                            await GoToSettoreGroup();
+                        })
+                        .DisposeWith(_navigationDisposables);
+
+                    // 3. NAVIGAZIONE SUL MAIN THREAD (Senza usare ScheduleAsync)
+                    var tcs = new TaskCompletionSource();
+
+                    RxSchedulers.MainThreadScheduler.Schedule(() =>
+                    {
+                        // Avviamo il comando sincrono del router di ReactiveUI 
+                        // e usiamo la Subscribe per intercettare il completamento
+                        Router.NavigateAndReset.Execute(groupVM)
+                            .Subscribe(
+                                _ => tcs.SetResult(), // Navigazione completata con successo
+                                ex => tcs.SetException(ex) // Errore catturato
+                            );
+                    });
+
+                    // Attendiamo in modo asincrono puro che la UI abbia finito lo switch visivo
+                    await tcs.Task;
+                }
+                else
+                {
+                    Debug.WriteLine(">>> [ERROR] Impossibile risolvere IPostazioneGroupViewModel.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($">>> [EXCEPTION] Errore durante la navigazione: {ex.Message}");
+                throw;
+            }
+        }
+
+        private async Task GoToSettoreGroup()
+        {
+            // 1. Puliamo subito i vecchi disposable (previene i memory leak delle vecchie view)
+            _navigationDisposables.Clear();
+
+            // 2. SOLUZIONE DOPPIO CLICK: Spegniamo subito l'interattività della view corrente
+            GroupEnabled = false;
+            await Task.Delay(200); // Assorbe il click "fantasma" hardware
+            GroupEnabled = true;   // Riabilitiamo per la nuova schermata in arrivo
+
+            try
+            {
+                // Risolviamo il ViewModel (può stare fuori dal thread UI, alleggerendolo)
+                var groupVM = Locator.Current.GetService<ISettoreGroupViewModel>();
+
+                if (groupVM != null)
+                {
+                    // Colleghiamo l'evento del nuovo ViewModel al ciclo di vita controllato della classe
+                    groupVM.SettoriToOperatori
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async _ =>
+                        {
+                            GroupEnabled = false;
+                            await GoToOperatoreGroup();
+                        })
+                        .DisposeWith(_navigationDisposables);
+
+                    groupVM.SettoriToPostazioni
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async _ =>
+                        {
+                            GroupEnabled = false;
+                            await GoToPostazioneGroup();
+                        })
+                        .DisposeWith(_navigationDisposables);
+
+                    // 3. NAVIGAZIONE SUL MAIN THREAD (Senza usare ScheduleAsync)
+                    var tcs = new TaskCompletionSource();
+
+                    RxSchedulers.MainThreadScheduler.Schedule(() =>
+                    {
+                        // Avviamo il comando sincrono del router di ReactiveUI 
+                        // e usiamo la Subscribe per intercettare il completamento
+                        Router.NavigateAndReset.Execute(groupVM)
+                            .Subscribe(
+                                _ => tcs.SetResult(), // Navigazione completata con successo
+                                ex => tcs.SetException(ex) // Errore catturato
+                            );
+                    });
+
+                    // Attendiamo in modo asincrono puro che la UI abbia finito lo switch visivo
+                    await tcs.Task;
+                }
+                else
+                {
+                    Debug.WriteLine(">>> [ERROR] Impossibile risolvere IPostazioneGroupViewModel.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($">>> [EXCEPTION] Errore durante la navigazione: {ex.Message}");
+                throw;
+            }
+        }
+
     }
 }

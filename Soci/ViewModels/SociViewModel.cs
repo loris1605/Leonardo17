@@ -66,6 +66,8 @@ namespace Soci.ViewModels
         private readonly Subject<Unit> _sociToMenu = new();
         public IObservable<Unit> SociToMenu => _sociToMenu.AsObservable();
 
+        private readonly CompositeDisposable _navigationDisposables = [];
+
         // ---------------------------------------------------------------------
         // 3. Ciclo di Vita (Override dei Metodi Virtuali della Base)
         // ---------------------------------------------------------------------
@@ -73,6 +75,7 @@ namespace Soci.ViewModels
         protected override void OnFinalDestruction()
         {
             // Svuotiamo gli stack di navigazione dei router interni per liberare le View collegate
+            _navigationDisposables.Dispose();
             GroupRouter?.NavigationStack.Clear();
             InputRouter?.NavigationStack.Clear();
             _host = null;
@@ -82,6 +85,7 @@ namespace Soci.ViewModels
 
         protected override async Task OnLoading() => await GoToPersonGroup();
         protected override async Task OnSaving() => await Task.CompletedTask;
+
         protected override async Task OnEsc()
         {
             _isClosing = true;
@@ -134,6 +138,7 @@ namespace Soci.ViewModels
     {
         private async Task GoToPersonGroup()
         {
+            _navigationDisposables.Clear();
 
             var tcs = new TaskCompletionSource();
 
@@ -150,7 +155,7 @@ namespace Soci.ViewModels
                     {
                         var personDisposables = new CompositeDisposable();
 
-                        SetEvents(groupVM, personDisposables).Wait();
+                        SetEvents(groupVM, personDisposables);
 
 
                         // Eseguiamo la navigazione e segnaliamo il completamento del Task
@@ -323,7 +328,7 @@ namespace Soci.ViewModels
             await tcs.Task;
         }
 
-        private async Task SetEvents(IPersonGroupViewModel personVM, CompositeDisposable disposables)
+        private void SetEvents(IPersonGroupViewModel personVM, CompositeDisposable disposables)
         {
             personVM.GroupToPersonAdd
                             .ObserveOn(RxSchedulers.MainThreadScheduler)
@@ -415,8 +420,6 @@ namespace Soci.ViewModels
                     await GoToInput(Locator.Current.GetService<ITesseraUpdViewModel>(), dati.id, dati.idRitorno);
                 }).DisposeWith(disposables);
 
-
-            await Task.CompletedTask;
         }
     }
         

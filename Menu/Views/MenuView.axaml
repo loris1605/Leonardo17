@@ -59,12 +59,12 @@
                                        Command="{Binding #Root.((vm:MenuViewModel)DataContext).SociCommand}"
                                        MaxHeight="50"/>
 
-                        <!--<ui:UiMenuItem x:Name="ConfigurazioneItem"
+                        <ui:UiMenuItem x:Name="ConfigurazioneItem"
                                        Header="  CONFIGURAZIONE  " 
-                                       Command="{Binding ConfigurazioneCommand}"
+                                       Command="{Binding #Root.((vm:MenuViewModel)DataContext).ConfigurazioneCommand}"
                                        MaxHeight="50"/>
 
-                        <ui:UiMenuItem Name="ServiziItem"
+                        <!--<ui:UiMenuItem Name="ServiziItem"
                                        Header="  SERVIZI  " 
                                        MaxHeight="50"
                                        Command="{Binding NavigateCommand}"
