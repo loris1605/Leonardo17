@@ -71,9 +71,9 @@ namespace Configurazione.ViewModels
 
             var canHasSelection = this.WhenAnyValue(x => x.GroupBindingT).Select(item => item != null);
 
-            OperatoriCommand = ReactiveCommand.CreateFromTask(GoToOperatori);
-            SettoriCommand = ReactiveCommand.CreateFromTask(GoToSettori);
-            TariffeCommand = ReactiveCommand.CreateFromTask(GoToTariffe);
+            OperatoriCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_postazioniToOperatori));
+            SettoriCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_postazioniToSettori));
+            TariffeCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_postazioniToTariffe));
 
             OperatoriCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Operatori: {ex.Message}"));
             SettoriCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Settori: {ex.Message}"));
@@ -127,30 +127,13 @@ namespace Configurazione.ViewModels
             catch (OperationCanceledException) { }
         }
 
-        private async Task GoToOperatori()
+        private async Task GoToGroup(Subject<Unit> group)
         {
             _isClosing = true; // Impedisce ulteriori interazioni durante la navigazione
-            _postazioniToOperatori.OnNext(Unit.Default);
-            _postazioniToOperatori.OnCompleted(); // Completa il flusso per notificare l'esterno
+            group.OnNext(Unit.Default);
+            group.OnCompleted(); // Completa il flusso per notificare l'esterno
             await Task.CompletedTask;
         }
-
-        private async Task GoToSettori()
-        {
-            _isClosing = true; // Impedisce ulteriori interazioni durante la navigazione
-            _postazioniToSettori.OnNext(Unit.Default);
-            _postazioniToSettori.OnCompleted(); // Completa il flusso per notificare l'esterno
-            await Task.CompletedTask;
-        }
-
-        private async Task GoToTariffe()
-        {
-            _isClosing = true; // Impedisce ulteriori interazioni durante la navigazione
-            _postazioniToTariffe.OnNext(Unit.Default);
-            _postazioniToTariffe.OnCompleted(); // Completa il flusso per notificare l'esterno
-            await Task.CompletedTask;
-        }
-
 
         protected async override Task OnAdding() => await Task.CompletedTask;
 

@@ -25,6 +25,7 @@ namespace Soci.ViewModels
         protected override void OnFinalDestruction()
         {
             Q = null;
+            _host = null;
             DataSource = null;
         }
 

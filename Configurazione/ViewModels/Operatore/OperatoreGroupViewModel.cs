@@ -63,9 +63,9 @@ namespace Configurazione.ViewModels
             _host = host ?? throw new ArgumentNullException(nameof(host));
             var canHasSelection = this.WhenAnyValue(x => x.GroupBindingT).Select(item => item != null);
 
-            PostazioniCommand = ReactiveCommand.CreateFromTask(GoToPostazioni);
-            SettoriCommand = ReactiveCommand.CreateFromTask(GoToSettori);
-            TariffeCommand = ReactiveCommand.CreateFromTask(GoToTariffe);
+            PostazioniCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_operatoreToPostazioni));
+            SettoriCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_operatoreToSettori));
+            TariffeCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_operatoreToTariffe));
 
             PostazioniCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Postazioni: {ex.Message}"));
             SettoriCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Settori: {ex.Message}"));
@@ -123,31 +123,21 @@ namespace Configurazione.ViewModels
             catch (OperationCanceledException) { }
         }
 
-        private async Task GoToPostazioni()
+        private async Task GoToGroup(Subject<Unit> group)
         {
             _isClosing = true; // Impedisce ulteriori interazioni durante la navigazione
-            _operatoreToPostazioni.OnNext(Unit.Default);
-            _operatoreToPostazioni.OnCompleted(); // Completa il flusso per notificare l'esterno
+            group.OnNext(Unit.Default);
+            group.OnCompleted(); // Completa il flusso per notificare l'esterno
             await Task.CompletedTask;
         }
 
-        private async Task GoToSettori()
+
+
+        protected async override Task OnAdding()
         {
-            _isClosing = true; // Impedisce ulteriori interazioni durante la navigazione
-            _operatoreToSettori.OnNext(Unit.Default);
-            _operatoreToSettori.OnCompleted(); // Completa il flusso per notificare l'esterno
+            _groupToOperatoreAdd.OnNext(Unit.Default);
             await Task.CompletedTask;
         }
-
-        private async Task GoToTariffe()
-        {
-            _isClosing = true; // Impedisce ulteriori interazioni durante la navigazione
-            _operatoreToTariffe.OnNext(Unit.Default);
-            _operatoreToTariffe.OnCompleted(); // Completa il flusso per notificare l'esterno
-            await Task.CompletedTask;
-        }
-
-        protected async override Task OnAdding() => await Task.CompletedTask;
 
         protected async override Task OnDeleting() =>
                                     await Task.CompletedTask;

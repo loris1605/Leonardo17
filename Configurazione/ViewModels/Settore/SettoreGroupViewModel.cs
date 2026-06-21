@@ -70,9 +70,9 @@ namespace Configurazione.ViewModels
 
 
             // Navigazioni Semplici (NavigateAndReset)
-            OperatoriCommand = ReactiveCommand.CreateFromTask(GoToOperatori);
-            PostazioniCommand = ReactiveCommand.CreateFromTask(GoToPostazioni);
-            TariffeCommand = ReactiveCommand.CreateFromTask(GoToTariffe);
+            OperatoriCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_settoriToOperatori));
+            PostazioniCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_settoriToPostazioni));
+            TariffeCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_settoriToTariffe));
 
             OperatoriCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Operatori: {ex.Message}"));
             PostazioniCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Postazioni: {ex.Message}"));
@@ -130,27 +130,11 @@ namespace Configurazione.ViewModels
             catch (OperationCanceledException) { }
         }
 
-        private async Task GoToOperatori()
+        private async Task GoToGroup(Subject<Unit> group)
         {
             _isClosing = true; // Impedisce ulteriori interazioni durante la navigazione
-            _settoriToOperatori.OnNext(Unit.Default);
-            _settoriToOperatori.OnCompleted(); // Completa il flusso per notificare l'esterno
-            await Task.CompletedTask;
-        }
-
-        private async Task GoToPostazioni()
-        {
-            _isClosing = true; // Impedisce ulteriori interazioni durante la navigazione
-            _settoriToPostazioni.OnNext(Unit.Default);
-            _settoriToPostazioni.OnCompleted(); // Completa il flusso per notificare l'esterno
-            await Task.CompletedTask;
-        }
-
-        private async Task GoToTariffe()
-        {
-            _isClosing = true; // Impedisce ulteriori interazioni durante la navigazione
-            _settoriToTariffe.OnNext(Unit.Default);
-            _settoriToTariffe.OnCompleted(); // Completa il flusso per notificare l'esterno
+            group.OnNext(Unit.Default);
+            group.OnCompleted(); // Completa il flusso per notificare l'esterno
             await Task.CompletedTask;
         }
 

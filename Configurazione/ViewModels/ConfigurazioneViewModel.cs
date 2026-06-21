@@ -115,7 +115,6 @@ namespace Configurazione.ViewModels
             }
         }
 
-
     }
 
     public partial class ConfigurazioneViewModel
@@ -130,7 +129,6 @@ namespace Configurazione.ViewModels
         }
 
         #endregion
-
 
     }
 
@@ -171,6 +169,25 @@ namespace Configurazione.ViewModels
                             await GoToSettoreGroup();
                         })
                         .DisposeWith(_navigationDisposables);
+
+                    groupVM.OperatoreToTariffe
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async _ =>
+                        {
+                            GroupEnabled = false;
+                            await GoToTariffaGroup();
+                        })
+                        .DisposeWith(_navigationDisposables);
+
+                    groupVM.GroupToOperatoreAdd
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async _ =>
+                        {
+                            GroupEnabled = false;
+                            await GoToInput(Locator.Current.GetService<IOperatoreAddViewModel>());
+                        })
+                        .DisposeWith(_navigationDisposables);
+                    
 
                     // 3. NAVIGAZIONE SUL MAIN THREAD (Senza usare ScheduleAsync)
                     var tcs = new TaskCompletionSource();
@@ -234,6 +251,15 @@ namespace Configurazione.ViewModels
                         {
                             GroupEnabled = false;
                             await GoToSettoreGroup();
+                        })
+                        .DisposeWith(_navigationDisposables);
+
+                    groupVM.PostazioniToTariffe
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async _ =>
+                        {
+                            GroupEnabled = false;
+                            await GoToTariffaGroup();
                         })
                         .DisposeWith(_navigationDisposables);
 
@@ -302,6 +328,15 @@ namespace Configurazione.ViewModels
                         })
                         .DisposeWith(_navigationDisposables);
 
+                    groupVM.SettoriToTariffe
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async _ =>
+                        {
+                            GroupEnabled = false;
+                            await GoToTariffaGroup();
+                        })
+                        .DisposeWith(_navigationDisposables);
+
                     // 3. NAVIGAZIONE SUL MAIN THREAD (Senza usare ScheduleAsync)
                     var tcs = new TaskCompletionSource();
 
@@ -329,6 +364,151 @@ namespace Configurazione.ViewModels
                 Debug.WriteLine($">>> [EXCEPTION] Errore durante la navigazione: {ex.Message}");
                 throw;
             }
+        }
+
+        private async Task GoToTariffaGroup()
+        {
+            // 1. Puliamo subito i vecchi disposable (previene i memory leak delle vecchie view)
+            _navigationDisposables.Clear();
+
+            // 2. SOLUZIONE DOPPIO CLICK: Spegniamo subito l'interattività della view corrente
+            GroupEnabled = false;
+            await Task.Delay(200); // Assorbe il click "fantasma" hardware
+            GroupEnabled = true;   // Riabilitiamo per la nuova schermata in arrivo
+
+            try
+            {
+                // Risolviamo il ViewModel (può stare fuori dal thread UI, alleggerendolo)
+                var groupVM = Locator.Current.GetService<ITariffaGroupViewModel>();
+
+                if (groupVM != null)
+                {
+                    // Colleghiamo l'evento del nuovo ViewModel al ciclo di vita controllato della classe
+                    groupVM.TariffaToOperatori
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async _ =>
+                        {
+                            GroupEnabled = false;
+                            await GoToOperatoreGroup();
+                        })
+                        .DisposeWith(_navigationDisposables);
+
+                    groupVM.TariffaToPostazioni
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async _ =>
+                        {
+                            GroupEnabled = false;
+                            await GoToPostazioneGroup();
+                        })
+                        .DisposeWith(_navigationDisposables);
+
+                    groupVM.TariffaToSettori
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async _ =>
+                        {
+                            GroupEnabled = false;
+                            await GoToSettoreGroup();
+                        })
+                        .DisposeWith(_navigationDisposables);
+
+                    // 3. NAVIGAZIONE SUL MAIN THREAD (Senza usare ScheduleAsync)
+                    var tcs = new TaskCompletionSource();
+
+                    RxSchedulers.MainThreadScheduler.Schedule(() =>
+                    {
+                        // Avviamo il comando sincrono del router di ReactiveUI 
+                        // e usiamo la Subscribe per intercettare il completamento
+                        Router.NavigateAndReset.Execute(groupVM)
+                            .Subscribe(
+                                _ => tcs.SetResult(), // Navigazione completata con successo
+                                ex => tcs.SetException(ex) // Errore catturato
+                            );
+                    });
+
+                    // Attendiamo in modo asincrono puro che la UI abbia finito lo switch visivo
+                    await tcs.Task;
+                }
+                else
+                {
+                    Debug.WriteLine(">>> [ERROR] Impossibile risolvere IPostazioneGroupViewModel.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($">>> [EXCEPTION] Errore durante la navigazione: {ex.Message}");
+                throw;
+            }
+        }
+
+        private async Task GoToInput(IConfigurazioneCrudViewModel vm, int id = 0, int idRitorno = 0)
+        {
+            var tcs = new TaskCompletionSource();
+            // 3. Risoluzione ViewModel e navigazione sul Main Thread
+            RxSchedulers.MainThreadScheduler.Schedule(() =>
+            {
+                try
+                {
+
+                    if (vm != null)
+                    {
+                        if (id != 0) vm.SetIdDaModificare(id);
+                        if (idRitorno != 0) vm.SetIdRitorno(idRitorno);
+
+                        var disposables = new CompositeDisposable();
+                        vm.InputEsc
+                            .ObserveOn(RxSchedulers.MainThreadScheduler)
+                            .Subscribe(_ =>
+                            {
+                                // Quando riceviamo il segnale di login riuscito, navighiamo al Menu
+                                InputRouter?.NavigationStack.Clear();
+                                GroupEnabled = true; // Riabilitiamo il gruppo per permettere nuove navigazioni
+                            }).DisposeWith(disposables);
+                        vm.InputBack
+                            .ObserveOn(RxSchedulers.MainThreadScheduler)
+                            .Take(1)
+                            .Subscribe(value =>
+                            {
+                                try
+                                {
+                                    InputRouter.NavigateBack.Execute();
+                                    AggiornaGridByInt(value);
+
+                                }
+                                catch (Exception ex)
+                                {
+                                    Debug.WriteLine($"Errore navigazione: {ex.Message}");
+                                    _isClosing = false;
+                                }
+                                // Quando riceviamo il segnale di login riuscito, navighiamo al Menu
+                                InputRouter?.NavigationStack.Clear();
+                                GroupEnabled = true; // Riabilitiamo il gruppo per permettere nuove navigazioni
+                            }).DisposeWith(disposables);
+
+                        InputRouter.NavigateAndReset.Execute(vm)
+                        .Subscribe(
+                            _ => tcs.SetResult(),
+                            ex => {
+                                disposables.Dispose(); // In caso di errore svuotiamo le risorse
+                                tcs.SetException(ex);
+                            })
+                        .DisposeWith(disposables);
+
+
+                    }
+                    else
+                    {
+                        Debug.WriteLine(">>> [ERROR] Il ViewModel passato a GoToInput è nullo.");
+                        tcs.SetResult();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Errore durante la navigazione: {ex.Message}");
+                    tcs.SetException(ex);
+                }
+            });
+
+            await tcs.Task;
         }
 
     }
