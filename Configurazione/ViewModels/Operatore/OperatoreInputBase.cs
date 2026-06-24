@@ -91,28 +91,22 @@ namespace Configurazione.ViewModels
         {
             if (_isClosing) return; // Protezione contro il multi-ESC
 
-            if (_host is not null)
-            {
-                // Focus sul tasto Esci prima di chiudere
-                await SetFocus(EscFocus, 0);
-                _isClosing = true; // "Congeliamo" prima di uscire
+            await SetFocus(EscFocus, 0);
+            _isClosing = true; // "Congeliamo" prima di uscire
 
-                _inputEsc.OnNext(Unit.Default); // Notifica l'esterno che ESC è stato premuto
-                _inputEsc.OnCompleted(); // Completa l'osservabile per evitare memory leak e notificare che non ci saranno più eventi
-            }
+            _inputEsc.OnNext(Unit.Default); // Notifica l'esterno che ESC è stato premuto
+            _inputEsc.OnCompleted(); // Completa l'osservabile per evitare memory leak e notificare che non ci saranno più eventi
+
         }
 
         protected async Task OnBack(int value = 0)
         {
-            if (_host is not null)
-            {
-                _isClosing = true;
+            _isClosing = true;
 
-                _inputBack.OnNext(value); // Notifica l'esterno che Back è stato premuto con il valore specificato
-                _inputBack.OnCompleted();
-                await Task.CompletedTask;
+            _inputBack.OnNext(value); // Notifica l'esterno che Back è stato premuto con il valore specificato
+            _inputBack.OnCompleted();
+            await Task.CompletedTask;
 
-            }
         }
     }
 

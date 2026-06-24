@@ -1,31 +1,28 @@
 ﻿using Configurazione.Core.Repository;
-using ReactiveUI;
 using System.Diagnostics;
 
 namespace Configurazione.ViewModels
 {
-    public interface IOperatoreAddViewModel : IRoutableViewModel, IConfigurazioneCrudViewModel { }
+    public interface IOperatoreAddViewModel : IConfigurazioneCrudViewModel { }
 
     public class OperatoreAddViewModel : OperatoreInputBase, IOperatoreAddViewModel
     {
         private IConfigurazioneOperatoreRepository Q;
         
-        public OperatoreAddViewModel( IConfigurazioneScreen host,
-                                      IConfigurazioneOperatoreRepository Repository) : base()
+        public OperatoreAddViewModel( IConfigurazioneOperatoreRepository Repository) : base()
         {
             
             Titolo = "Aggiungi Nuovo Operatore";
             FieldsVisibile = true;
             FieldsEnabled = true;
             Q = Repository ?? throw new ArgumentNullException(nameof(Repository));
-            _host = host ?? throw new ArgumentNullException(nameof(host));
             BindingT = new();
         }
 
         protected override void OnFinalDestruction()
         {
             Q = null;
-            _host = null;
+            
         }
 
         protected override async Task OnLoading() => await SetFocus(NomeFocus);

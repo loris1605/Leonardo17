@@ -132,18 +132,23 @@ namespace Configurazione.ViewModels
         }
 
 
-
         protected async override Task OnAdding()
         {
             _groupToOperatoreAdd.OnNext(Unit.Default);
             await Task.CompletedTask;
         }
 
-        protected async override Task OnDeleting() =>
-                                    await Task.CompletedTask;
+        protected async override Task OnDeleting()
+        {
+            _groupToOperatoreDel.OnNext(GroupBindingT.Id);
+            await Task.CompletedTask;
+        }
 
-        protected async override Task OnUpdating() =>
-                                    await Task.CompletedTask;
+        protected async override Task OnUpdating()
+        {
+            _groupToOperatoreUpd.OnNext(GroupBindingT.Id);
+            await Task.CompletedTask;
+        }
 
         protected override Task OnEsc() => Task.FromResult(Unit.Default);
         

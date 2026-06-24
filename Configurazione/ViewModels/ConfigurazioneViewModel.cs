@@ -187,7 +187,25 @@ namespace Configurazione.ViewModels
                             await GoToInput(Locator.Current.GetService<IOperatoreAddViewModel>());
                         })
                         .DisposeWith(_navigationDisposables);
-                    
+
+                    groupVM.GroupToOperatoreDel
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async id =>
+                        {
+                            GroupEnabled = false;
+                            await GoToInput(Locator.Current.GetService<IOperatoreDelViewModel>(), id);
+                        })
+                        .DisposeWith(_navigationDisposables);
+
+                    groupVM.GroupToOperatoreUpd
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async id =>
+                        {
+                            GroupEnabled = false;
+                            await GoToInput(Locator.Current.GetService<IOperatoreUpdViewModel>(), id);
+                        })
+                        .DisposeWith(_navigationDisposables);
+
 
                     // 3. NAVIGAZIONE SUL MAIN THREAD (Senza usare ScheduleAsync)
                     var tcs = new TaskCompletionSource();

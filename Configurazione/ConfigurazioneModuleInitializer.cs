@@ -73,9 +73,20 @@ namespace Configurazione
             Locator.CurrentMutable.Register(() =>
             {
                 var context = Locator.Current.GetService<IConfigurazioneOperatoreRepository>();
-                var host = Locator.Current.GetService<IConfigurazioneScreen>();
-                return new OperatoreAddViewModel(host, context);
+                return new OperatoreAddViewModel(context);
             }, typeof(IOperatoreAddViewModel));
+
+            Locator.CurrentMutable.Register(() =>
+            {
+                var context = Locator.Current.GetService<IConfigurazioneOperatoreRepository>();
+                return new OperatoreDelViewModel(context);
+            }, typeof(IOperatoreDelViewModel));
+
+            Locator.CurrentMutable.Register(() =>
+            {
+                var context = Locator.Current.GetService<IConfigurazioneOperatoreRepository>();
+                return new OperatoreUpdViewModel(context);
+            }, typeof(IOperatoreUpdViewModel));
 
             Locator.CurrentMutable.Register(() =>
             {
@@ -105,7 +116,11 @@ namespace Configurazione
             Locator.CurrentMutable.Register(() => new ConfigurazioneView(), typeof(IViewFor<ConfigurazioneViewModel>));
 
             Locator.CurrentMutable.Register(() => new OperatoreGroupView(), typeof(IViewFor<OperatoreGroupViewModel>));
-            //Locator.CurrentMutable.Register(() => new OperatoreGroupView(), typeof(IViewFor<OperatoreGroupViewModel>));
+            Locator.CurrentMutable.Register(() => new OperatoreInputView(), typeof(IViewFor<OperatoreAddViewModel>));
+            Locator.CurrentMutable.Register(() => new OperatoreInputView(), typeof(IViewFor<OperatoreDelViewModel>));
+            Locator.CurrentMutable.Register(() => new OperatoreInputView(), typeof(IViewFor<OperatoreUpdViewModel>));
+
+
             Locator.CurrentMutable.Register(() => new PostazioneGroupView(), typeof(IViewFor<PostazioneGroupViewModel>));
             Locator.CurrentMutable.Register(() => new SettoreGroupView(), typeof(IViewFor<SettoreGroupViewModel>));
             Locator.CurrentMutable.Register(() => new TariffaGroupView(), typeof(IViewFor<TariffaGroupViewModel>));
