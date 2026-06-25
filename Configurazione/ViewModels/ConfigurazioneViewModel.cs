@@ -31,7 +31,7 @@ namespace Configurazione.ViewModels
         IObservable<Unit> InputEsc { get; }
         IObservable<int> InputBack { get; }
     }
-    public partial class ConfigurazioneViewModel(IScreen host) : ViewModelBase(host), IConfigurazioneScreen, IConfigurazioneViewModel
+    public partial class ConfigurazioneViewModel() : ViewModelBase(), IConfigurazioneScreen, IConfigurazioneViewModel
     {
         // ---------------------------------------------------------------------
         // 1. Router Interni (Sub-Routing) e Dipendenze
@@ -42,8 +42,7 @@ namespace Configurazione.ViewModels
         // Espone il router principale richiesto dall'infrastruttura ReactiveUI
         public RoutingState Router => GroupRouter;
 
-        private IScreen _host = host;
-        public new IScreen HostScreen => _host;
+        //public new IScreen HostScreen => _host;
 
         // ---------------------------------------------------------------------
         // 2. Controllo Esecuzione Centralizzato (Prevenzione Doppi Clic)
@@ -78,7 +77,7 @@ namespace Configurazione.ViewModels
             _navigationDisposables.Dispose();
             GroupRouter?.NavigationStack.Clear();
             InputRouter?.NavigationStack.Clear();
-            _host = null;
+            
 
             base.OnFinalDestruction();
         }
@@ -278,6 +277,33 @@ namespace Configurazione.ViewModels
                         {
                             GroupEnabled = false;
                             await GoToTariffaGroup();
+                        })
+                        .DisposeWith(_navigationDisposables);
+
+                    groupVM.GroupToPostazioneAdd
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async _ =>
+                        {
+                            GroupEnabled = false;
+                            await GoToInput(Locator.Current.GetService<IPostazioneAddViewModel>());
+                        })
+                        .DisposeWith(_navigationDisposables);
+
+                    groupVM.GroupToPostazioneDel
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async id =>
+                        {
+                            GroupEnabled = false;
+                            await GoToInput(Locator.Current.GetService<IPostazioneDelViewModel>(), id);
+                        })
+                        .DisposeWith(_navigationDisposables);
+
+                    groupVM.GroupToPostazioneUpd
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async id =>
+                        {
+                            GroupEnabled = false;
+                            await GoToInput(Locator.Current.GetService<IPostazioneUpdViewModel>(), id);
                         })
                         .DisposeWith(_navigationDisposables);
 
