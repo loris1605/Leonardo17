@@ -56,11 +56,9 @@ namespace Configurazione.ViewModels
             (baseLoad, baseSave, baseEsc, localExec) => baseLoad || baseSave || baseEsc || localExec)
         .DistinctUntilChanged();
 
-        public OperatoreGroupViewModel(IConfigurazioneScreen host,
-                                       IConfigurazioneOperatoreRepository Repository) : base(null)
+        public OperatoreGroupViewModel(IConfigurazioneOperatoreRepository Repository) : base(null)
         {
             Q = Repository ?? throw new ArgumentNullException(nameof(Repository));
-            _host = host ?? throw new ArgumentNullException(nameof(host));
             var canHasSelection = this.WhenAnyValue(x => x.GroupBindingT).Select(item => item != null);
 
             PostazioniCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_operatoreToPostazioni));
@@ -78,7 +76,6 @@ namespace Configurazione.ViewModels
         {
             // Assicuriamoci che la collezione sia nulla per il GC
             Q = null;
-            _host = null;
             base.OnFinalDestruction();
         }
 

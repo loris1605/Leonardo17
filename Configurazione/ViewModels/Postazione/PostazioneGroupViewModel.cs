@@ -63,12 +63,10 @@ namespace Configurazione.ViewModels
 
 
 
-        public PostazioneGroupViewModel(IConfigurazioneScreen host,
-                                        IConfigurazionePostazioneRepository Repository) : base(null)
+        public PostazioneGroupViewModel(IConfigurazionePostazioneRepository Repository) : base(null)
         {
             Q = Repository ?? throw new ArgumentNullException(nameof(Repository));
-            _host = host ?? throw new ArgumentNullException(nameof(host));
-
+            
             var canHasSelection = this.WhenAnyValue(x => x.GroupBindingT).Select(item => item != null);
 
             OperatoriCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_postazioniToOperatori));
@@ -84,7 +82,6 @@ namespace Configurazione.ViewModels
         protected override void OnFinalDestruction()
         {
             Q = null;
-            _host = null;
             base.OnFinalDestruction();
         }
 
@@ -135,13 +132,23 @@ namespace Configurazione.ViewModels
             await Task.CompletedTask;
         }
 
-        protected async override Task OnAdding() => await Task.CompletedTask;
+        protected async override Task OnAdding()
+        {
+            _groupToPostazioneAdd.OnNext(Unit.Default);
+            await Task.CompletedTask;
+        }
 
-        protected async override Task OnDeleting() =>
-                                    await Task.CompletedTask;
+        protected async override Task OnDeleting()
+        {
+            _groupToPostazioneDel.OnNext(GroupBindingT.Id);
+            await Task.CompletedTask;
+        }
 
-        protected async override Task OnUpdating() =>
-                                    await Task.CompletedTask;
+        protected async override Task OnUpdating()
+        {
+            _groupToPostazioneUpd.OnNext(GroupBindingT.Id);
+            await Task.CompletedTask;
+        }
 
         protected override Task OnEsc() => Task.FromResult(Unit.Default);
     }

@@ -59,11 +59,10 @@ namespace Configurazione.ViewModels
 
 
 
-        public TariffaGroupViewModel(IConfigurazioneScreen host, 
-                                     IConfigurazioneTariffaRepository Repository) : base(null)
+        public TariffaGroupViewModel(IConfigurazioneTariffaRepository Repository) : base(null)
         {
             Q = Repository ?? throw new ArgumentNullException(nameof(Repository));
-            _host = host ?? throw new ArgumentNullException(nameof(host));
+            
 
             var canHasSelection = this.WhenAnyValue(x => x.GroupBindingT).Select(item => item != null);
 
@@ -81,7 +80,6 @@ namespace Configurazione.ViewModels
         {
             // Assicuriamoci che la collezione sia nulla per il GC
             Q = null;
-            _host = null;
             base.OnFinalDestruction();
         }
 

@@ -19,11 +19,7 @@ namespace Configurazione.ViewModels
             BindingT = new();
         }
 
-        protected override void OnFinalDestruction()
-        {
-            Q = null;
-            
-        }
+        protected override void OnFinalDestruction() => Q = null;
 
         protected override async Task OnLoading() => await SetFocus(NomeFocus);
 

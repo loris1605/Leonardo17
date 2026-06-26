@@ -60,11 +60,10 @@ namespace Configurazione.ViewModels
             (baseLoad, baseSave, baseEsc, localExec) => baseLoad || baseSave || baseEsc || localExec)
         .DistinctUntilChanged();
 
-        public SettoreGroupViewModel(IConfigurazioneScreen host, 
-                                     IConfigurazioneSettoreRepository Repository) : base(null)
+        public SettoreGroupViewModel(IConfigurazioneSettoreRepository Repository) : base(null)
         {
             Q = Repository ?? throw new ArgumentNullException(nameof(Repository));
-            _host = host ?? throw new ArgumentNullException(nameof(host));
+            
 
             var canHasSelection = this.WhenAnyValue(x => x.GroupBindingT).Select(item => item != null);
 
@@ -80,13 +79,12 @@ namespace Configurazione.ViewModels
 
         }
 
-        public void SetHost(IConfigurazioneScreen host) => _host = host;
+        //public void SetHost(IConfigurazioneScreen host) => _host = host;
 
         protected override void OnFinalDestruction()
         {
             // Assicuriamoci che la collezione sia nulla per il GC
             Q = null;
-            _host = null;
             base.OnFinalDestruction();
         }
 
