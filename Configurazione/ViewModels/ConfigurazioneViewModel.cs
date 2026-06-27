@@ -379,6 +379,33 @@ namespace Configurazione.ViewModels
                         })
                         .DisposeWith(_navigationDisposables);
 
+                    groupVM.GroupToSettoreAdd
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async _ =>
+                        {
+                            GroupEnabled = false;
+                            await GoToInput(Locator.Current.GetService<ISettoreAddViewModel>());
+                        })
+                        .DisposeWith(_navigationDisposables);
+
+                    groupVM.GroupToSettoreDel
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async id =>
+                        {
+                            GroupEnabled = false;
+                            await GoToInput(Locator.Current.GetService<ISettoreDelViewModel>(), id);
+                        })
+                        .DisposeWith(_navigationDisposables);
+
+                    groupVM.GroupToSettoreUpd
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async id =>
+                        {
+                            GroupEnabled = false;
+                            await GoToInput(Locator.Current.GetService<ISettoreUpdViewModel>(), id);
+                        })
+                        .DisposeWith(_navigationDisposables);
+
                     // 3. NAVIGAZIONE SUL MAIN THREAD (Senza usare ScheduleAsync)
                     var tcs = new TaskCompletionSource();
 
@@ -398,7 +425,7 @@ namespace Configurazione.ViewModels
                 }
                 else
                 {
-                    Debug.WriteLine(">>> [ERROR] Impossibile risolvere IPostazioneGroupViewModel.");
+                    Debug.WriteLine(">>> [ERROR] Impossibile risolvere ISettoreGroupViewModel.");
                 }
             }
             catch (Exception ex)
@@ -453,6 +480,33 @@ namespace Configurazione.ViewModels
                         })
                         .DisposeWith(_navigationDisposables);
 
+                    groupVM.GroupToTariffaAdd
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async _ =>
+                        {
+                            GroupEnabled = false;
+                            await GoToInput(Locator.Current.GetService<ITariffaAddViewModel>());
+                        })
+                        .DisposeWith(_navigationDisposables);
+
+                    groupVM.GroupToTariffaDel
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async id =>
+                        {
+                            GroupEnabled = false;
+                            await GoToInput(Locator.Current.GetService<ITariffaDelViewModel>(), id);
+                        })
+                        .DisposeWith(_navigationDisposables);
+
+                    groupVM.GroupToTariffaUpd
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async id =>
+                        {
+                            GroupEnabled = false;
+                            await GoToInput(Locator.Current.GetService<ITariffaUpdViewModel>(), id);
+                        })
+                        .DisposeWith(_navigationDisposables);
+
                     // 3. NAVIGAZIONE SUL MAIN THREAD (Senza usare ScheduleAsync)
                     var tcs = new TaskCompletionSource();
 
@@ -472,7 +526,7 @@ namespace Configurazione.ViewModels
                 }
                 else
                 {
-                    Debug.WriteLine(">>> [ERROR] Impossibile risolvere IPostazioneGroupViewModel.");
+                    Debug.WriteLine(">>> [ERROR] Impossibile risolvere ITariffaGroupViewModel.");
                 }
             }
             catch (Exception ex)

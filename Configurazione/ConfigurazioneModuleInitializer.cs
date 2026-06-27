@@ -102,12 +102,32 @@ namespace Configurazione
 
 
 
-
             Locator.CurrentMutable.Register(() =>
             {
                 var context = Locator.Current.GetService<IConfigurazioneSettoreRepository>();
                 return new SettoreGroupViewModel(context);
             }, typeof(ISettoreGroupViewModel));
+
+            Locator.CurrentMutable.Register(() =>
+            {
+                var context = Locator.Current.GetService<IConfigurazioneSettoreRepository>();
+                return new SettoreAddViewModel(context);
+            }, typeof(ISettoreAddViewModel));
+
+            Locator.CurrentMutable.Register(() =>
+            {
+                var context = Locator.Current.GetService<IConfigurazioneSettoreRepository>();
+                return new SettoreDelViewModel(context);
+            }, typeof(ISettoreDelViewModel));
+
+            Locator.CurrentMutable.Register(() =>
+            {
+                var context = Locator.Current.GetService<IConfigurazioneSettoreRepository>();
+                return new SettoreUpdViewModel(context);
+            }, typeof(ISettoreUpdViewModel));
+
+
+
 
             Locator.CurrentMutable.Register(() =>
             {
@@ -133,6 +153,11 @@ namespace Configurazione
             Locator.CurrentMutable.Register(() => new PostazioneInputView(), typeof(IViewFor<PostazioneUpdViewModel>));
 
             Locator.CurrentMutable.Register(() => new SettoreGroupView(), typeof(IViewFor<SettoreGroupViewModel>));
+            Locator.CurrentMutable.Register(() => new SettoreInputView(), typeof(IViewFor<SettoreAddViewModel>));
+            Locator.CurrentMutable.Register(() => new SettoreInputView(), typeof(IViewFor<SettoreDelViewModel>));
+            Locator.CurrentMutable.Register(() => new SettoreInputView(), typeof(IViewFor<SettoreUpdViewModel>));
+
+
             Locator.CurrentMutable.Register(() => new TariffaGroupView(), typeof(IViewFor<TariffaGroupViewModel>));
 
 

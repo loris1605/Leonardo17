@@ -43,10 +43,8 @@ namespace Configurazione.ViewModels
                 })
                 .DisposeWith(d);
 
-
             });
         }
-
         
         public void SetIdDaModificare(int id)
         {
