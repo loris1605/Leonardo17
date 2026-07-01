@@ -203,6 +203,15 @@ namespace Configurazione.ViewModels
                         })
                         .DisposeWith(_navigationDisposables);
 
+                    groupVM.GroupToPermessi
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async id =>
+                        {
+                            GroupEnabled = false;
+                            await GoToInput(Locator.Current.GetService<IPermessoViewModel>(), id);
+                        })
+                        .DisposeWith(_navigationDisposables);
+
 
                     // 3. NAVIGAZIONE SUL MAIN THREAD (Senza usare ScheduleAsync)
                     var tcs = new TaskCompletionSource();
@@ -302,6 +311,15 @@ namespace Configurazione.ViewModels
                         {
                             GroupEnabled = false;
                             await GoToInput(Locator.Current.GetService<IPostazioneUpdViewModel>(), id);
+                        })
+                        .DisposeWith(_navigationDisposables);
+
+                    groupVM.GroupToReparti
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async id =>
+                        {
+                            GroupEnabled = false;
+                            await GoToInput(Locator.Current.GetService<IRepartoViewModel>(), id);
                         })
                         .DisposeWith(_navigationDisposables);
 

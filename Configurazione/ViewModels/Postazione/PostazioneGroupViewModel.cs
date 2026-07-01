@@ -1,7 +1,6 @@
 ﻿using Avalonia.Collections;
 using Configurazione.Core.DTO;
 using Configurazione.Core.Repository;
-using Configurazione.ViewModels;
 using Configurazione.ViewModels.Map;
 using ReactiveUI;
 using System.Diagnostics;
@@ -17,6 +16,7 @@ namespace Configurazione.ViewModels
         IObservable<Unit> GroupToPostazioneAdd { get; }
         IObservable<int> GroupToPostazioneDel { get; }
         IObservable<int> GroupToPostazioneUpd { get; }
+        IObservable<int> GroupToReparti { get; }
         IObservable<Unit> PostazioniToOperatori { get; }
         IObservable<Unit> PostazioniToSettori { get; }
         IObservable<Unit> PostazioniToTariffe { get; }
@@ -72,6 +72,7 @@ namespace Configurazione.ViewModels
             OperatoriCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_postazioniToOperatori));
             SettoriCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_postazioniToSettori));
             TariffeCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_postazioniToTariffe));
+            RepartiCommand = ReactiveCommand.CreateFromTask(() => OnReparti(), canHasSelection);
 
             OperatoriCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Operatori: {ex.Message}"));
             SettoriCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Settori: {ex.Message}"));
@@ -150,6 +151,12 @@ namespace Configurazione.ViewModels
             await Task.CompletedTask;
         }
 
+        protected async Task OnReparti()
+        {
+            _groupToReparti.OnNext(GroupBindingT.Id);
+            await Task.CompletedTask;
+        }
+
         protected override Task OnEsc() => Task.FromResult(Unit.Default);
     }
 
@@ -164,6 +171,9 @@ namespace Configurazione.ViewModels
 
         private readonly Subject<int> _groupToPostazioneUpd = new();
         public IObservable<int> GroupToPostazioneUpd => _groupToPostazioneUpd.AsObservable();
+
+        private readonly Subject<int> _groupToReparti = new();
+        public IObservable<int> GroupToReparti => _groupToReparti.AsObservable();
 
         private readonly Subject<Unit> _postazioniToOperatori = new();
         public IObservable<Unit> PostazioniToOperatori => _postazioniToOperatori.AsObservable();

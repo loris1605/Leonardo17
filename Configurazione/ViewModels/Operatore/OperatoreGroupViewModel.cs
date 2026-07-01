@@ -3,6 +3,7 @@ using Configurazione.Core.DTO;
 using Configurazione.Core.Repository;
 using Configurazione.ViewModels.Map;
 using ReactiveUI;
+using System.Configuration;
 using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -16,6 +17,7 @@ namespace Configurazione.ViewModels
         IObservable<Unit> GroupToOperatoreAdd { get; }
         IObservable<int> GroupToOperatoreDel { get; }
         IObservable<int> GroupToOperatoreUpd { get; }
+        IObservable<int> GroupToPermessi { get; }
         IObservable<Unit> OperatoreToPostazioni { get; }
         IObservable<Unit> OperatoreToSettori { get; }
         IObservable<Unit> OperatoreToTariffe { get; }
@@ -64,6 +66,7 @@ namespace Configurazione.ViewModels
             PostazioniCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_operatoreToPostazioni));
             SettoriCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_operatoreToSettori));
             TariffeCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_operatoreToTariffe));
+            PermessiCommand = ReactiveCommand.CreateFromTask(() => OnPermessi(), canHasSelection);
 
             PostazioniCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Postazioni: {ex.Message}"));
             SettoriCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Settori: {ex.Message}"));
@@ -147,6 +150,12 @@ namespace Configurazione.ViewModels
             await Task.CompletedTask;
         }
 
+        protected async Task OnPermessi()
+        {
+            _groupToPermessi.OnNext(GroupBindingT.Id);
+            await Task.CompletedTask;
+        }
+
         protected override Task OnEsc() => Task.FromResult(Unit.Default);
         
     }
@@ -162,6 +171,9 @@ namespace Configurazione.ViewModels
 
         private readonly Subject<int> _groupToOperatoreUpd = new();
         public IObservable<int> GroupToOperatoreUpd => _groupToOperatoreUpd.AsObservable();
+
+        private readonly Subject<int> _groupToPermessi = new();
+        public IObservable<int> GroupToPermessi => _groupToPermessi.AsObservable();
 
         private readonly Subject<Unit> _operatoreToPostazioni = new();
         public IObservable<Unit> OperatoreToPostazioni => _operatoreToPostazioni.AsObservable();

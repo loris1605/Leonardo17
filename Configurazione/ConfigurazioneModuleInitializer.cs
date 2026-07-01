@@ -18,6 +18,8 @@ namespace Configurazione
             Locator.CurrentMutable.Register(() => new PostazioneDbContext(), typeof(IPostazioneDbContext));
             Locator.CurrentMutable.Register(() => new SettoreDbContext(), typeof(ISettoreDbContext));
             Locator.CurrentMutable.Register(() => new TariffaDbContext(), typeof(ITariffaDbContext));
+            Locator.CurrentMutable.Register(() => new PermessoDbContext(), typeof(IPermessoDbContext));
+            Locator.CurrentMutable.Register(() => new RepartoDbContext(), typeof(IRepartoDbContext));
 
             // CORRETTO: Spostiamo il GetService dentro l'ambito della Lambda () => ...
             // In questo modo, il DbContext verrà cercato solo quando verrà creato il Repository
@@ -45,6 +47,17 @@ namespace Configurazione
                 return new ConfigurazioneTariffaRepository(context);
             }, typeof(IConfigurazioneTariffaRepository));
 
+            Locator.CurrentMutable.Register(() =>
+            {
+                var context = Locator.Current.GetService<IPermessoDbContext>();
+                return new PermessoRepository(context);
+            }, typeof(IPermessoRepository));
+
+            Locator.CurrentMutable.Register(() =>
+            {
+                var context = Locator.Current.GetService<IRepartoDbContext>();
+                return new ConfigurazioneRepartoRepository(context);
+            }, typeof(IConfigurazioneRepartoRepository));
 
 
             Locator.CurrentMutable.Register(() => new ConfigurazioneViewModel(), typeof(IConfigurazioneViewModel));
@@ -74,6 +87,13 @@ namespace Configurazione
                 return new OperatoreUpdViewModel(context);
             }, typeof(IOperatoreUpdViewModel));
 
+            Locator.CurrentMutable.Register(() =>
+            {
+                var context1 = Locator.Current.GetService<IPermessoRepository>();
+                var context2 = Locator.Current.GetService<IConfigurazioneOperatoreRepository>();
+                return new PermessiViewModel(context1, context2);
+            }, typeof(IPermessoViewModel));
+
 
 
             Locator.CurrentMutable.Register(() =>
@@ -99,6 +119,13 @@ namespace Configurazione
                 var context = Locator.Current.GetService<IConfigurazionePostazioneRepository>();
                 return new PostazioneUpdViewModel(context);
             }, typeof(IPostazioneUpdViewModel));
+
+            Locator.CurrentMutable.Register(() =>
+            {
+                var context1 = Locator.Current.GetService<IConfigurazionePostazioneRepository>();
+                var context2 = Locator.Current.GetService<IConfigurazioneRepartoRepository>();
+                return new RepartiViewModel(context1, context2);
+            }, typeof(IRepartoViewModel));
 
 
 
@@ -165,11 +192,15 @@ namespace Configurazione
             Locator.CurrentMutable.Register(() => new OperatoreInputView(), typeof(IViewFor<OperatoreDelViewModel>));
             Locator.CurrentMutable.Register(() => new OperatoreInputView(), typeof(IViewFor<OperatoreUpdViewModel>));
 
+            Locator.CurrentMutable.Register(() => new PermessiView(), typeof(IViewFor<PermessiViewModel>));
+
 
             Locator.CurrentMutable.Register(() => new PostazioneGroupView(), typeof(IViewFor<PostazioneGroupViewModel>));
             Locator.CurrentMutable.Register(() => new PostazioneInputView(), typeof(IViewFor<PostazioneAddViewModel>));
             Locator.CurrentMutable.Register(() => new PostazioneInputView(), typeof(IViewFor<PostazioneDelViewModel>));
             Locator.CurrentMutable.Register(() => new PostazioneInputView(), typeof(IViewFor<PostazioneUpdViewModel>));
+
+            Locator.CurrentMutable.Register(() => new RepartiView(), typeof(IViewFor<RepartiViewModel>));
 
             Locator.CurrentMutable.Register(() => new SettoreGroupView(), typeof(IViewFor<SettoreGroupViewModel>));
             Locator.CurrentMutable.Register(() => new SettoreInputView(), typeof(IViewFor<SettoreAddViewModel>));
