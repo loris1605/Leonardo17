@@ -5,29 +5,28 @@ using System.Diagnostics;
 
 namespace Configurazione.ViewModels
 {
-    public interface IRepartoViewModel : IConfigurazioneCrudViewModel { }
+    public interface IListinoViewModel : IConfigurazioneCrudViewModel { }
 
-    public partial class RepartiViewModel(IConfigurazionePostazioneRepository pRepository, 
-                                          IConfigurazioneRepartoRepository Repository) : 
-                                          PostazioneInputBase(), IRepartoViewModel
+    public partial class ListinoViewModel(IConfigurazioneSettoreRepository settoreRepository, 
+                                          IConfigurazioneListinoRepository listinoRepository) : SettoreInputBase(), IListinoViewModel
     {
-        private IConfigurazioneRepartoRepository Q = Repository ?? throw new ArgumentNullException(nameof(Repository));
-        private IConfigurazionePostazioneRepository pQ = pRepository ?? throw new ArgumentNullException(nameof(pRepository));
+        private IConfigurazioneListinoRepository Q = listinoRepository ?? throw new ArgumentNullException(nameof(listinoRepository));
+        private IConfigurazioneSettoreRepository sQ = settoreRepository ?? throw new ArgumentNullException(nameof(settoreRepository));
 
         protected override void OnFinalDestruction()
         {
             Q = null;
-            pQ = null;
+            sQ = null;
             base.OnFinalDestruction();
         }
 
         protected override async Task OnLoading()
         {
-            var postazione = await pQ.FirstPostazione(_idDaModificare, Token);
-            Titolo = $"Reparti per la postazione: {postazione?.NomePostazione ?? "Sconosciuto"}";
-            var data = await Q.GetReparti(_idDaModificare, Token);
-            
-            DataSource = [.. data.Select(dto => new ConfigurazioneSettoreElencoMap(dto))];
+            var settore = await sQ.FirstSettore(_idDaModificare, Token);
+            Titolo = $"Listini per il settore: {settore?.NomeSettore ?? "Sconosciuto"}";
+            var data = await Q.GetListini(_idDaModificare, Token);
+
+            DataSource = [.. data.Select(dto => new ConfigurazioneTariffaMap(dto))];
             await SetFocus(EscFocus);
         }
 
@@ -40,11 +39,11 @@ namespace Configurazione.ViewModels
 
             try
             {
-                InfoLabel = "Salvataggio reparti...";
+                InfoLabel = "Salvataggio listini...";
 
-                if (!await Q.SaveReparti(_idDaModificare, dtoSource, Token))
+                if (!await Q.SaveListini(_idDaModificare, dtoSource, Token))
                 {
-                    InfoLabel = "Errore Database: modifica reparti fallita";
+                    InfoLabel = "Errore Database: modifica listini fallita";
                     _isClosing = false;
                     await SetFocus(EscFocus);
                     return;
@@ -65,15 +64,14 @@ namespace Configurazione.ViewModels
                 await SetFocus(EscFocus);
             }
         }
-
     }
 
-    public partial class RepartiViewModel
+    public partial class ListinoViewModel
     {
         #region DataSource
 
-        private IList<ConfigurazioneSettoreElencoMap> _datasource = [];
-        public IList<ConfigurazioneSettoreElencoMap> DataSource
+        private IList<ConfigurazioneTariffaMap> _datasource = [];
+        public IList<ConfigurazioneTariffaMap> DataSource
         {
             get => _datasource;
             set => this.RaiseAndSetIfChanged(ref _datasource, value);
@@ -83,8 +81,8 @@ namespace Configurazione.ViewModels
 
         #region BindingT
 
-        private ConfigurazioneSettoreElencoMap _bindingT;
-        public new ConfigurazioneSettoreElencoMap BindingT
+        private ConfigurazioneTariffaMap _bindingT;
+        public new ConfigurazioneTariffaMap BindingT
         {
             get => _bindingT;
             set => this.RaiseAndSetIfChanged(ref _bindingT, value);

@@ -20,6 +20,7 @@ namespace Configurazione
             Locator.CurrentMutable.Register(() => new TariffaDbContext(), typeof(ITariffaDbContext));
             Locator.CurrentMutable.Register(() => new PermessoDbContext(), typeof(IPermessoDbContext));
             Locator.CurrentMutable.Register(() => new RepartoDbContext(), typeof(IRepartoDbContext));
+            Locator.CurrentMutable.Register(() => new ListinoDbContext(), typeof(IListinoDbContext));
 
             // CORRETTO: Spostiamo il GetService dentro l'ambito della Lambda () => ...
             // In questo modo, il DbContext verrà cercato solo quando verrà creato il Repository
@@ -58,6 +59,12 @@ namespace Configurazione
                 var context = Locator.Current.GetService<IRepartoDbContext>();
                 return new ConfigurazioneRepartoRepository(context);
             }, typeof(IConfigurazioneRepartoRepository));
+
+            Locator.CurrentMutable.Register(() =>
+            {
+                var context = Locator.Current.GetService<IListinoDbContext>();
+                return new ConfigurazioneListinoRepository(context);
+            }, typeof(IConfigurazioneListinoRepository));
 
 
             Locator.CurrentMutable.Register(() => new ConfigurazioneViewModel(), typeof(IConfigurazioneViewModel));
@@ -153,6 +160,13 @@ namespace Configurazione
                 return new SettoreUpdViewModel(context);
             }, typeof(ISettoreUpdViewModel));
 
+            Locator.CurrentMutable.Register(() =>
+            {
+                var context1 = Locator.Current.GetService<IConfigurazioneSettoreRepository>();
+                var context2 = Locator.Current.GetService<IConfigurazioneListinoRepository>();
+                return new ListinoViewModel(context1, context2);
+            }, typeof(IListinoViewModel));
+
 
 
             Locator.CurrentMutable.Register(() =>
@@ -206,6 +220,8 @@ namespace Configurazione
             Locator.CurrentMutable.Register(() => new SettoreInputView(), typeof(IViewFor<SettoreAddViewModel>));
             Locator.CurrentMutable.Register(() => new SettoreInputView(), typeof(IViewFor<SettoreDelViewModel>));
             Locator.CurrentMutable.Register(() => new SettoreInputView(), typeof(IViewFor<SettoreUpdViewModel>));
+
+            Locator.CurrentMutable.Register(() => new ListinoView(), typeof(IViewFor<ListinoViewModel>));
 
 
             Locator.CurrentMutable.Register(() => new TariffaGroupView(), typeof(IViewFor<TariffaGroupViewModel>));

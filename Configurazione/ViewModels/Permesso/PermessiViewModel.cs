@@ -52,6 +52,7 @@ namespace Configurazione.ViewModels
                 if (!await Q.SavePermessi(_idDaModificare, dtoSource, Token))
                 {
                     InfoLabel = "Errore Database: modifica permessi fallita";
+                    _isClosing = false;
                     await SetFocus(EscFocus);
                     return;
                 }

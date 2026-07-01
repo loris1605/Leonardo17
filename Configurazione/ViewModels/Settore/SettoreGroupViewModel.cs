@@ -16,6 +16,8 @@ namespace Configurazione.ViewModels
         IObservable<Unit> GroupToSettoreAdd { get; }
         IObservable<int> GroupToSettoreDel { get; }
         IObservable<int> GroupToSettoreUpd { get; }
+        IObservable<int> GroupToListino { get; }
+
         IObservable<Unit> SettoriToOperatori { get; }
         IObservable<Unit> SettoriToPostazioni { get; }
         IObservable<Unit> SettoriToTariffe { get; }
@@ -54,6 +56,7 @@ namespace Configurazione.ViewModels
                 x => x.OperatoriCommand.IsExecuting,
                 x => x.PostazioniCommand.IsExecuting,
                 x => x.TariffeCommand.IsExecuting,
+                x => x.ListiniCommand.IsExecuting,
                 x => x.RepartiCommand.IsExecuting
             ).StartWith(false),
             // Se anche uno solo è in esecuzione, restituisce true
@@ -72,11 +75,12 @@ namespace Configurazione.ViewModels
             OperatoriCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_settoriToOperatori));
             PostazioniCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_settoriToPostazioni));
             TariffeCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_settoriToTariffe));
+            ListiniCommand = ReactiveCommand.CreateFromTask(() => OnListini(), canHasSelection);
 
             OperatoriCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Operatori: {ex.Message}"));
             PostazioniCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Postazioni: {ex.Message}"));
             TariffeCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Tariffe: {ex.Message}"));
-
+            ListiniCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Listini: {ex.Message}"));
         }
 
         //public void SetHost(IConfigurazioneScreen host) => _host = host;
@@ -154,6 +158,12 @@ namespace Configurazione.ViewModels
             await Task.CompletedTask;
         }
 
+        protected async Task OnListini()
+        {
+            _groupToListino.OnNext(GroupBindingT.Id);
+            await Task.CompletedTask;
+        }
+
         protected override async Task OnEsc() => await Task.CompletedTask;
         
 
@@ -170,6 +180,9 @@ namespace Configurazione.ViewModels
 
         private readonly Subject<int> _groupToSettoreUpd = new();
         public IObservable<int> GroupToSettoreUpd => _groupToSettoreUpd.AsObservable();
+
+        private readonly Subject<int> _groupToListino = new();
+        public IObservable<int> GroupToListino => _groupToListino.AsObservable();
 
         private readonly Subject<Unit> _settoriToOperatori = new();
         public IObservable<Unit> SettoriToOperatori => _settoriToOperatori.AsObservable();
