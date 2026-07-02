@@ -62,7 +62,6 @@ namespace Models.Context
             FidelityContoConfig(modelBuilder);
         }
 
-
         private void SettingsConfig(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<DbSettings>().HasData(

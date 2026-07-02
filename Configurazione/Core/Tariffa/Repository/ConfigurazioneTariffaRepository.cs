@@ -40,7 +40,8 @@ namespace Configurazione.Core.Repository
 
         }
 
-        public async Task<ConfigurazioneTariffaDTO> FirstTariffa(int id) => await GetById(id, selector: ConfigurazioneTariffaDTO.ToDto) ?? new ConfigurazioneTariffaDTO();
+        public async Task<ConfigurazioneTariffaDTO> FirstTariffa(int id) => 
+            await GetById(id, selector: ConfigurazioneTariffaDTO.ToDto) ?? new ConfigurazioneTariffaDTO();
 
         public async Task<bool> Upd(ConfigurazioneTariffaDTO dto, CancellationToken ctk = default) => await Upd<ConfigurazioneTariffaDTO, Tariffa>(dto, ctk);
     }

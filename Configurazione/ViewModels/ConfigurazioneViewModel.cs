@@ -424,6 +424,15 @@ namespace Configurazione.ViewModels
                         })
                         .DisposeWith(_navigationDisposables);
 
+                    groupVM.GroupToListino
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async id =>
+                        {
+                            GroupEnabled = false;
+                            await GoToInput(Locator.Current.GetService<IListinoViewModel>(), id);
+                        })
+                        .DisposeWith(_navigationDisposables);
+
                     // 3. NAVIGAZIONE SUL MAIN THREAD (Senza usare ScheduleAsync)
                     var tcs = new TaskCompletionSource();
 

@@ -21,6 +21,7 @@ namespace Configurazione
             Locator.CurrentMutable.Register(() => new PermessoDbContext(), typeof(IPermessoDbContext));
             Locator.CurrentMutable.Register(() => new RepartoDbContext(), typeof(IRepartoDbContext));
             Locator.CurrentMutable.Register(() => new ListinoDbContext(), typeof(IListinoDbContext));
+            Locator.CurrentMutable.Register(() => new TipoRientroDbContext(), typeof(ITipoRientroDbContext));
 
             // CORRETTO: Spostiamo il GetService dentro l'ambito della Lambda () => ...
             // In questo modo, il DbContext verrà cercato solo quando verrà creato il Repository
@@ -65,6 +66,12 @@ namespace Configurazione
                 var context = Locator.Current.GetService<IListinoDbContext>();
                 return new ConfigurazioneListinoRepository(context);
             }, typeof(IConfigurazioneListinoRepository));
+
+            Locator.CurrentMutable.Register(() =>
+            {
+                var context = Locator.Current.GetService<ITipoRientroDbContext>();
+                return new TipoRientroRepository(context);
+            }, typeof(ITipoRientroRepository));
 
 
             Locator.CurrentMutable.Register(() => new ConfigurazioneViewModel(), typeof(IConfigurazioneViewModel));

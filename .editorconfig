@@ -20,6 +20,10 @@ dotnet_style_prefer_compound_assignment = true:suggestion
 
 # IDE0130: La parola chiave namespace non corrisponde alla struttura di cartelle
 dotnet_diagnostic.IDE0130.severity = none
+dotnet_style_prefer_simplified_interpolation = true:suggestion
+dotnet_style_prefer_collection_expression = when_types_loosely_match:suggestion
+dotnet_style_namespace_match_folder = true:suggestion
+dotnet_diagnostic.CA1822.severity = none
 
 [*.cs]
 #### Stili di denominazione ####
@@ -78,6 +82,12 @@ csharp_style_expression_bodied_accessors = true:silent
 csharp_style_expression_bodied_lambdas = true:silent
 csharp_style_expression_bodied_local_functions = false:silent
 csharp_style_conditional_delegate_call = true:suggestion
+csharp_style_throw_expression = true:suggestion
+csharp_style_prefer_null_check_over_type_check = true:suggestion
+csharp_prefer_simple_default_expression = true:suggestion
+csharp_style_prefer_local_over_anonymous_function = true:suggestion
+csharp_style_prefer_index_operator = true:suggestion
+csharp_style_prefer_range_operator = true:suggestion
 
 [*.vb]
 #### Stili di denominazione ####
