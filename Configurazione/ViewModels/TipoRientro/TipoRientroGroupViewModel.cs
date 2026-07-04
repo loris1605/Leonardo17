@@ -1,5 +1,4 @@
-﻿using Avalonia.Collections;
-using Configurazione.Core.DTO;
+﻿using Configurazione.Core.DTO;
 using Configurazione.Core.Repository;
 using Configurazione.ViewModels.Map;
 using ReactiveUI;
@@ -11,33 +10,32 @@ using ViewModels;
 
 namespace Configurazione.ViewModels
 {
-    public interface ITariffaGroupViewModel : IRoutableViewModel
+    public interface ITipoRientroGroupViewModel : IRoutableViewModel
     {
-        IObservable<Unit> GroupToTariffaAdd { get; }
-        IObservable<int> GroupToTariffaDel { get; }
-        IObservable<int> GroupToTariffaUpd { get; }
-        IObservable<Unit> TariffaToOperatori { get; }
-        IObservable<Unit> TariffaToPostazioni { get; }
-        IObservable<Unit> TariffaToSettori { get; }
+        IObservable<Unit> GroupToTipoRientroAdd { get; }
+        IObservable<int> GroupToTipoRientroDel { get; }
+        IObservable<int> GroupToTipoRientroUpd { get; }
+        IObservable<Unit> TipoRientroToOperatori { get; }
+        IObservable<Unit> TipoRientroToPostazioni { get; }
+        IObservable<Unit> TipoRientroToSettori { get; }
+        IObservable<Unit> TipoRientroToTariffe { get; }
     }
 
-    public partial class TariffaGroupViewModel : GroupViewModelBase<ConfigurazioneTariffaMap>, IGroupViewModelBase, ITariffaGroupViewModel
+    public partial class TipoRientroGroupViewModel : GroupViewModelBase<ConfigurazioneTipoRientroMap>, 
+                                             IGroupViewModelBase, ITipoRientroGroupViewModel
     {
+        public ReactiveCommand<Unit, Unit> PostazioniCommand { get; }
+        public ReactiveCommand<Unit, Unit> SettoriCommand { get; }
+        public ReactiveCommand<Unit, Unit> OperatoriCommand { get; }
+        public ReactiveCommand<Unit, Unit> TariffeCommand { get; }
 
-        public ReactiveCommand<Unit, Unit> PostazioniCommand { get;}
-        public ReactiveCommand<Unit, Unit> SettoriCommand { get;  }
-        public ReactiveCommand<Unit, Unit> OperatoriCommand { get;  }
-        public ReactiveCommand<Unit, Unit> ListiniCommand { get;  }
-
-        private IConfigurazioneTariffaRepository Q;
-
-        //protected IConfigurazioneScreen _host;
+        private ITipoRientroRepository Q;
 
         // Logica di cancellazione reattiva (IsLoading gestito dalla base)
         protected override IObservable<bool> CanDel => this.WhenAnyValue(
             x => x.GroupBindingT,
-            x => x.GroupBindingT.HasListino,
-            (item, hasListino) => item != null && !hasListino);
+            x => x.GroupBindingT.HasPostazione,
+            (item, hasPostazione) => item != null && !hasPostazione);
 
         // Registriamo i nuovi comandi nell'IsLoading globale per automatizzare l'icona di attesa
         protected override IObservable<bool> IsAnythingExecuting =>
@@ -51,29 +49,28 @@ namespace Configurazione.ViewModels
                 x => x.OperatoriCommand.IsExecuting,
                 x => x.PostazioniCommand.IsExecuting,
                 x => x.SettoriCommand.IsExecuting,
-                x => x.ListiniCommand.IsExecuting
+                x => x.TariffeCommand.IsExecuting
             ).StartWith(false),
             // Se anche uno solo è in esecuzione, restituisce true
             (baseLoad, baseSave, baseEsc, localExec) => baseLoad || baseSave || baseEsc || localExec)
         .DistinctUntilChanged();
 
-
-
-        public TariffaGroupViewModel(IConfigurazioneTariffaRepository Repository) : base(null)
+        public TipoRientroGroupViewModel(ITipoRientroRepository Repository) : base(null)
         {
             Q = Repository ?? throw new ArgumentNullException(nameof(Repository));
-            
+
 
             var canHasSelection = this.WhenAnyValue(x => x.GroupBindingT).Select(item => item != null);
 
-            OperatoriCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_tariffaToOperatori));
-            PostazioniCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_tariffaToPostazioni));
-            SettoriCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_tariffaToSettori));
+            OperatoriCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_tipoRientroToOperatori));
+            PostazioniCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_tipoRientroToPostazioni));
+            SettoriCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_tipoRientroToSettori));
+            TariffeCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_tipoRientroToTariffe));
 
             OperatoriCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Operatori: {ex.Message}"));
             PostazioniCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Postazioni: {ex.Message}"));
             SettoriCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Settori: {ex.Message}"));
-
+            TariffeCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Tariffe: {ex.Message}"));
         }
 
         protected override void OnFinalDestruction()
@@ -98,9 +95,9 @@ namespace Configurazione.ViewModels
             }
         }
 
-        private async Task UpdateCollection(List<ConfigurazioneTariffaDTO> data, int id)
+        private async Task UpdateCollection(List<ConfigurazioneTipoRientroDTO> data, int id)
         {
-            var mapped = await Task.Run(() => data.Select(dto => new ConfigurazioneTariffaMap(dto)).ToList(), Token);
+            var mapped = await Task.Run(() => data.Select(dto => new ConfigurazioneTipoRientroMap(dto)).ToList(), Token);
 
             var backup = GroupBindingT;
             GroupBindingT = null;
@@ -131,19 +128,19 @@ namespace Configurazione.ViewModels
 
         protected async override Task OnAdding()
         {
-            _groupToTariffaAdd.OnNext(Unit.Default);
+            _groupToTipoRientroAdd.OnNext(Unit.Default);
             await Task.CompletedTask;
         }
 
         protected async override Task OnDeleting()
         {
-            _groupToTariffaDel.OnNext(GroupBindingT.Id);
+            _groupToTipoRientroDel.OnNext(GroupBindingT.Id);
             await Task.CompletedTask;
         }
 
         protected async override Task OnUpdating()
         {
-            _groupToTariffaUpd.OnNext(GroupBindingT.Id);
+            _groupToTipoRientroUpd.OnNext(GroupBindingT.Id);
             await Task.CompletedTask;
         }
 
@@ -151,25 +148,28 @@ namespace Configurazione.ViewModels
 
     }
 
-    public partial class TariffaGroupViewModel
+    public partial class TipoRientroGroupViewModel
     {
         // 1. Aggiungi questo Subject per notificare l'esterno
-        private readonly Subject<Unit> _groupToTariffaAdd = new();
-        public IObservable<Unit> GroupToTariffaAdd => _groupToTariffaAdd.AsObservable();
+        private readonly Subject<Unit> _groupToTipoRientroAdd = new();
+        public IObservable<Unit> GroupToTipoRientroAdd => _groupToTipoRientroAdd.AsObservable();
 
-        private readonly Subject<int> _groupToTariffaDel = new();
-        public IObservable<int> GroupToTariffaDel => _groupToTariffaDel.AsObservable(); 
+        private readonly Subject<int> _groupToTipoRientroDel = new();
+        public IObservable<int> GroupToTipoRientroDel => _groupToTipoRientroDel.AsObservable();
 
-        private readonly Subject<int> _groupToTariffaUpd = new();
-        public IObservable<int> GroupToTariffaUpd => _groupToTariffaUpd.AsObservable();
+        private readonly Subject<int> _groupToTipoRientroUpd = new();
+        public IObservable<int> GroupToTipoRientroUpd => _groupToTipoRientroUpd.AsObservable();
 
-        private readonly Subject<Unit> _tariffaToOperatori = new();
-        public IObservable<Unit> TariffaToOperatori => _tariffaToOperatori.AsObservable();
+        private readonly Subject<Unit> _tipoRientroToOperatori = new();
+        public IObservable<Unit> TipoRientroToOperatori => _tipoRientroToOperatori.AsObservable();
 
-        private readonly Subject<Unit> _tariffaToPostazioni = new();
-        public IObservable<Unit> TariffaToPostazioni => _tariffaToPostazioni.AsObservable();
+        private readonly Subject<Unit> _tipoRientroToPostazioni = new();
+        public IObservable<Unit> TipoRientroToPostazioni => _tipoRientroToPostazioni.AsObservable();
 
-        private readonly Subject<Unit> _tariffaToSettori = new();
-        public IObservable<Unit> TariffaToSettori => _tariffaToSettori.AsObservable();
+        private readonly Subject<Unit> _tipoRientroToSettori = new();
+        public IObservable<Unit> TipoRientroToSettori => _tipoRientroToSettori.AsObservable();
+
+        private readonly Subject<Unit> _tipoRientroToTariffe = new();
+        public IObservable<Unit> TipoRientroToTariffe => _tipoRientroToTariffe.AsObservable();
     }
 }

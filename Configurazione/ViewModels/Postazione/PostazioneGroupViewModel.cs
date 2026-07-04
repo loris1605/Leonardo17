@@ -20,6 +20,7 @@ namespace Configurazione.ViewModels
         IObservable<Unit> PostazioniToOperatori { get; }
         IObservable<Unit> PostazioniToSettori { get; }
         IObservable<Unit> PostazioniToTariffe { get; }
+        IObservable<Unit> PostazioniToRientri { get; }
     }
 
     public partial class PostazioneGroupViewModel : GroupViewModelBase<ConfigurazionePostazioneMap>, 
@@ -183,5 +184,8 @@ namespace Configurazione.ViewModels
 
         private readonly Subject<Unit> _postazioniToTariffe = new();
         public IObservable<Unit> PostazioniToTariffe => _postazioniToTariffe.AsObservable();
+
+        private readonly Subject<Unit> _postazioniToRientri = new();
+        public IObservable<Unit> PostazioniToRientri => _postazioniToRientri.AsObservable();
     }
 }

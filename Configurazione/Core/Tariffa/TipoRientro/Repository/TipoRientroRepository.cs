@@ -9,16 +9,16 @@ namespace Configurazione.Core.Repository
 {
     public interface ITipoRientroRepository
     {
-        Task<TipoRientroDTO> FirstTipoRientro(int id);
-        Task<List<TipoRientroDTO>> Load(int id, CancellationToken ctk = default);
-        Task<bool> Upd(TipoRientroDTO dto, CancellationToken ctk = default);
+        Task<ConfigurazioneTipoRientroDTO> FirstTipoRientro(int id);
+        Task<List<ConfigurazioneTipoRientroDTO>> Load(int id, CancellationToken ctk = default);
+        Task<bool> Upd(ConfigurazioneTipoRientroDTO dto, CancellationToken ctk = default);
     }
 
     public class TipoRientroRepository(ITipoRientroDbContext ctx) : BaseRepository<TipoRientroDbContext, TipoRientro>, ITipoRientroRepository
     {
         private readonly ITipoRientroDbContext _ctx = ctx;
 
-        public async Task<List<TipoRientroDTO>> Load(int id, CancellationToken ctk = default)
+        public async Task<List<ConfigurazioneTipoRientroDTO>> Load(int id, CancellationToken ctk = default)
         {
             if (id > 0)
                 return await LoadTipoRientri(x => x.Id == id, ctk);
@@ -26,7 +26,7 @@ namespace Configurazione.Core.Repository
                 return await LoadTipoRientri(p => p.Id > 0, ctk);
         }
 
-        private async Task<List<TipoRientroDTO>> LoadTipoRientri(Expression<Func<TipoRientro, bool>> predicate
+        private async Task<List<ConfigurazioneTipoRientroDTO>> LoadTipoRientri(Expression<Func<TipoRientro, bool>> predicate
                                                             , CancellationToken ctk = default)
         {
 
@@ -35,15 +35,15 @@ namespace Configurazione.Core.Repository
                 .AsNoTracking()
                 .Where(predicate)
                 .OrderBy(o => o.Nome)
-                .Select(TipoRientroDTO.ToDto) // <--- Usi l'espressione qui
+                .Select(ConfigurazioneTipoRientroDTO.ToDto) // <--- Usi l'espressione qui
                 .ToListAsync(ctk);
 
         }
 
-        public async Task<TipoRientroDTO> FirstTipoRientro(int id) =>
-            await GetById(id, selector: TipoRientroDTO.ToDto) ?? new TipoRientroDTO();
+        public async Task<ConfigurazioneTipoRientroDTO> FirstTipoRientro(int id) =>
+            await GetById(id, selector: ConfigurazioneTipoRientroDTO.ToDto) ?? new ConfigurazioneTipoRientroDTO();
 
-        public async Task<bool> Upd(TipoRientroDTO dto, CancellationToken ctk = default) =>
-            await Upd<TipoRientroDTO, TipoRientro>(dto, ctk);
+        public async Task<bool> Upd(ConfigurazioneTipoRientroDTO dto, CancellationToken ctk = default) =>
+            await Upd<ConfigurazioneTipoRientroDTO, TipoRientro>(dto, ctk);
     }
 }

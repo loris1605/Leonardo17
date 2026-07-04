@@ -201,6 +201,11 @@ namespace Configurazione
             }, typeof(ITariffaUpdViewModel));
 
 
+            Locator.CurrentMutable.Register(() =>
+            {
+                var context = Locator.Current.GetService<ITipoRientroRepository>();
+                return new TipoRientroGroupViewModel(context);
+            }, typeof(ITipoRientroGroupViewModel));
 
 
             // 2. REGISTRAZIONE COMPONENTI UI (Modello B - Usa e Getta)
@@ -235,6 +240,8 @@ namespace Configurazione
             Locator.CurrentMutable.Register(() => new TariffaInputView(), typeof(IViewFor<TariffaAddViewModel>));
             Locator.CurrentMutable.Register(() => new TariffaInputView(), typeof(IViewFor<TariffaDelViewModel>));
             Locator.CurrentMutable.Register(() => new TariffaInputView(), typeof(IViewFor<TariffaUpdViewModel>));
+
+            Locator.CurrentMutable.Register(() => new TipoRientroGroupView(), typeof(IViewFor<TipoRientroGroupViewModel>));
 
         }
     }

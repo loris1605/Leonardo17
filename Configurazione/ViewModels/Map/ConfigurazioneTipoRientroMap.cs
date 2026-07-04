@@ -13,6 +13,7 @@ namespace Configurazione.ViewModels.Map
             this.Id = dto.Id;
             this.Nome = dto.Nome;
             this.DurataOre = dto.DurataOre;
+            this.HasPostazione = dto.HasPostazione;
         }
 
         public ConfigurazioneTipoRientroDTO ToDto()
@@ -21,8 +22,8 @@ namespace Configurazione.ViewModels.Map
             {
                 Id = this.Id,
                 Nome = this.Nome,
-                DurataOre = this.DurataOre
-
+                DurataOre = this.DurataOre,
+                HasPostazione = this.HasPostazione
             };
         }
 
@@ -38,6 +39,13 @@ namespace Configurazione.ViewModels.Map
         {
             get => _mydurataore;
             set => this.RaiseAndSetIfChanged(ref _mydurataore, value);
+        }
+
+        private bool _haspostazione;
+        public bool HasPostazione
+        {
+            get => _haspostazione;
+            set => this.RaiseAndSetIfChanged(ref _haspostazione, value);
         }
     }
 }

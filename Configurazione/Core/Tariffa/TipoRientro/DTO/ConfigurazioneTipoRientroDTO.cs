@@ -14,9 +14,11 @@ namespace Configurazione.Core.DTO
             this.Id = table.Id;
             this.Nome = table.Nome;
             this.DurataOre = table.DurataOre;
+            
         }
 
         public int DurataOre { get; set; }
+        public bool HasPostazione { get; set; }
 
         public TipoRientro ToTable()
         {
@@ -39,7 +41,8 @@ namespace Configurazione.Core.DTO
         {
             Id = t.Id,
             Nome = t.Nome,
-            DurataOre = t.DurataOre
+            DurataOre = t.DurataOre,
+            HasPostazione = t.Postazioni.Any() // Assuming Postazioni is a collection in TipoRientro
         };
     }
 }

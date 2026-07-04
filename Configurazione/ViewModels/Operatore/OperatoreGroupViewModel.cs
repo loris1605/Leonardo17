@@ -21,6 +21,7 @@ namespace Configurazione.ViewModels
         IObservable<Unit> OperatoreToPostazioni { get; }
         IObservable<Unit> OperatoreToSettori { get; }
         IObservable<Unit> OperatoreToTariffe { get; }
+        IObservable<Unit> OperatoreToRientri { get; }
     }
 
     public partial class OperatoreGroupViewModel : GroupViewModelBase<ConfigurazioneOperatoreMap>, IGroupViewModelBase, IOperatoreGroupViewModel
@@ -29,6 +30,7 @@ namespace Configurazione.ViewModels
         public ReactiveCommand<Unit, Unit> SettoriCommand { get;  }
         public ReactiveCommand<Unit, Unit> TariffeCommand { get; }
         public ReactiveCommand<Unit, Unit> PermessiCommand { get;  }
+        public ReactiveCommand<Unit, Unit> RientriCommand { get;  }
 
         private IConfigurazioneOperatoreRepository Q;
         
@@ -52,7 +54,8 @@ namespace Configurazione.ViewModels
                 x => x.PostazioniCommand.IsExecuting,
                 x => x.SettoriCommand.IsExecuting,
                 x => x.TariffeCommand.IsExecuting,
-                x => x.PermessiCommand.IsExecuting
+                x => x.PermessiCommand.IsExecuting,
+                x => x.RientriCommand.IsExecuting
             ).StartWith(false),
             // Se anche uno solo è in esecuzione, restituisce true
             (baseLoad, baseSave, baseEsc, localExec) => baseLoad || baseSave || baseEsc || localExec)
@@ -66,11 +69,14 @@ namespace Configurazione.ViewModels
             PostazioniCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_operatoreToPostazioni));
             SettoriCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_operatoreToSettori));
             TariffeCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_operatoreToTariffe));
+            RientriCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_operatoreToRientri));
             PermessiCommand = ReactiveCommand.CreateFromTask(() => OnPermessi(), canHasSelection);
 
             PostazioniCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Postazioni: {ex.Message}"));
             SettoriCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Settori: {ex.Message}"));
             TariffeCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Tariffe: {ex.Message}"));
+            RientriCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Rientri: {ex.Message}"));
+            PermessiCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Permessi: {ex.Message}"));
         }
 
         public void SetHost(IConfigurazioneScreen host) => _host = host;
@@ -183,5 +189,10 @@ namespace Configurazione.ViewModels
 
         private readonly Subject<Unit> _operatoreToTariffe = new();
         public IObservable<Unit> OperatoreToTariffe => _operatoreToTariffe.AsObservable();
+
+        private readonly Subject<Unit> _operatoreToRientri = new();
+        public IObservable<Unit> OperatoreToRientri => _operatoreToRientri.AsObservable();
+
+
     }
 }

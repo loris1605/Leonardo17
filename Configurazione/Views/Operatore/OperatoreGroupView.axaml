@@ -147,10 +147,11 @@
             <ui:UiButton x:Name="RientriButton"
                                  Margin="20,5"
                                  MinHeight="40"
-                                 ToolTipText="GRUPPO RIENTRI"
+                                 ToolTipText="GRUPPO TIPI RIENTRO"
                                  HorizontalAlignment="Stretch"
                                  Content="RIENTRI"
-                                 HorizontalContentAlignment="Center"/>
+                                 HorizontalContentAlignment="Center"
+                                 Command="{Binding RientriCommand}"/>
 
             <ui:UiButton x:Name="PromozioniButton"
                                  Margin="20,5"

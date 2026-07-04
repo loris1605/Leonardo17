@@ -10,9 +10,9 @@
              d:DesignHeight="450"
              KeyboardNavigation.TabNavigation="Cycle"
              Background="Transparent"
-             x:DataType="vm:TariffaGroupViewModel"
+             x:DataType="vm:TipoRientroGroupViewModel"
              x:CompileBindings="True"
-             x:Class="Configurazione.Views.TariffaGroupView">
+             x:Class="Configurazione.Views.TipoRientroGroupView">
 
     <Grid x:Name="MainGrid">
     
@@ -27,13 +27,12 @@
         </Grid.ColumnDefinitions>    
     
         <lc:CrudToolBar x:Name="CrudBar"
-                        GroupText="TARIFFA"
+                        GroupText="TIPO RIENTRO"
                         Grid.ColumnSpan="2"
                         FilterCommandVisibile="False"
                         AddCommand="{Binding AddCommand}"
                         DelCommand="{Binding DelCommand}"
-                        UpdCommand="{Binding UpdCommand}"
-                        CancelFilterCommand="{Binding FilterCommand}"/>
+                        UpdCommand="{Binding UpdCommand}"/>
 
         <HeaderedContentControl BorderBrush="Black" 
                                 Grid.Row="1" 
@@ -46,7 +45,7 @@
                                 Background="Transparent">
         
             <HeaderedContentControl.Header>
-                <TextBlock Text=" Tariffe " 
+                <TextBlock Text=" Tipi Rientro " 
                            Foreground="Black" 
                            Margin="3"
                            HorizontalAlignment="Center"/>
@@ -54,7 +53,7 @@
 
             <DataGrid ItemsSource="{Binding DataSource}"
                       Classes="Group"
-                      x:Name="TariffaDataGrid"
+                      x:Name="TipoRientroDataGrid"
                       SelectedItem="{Binding GroupBindingT}"
                       SelectedIndex="{Binding IdIndex}">
     
@@ -65,16 +64,13 @@
                                         IsVisible="False" />
 
                     <DataGridTextColumn Header="Nome" 
-                                        Binding="{Binding NomeTariffa}" 
+                                        Binding="{Binding Nome}" 
                                         Width="Auto" />
                                                
-                    <DataGridTextColumn Header="Etichetta" 
-                                        Binding="{Binding EtichettaTariffa}" 
+                    <DataGridTextColumn Header="Durata Ore" 
+                                        Binding="{Binding DurataOre}" 
                                         Width="Auto" />
 
-                    <DataGridTextColumn Header="Prezzo" 
-                                        Binding="{Binding PrezzoTariffa, StringFormat={}{0:C}}" 
-                                        Width="Auto" />
                     
                 </DataGrid.Columns>
             
@@ -85,35 +81,7 @@
 
         <StackPanel Grid.Column="1" Orientation="Vertical" Grid.Row="1">
 
-            <HeaderedContentControl BorderBrush="Black" 
-                                    Grid.Row="1" Grid.Column="1"
-                                    HorizontalAlignment="Stretch" 
-                                    VerticalAlignment="Stretch"
-                                    BorderThickness="1"
-                                    CornerRadius="5"
-                                    Margin="3"
-                                    x:Name="Listino">
-
-                <HeaderedContentControl.Header>
-                     <TextBlock Text=" Listini " 
-                                Foreground="Black"
-                                Background="Transparent"
-                                Margin="3"/>
-                </HeaderedContentControl.Header>
-
-                <ui:UiButton x:Name="ListiniButton"
-                                     MinWidth="50"
-                                     Margin="20,5"
-                                     ToolTipText="GESTIONE LISTINI"
-                                     HorizontalAlignment="Center">
-
-                    <Image Source="avares://ControlStyles/Resources/AggiungiIcon.png" Width="34" Height="34" />
-                
-                </ui:UiButton>
-
-                
             
-            </HeaderedContentControl>
         
             <ui:UiButton x:Name="OperatoriButton"
                                  Margin="20,5"
@@ -144,10 +112,11 @@
             <ui:UiButton x:Name="RientriButton"
                                  Margin="20,5"
                                  MinHeight="50"
-                                 ToolTipText="GRUPPO RIENTRI"
+                                 ToolTipText="GRUPPO TARIFFE"
                                  HorizontalAlignment="Stretch"
-                                 Content="RIENTRI"
-                                 HorizontalContentAlignment="Center"/>
+                                 Content="TARIFFE"
+                                 HorizontalContentAlignment="Center"
+                                 Command="{Binding TariffeCommand}"/>
         
         </StackPanel>
     
