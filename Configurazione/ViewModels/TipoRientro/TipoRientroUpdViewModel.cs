@@ -3,18 +3,17 @@ using System.Diagnostics;
 
 namespace Configurazione.ViewModels
 {
-    public interface ITariffaUpdViewModel : IConfigurazioneCrudViewModel { }
+    public interface ITipoRientroUpdViewModel : IConfigurazioneCrudViewModel { }
 
-    public class TariffaUpdViewModel : TariffaInputBase, ITariffaUpdViewModel
+    public class TipoRientroUpdViewModel : TipoRientroInputBase, ITipoRientroAddViewModel
     {
-        private IConfigurazioneTariffaRepository Q;
-       
-        public TariffaUpdViewModel(IConfigurazioneTariffaRepository Repository) : base()
-        {
-            Titolo = "Modifica Tariffa";
-            FieldsVisibile = true; // Impostato come richiesto
-            FieldsEnabled = true;
+        private ITipoRientroRepository Q;
 
+        public TipoRientroUpdViewModel(ITipoRientroRepository Repository) : base()
+        {
+            Titolo = "Modifica Tipo Rientro";
+            FieldsVisibile = true;
+            FieldsEnabled = true;
             Q = Repository ?? throw new ArgumentNullException(nameof(Repository));
         }
 
@@ -24,17 +23,14 @@ namespace Configurazione.ViewModels
         {
             try
             {
-                var data = await Q.FirstTariffa(_idDaModificare);
-
+                var data = await Q.FirstTipoRientro(_idDaModificare);
                 if (data == null)
                 {
-                    InfoLabel = "Errore: Tariffa non trovata.";
+                    InfoLabel = "Errore: Tipo Rientro non trovato.";
                     FieldsEnabled = false;
                     return;
                 }
-
                 BindingT = new (data);
-
                 // In modifica, portiamo il focus sul nome all'avvio
                 await SetFocus(NomeFocus);
             }
@@ -45,7 +41,7 @@ namespace Configurazione.ViewModels
             }
         }
 
-        protected override async Task OnSaving()
+        protected async override Task OnSaving()
         {
             InfoLabel = "";
             _isClosing = true;
@@ -55,49 +51,31 @@ namespace Configurazione.ViewModels
                 _isClosing = false;
                 return;
             }
-
             try
             {
-                // 2. Disabilita UI durante l'operazione
-                FieldsEnabled = false;
-
-                var input = BindingT.ToDto();
-
-                // 3. Controllo duplicati (escludendo se stessa)
-                if (await Q.EsisteNomeUpd(input))
+                // 2. Controllo Duplicati
+                if (await Q.EsisteNome(BindingT.ToDto(), Token))
                 {
                     _isClosing = false;
-                    InfoLabel = "Tariffa già registrata";
-                    FieldsEnabled = true;
+                    InfoLabel = "Tipo Rientro già registrato";
                     await SetFocus(NomeFocus);
                     return;
                 }
-
-                InfoLabel = "Aggiornamento in corso...";
-
-                // 4. Aggiornamento Database
-                if (!await Q.Upd(input))
+                InfoLabel = "Salvataggio in corso...";
+                // 3. Aggiornamento a Database
+                if (!await Q.Upd(BindingT.ToDto(), Token))
                 {
                     _isClosing = false;
-                    InfoLabel = "Errore Db modifica Tariffa";
-                    FieldsEnabled = true;
+                    InfoLabel = "Errore Database: aggiornamento fallito";
                     await SetFocus(NomeFocus);
                     return;
                 }
-
-                // 5. Successo
-                await OnBack(_idDaModificare);
             }
-            catch (OperationCanceledException)
-            {
-                _isClosing = false;
-                Debug.WriteLine("Salvataggio annullato.");
-            }
+            catch (OperationCanceledException) { Debug.WriteLine("Salvataggio annullato."); _isClosing = false; }
             catch (Exception ex)
             {
                 _isClosing = false;
                 InfoLabel = $"Errore: {ex.Message}";
-                FieldsEnabled = true;
                 await SetFocus(NomeFocus);
             }
         }

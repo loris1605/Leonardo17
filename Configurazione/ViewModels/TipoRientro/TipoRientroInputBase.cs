@@ -7,27 +7,19 @@ using ViewModels;
 
 namespace Configurazione.ViewModels
 {
-    public partial class TariffaInputBase : InputViewModel<ConfigurazioneTariffaMap>
+    public partial class TipoRientroInputBase : InputViewModel<ConfigurazioneTipoRientroMap>
     {
         protected async override Task OnSaving() { await Task.CompletedTask; }
         protected async override Task OnLoading() => await Task.CompletedTask;
-
         public Interaction<Unit, Unit> NomeFocus { get; } = new();
-        public Interaction<Unit, Unit> LabelFocus { get; } = new();
-       
+        
         protected int _idDaModificare;
         protected int _idRitorno;
-
-        public string Name => BindingT.NomeTariffa.Trim() is null ? "" : BindingT.NomeTariffa.Trim();
-        string Label => BindingT.EtichettaTariffa.Trim() is null ? "" : BindingT.EtichettaTariffa.Trim();
-        protected int GetCodiceTariffa => BindingT is null ? 0 : BindingT.Id;
-
+        public string Name => BindingT.Nome.Trim() is null ? "" : BindingT.Nome.Trim();
+        protected int GetCodiceTipoRientro => BindingT is null ? 0 : BindingT.Id;
         protected bool IsNameEmpty => BindingT is not null && (Name == "");
         protected bool CheckLess2Name => Name.Length < 2;
-        public bool IsLabelEmpty => BindingT is not null && (Label == "");
-        public bool CheckLess2Label => Label.Length < 2;
 
-        
         public void SetIdDaModificare(int id)
         {
             _idDaModificare = id;
@@ -59,36 +51,26 @@ namespace Configurazione.ViewModels
             await Task.CompletedTask;
 
         }
+
     }
 
-    public partial class TariffaInputBase
+    public partial class TipoRientroInputBase
     {
         protected async Task<bool> ValidaDati()
         {
             if (IsNameEmpty)
             {
-                InfoLabel = "Inserire il nome della tariffa";
+                InfoLabel = "Inserire il nome del Tipo Rientro";
                 await SetFocus(NomeFocus);
                 return false;
             }
             if (CheckLess2Name)
             {
-                InfoLabel = "Formato Nome Tariffa non valido";
+                InfoLabel = "Formato Nome Tipo Rientro non valido";
                 await SetFocus(NomeFocus);
                 return false;
             }
-            if (IsLabelEmpty)
-            {
-                InfoLabel = "Inserire l'etichetta della tariffa";
-                await SetFocus(LabelFocus);
-                return false;
-            }
-            if (CheckLess2Label)
-            {
-                InfoLabel = "Formato Etichetta Tariffa non valido";
-                await SetFocus(LabelFocus);
-                return false;
-            }
+            
             InfoLabel = ""; // Pulisce eventuali errori precedenti
             return true;
 
@@ -100,8 +82,7 @@ namespace Configurazione.ViewModels
 
         private readonly Subject<int> _inputBack = new();
         public IObservable<int> InputBack => _inputBack.AsObservable();
-
-
-
     }
+
+
 }

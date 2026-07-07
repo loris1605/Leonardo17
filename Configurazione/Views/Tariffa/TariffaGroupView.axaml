@@ -147,7 +147,8 @@
                                  ToolTipText="GRUPPO RIENTRI"
                                  HorizontalAlignment="Stretch"
                                  Content="RIENTRI"
-                                 HorizontalContentAlignment="Center"/>
+                                 HorizontalContentAlignment="Center"
+                                 Command="{Binding RientriCommand}"/>
         
         </StackPanel>
     

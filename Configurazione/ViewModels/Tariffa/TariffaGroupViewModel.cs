@@ -19,6 +19,7 @@ namespace Configurazione.ViewModels
         IObservable<Unit> TariffaToOperatori { get; }
         IObservable<Unit> TariffaToPostazioni { get; }
         IObservable<Unit> TariffaToSettori { get; }
+        IObservable<Unit> TariffaToRientri { get; }
     }
 
     public partial class TariffaGroupViewModel : GroupViewModelBase<ConfigurazioneTariffaMap>, IGroupViewModelBase, ITariffaGroupViewModel
@@ -27,6 +28,8 @@ namespace Configurazione.ViewModels
         public ReactiveCommand<Unit, Unit> PostazioniCommand { get;}
         public ReactiveCommand<Unit, Unit> SettoriCommand { get;  }
         public ReactiveCommand<Unit, Unit> OperatoriCommand { get;  }
+        public ReactiveCommand<Unit, Unit> RientriCommand { get; }
+
         public ReactiveCommand<Unit, Unit> ListiniCommand { get;  }
 
         private IConfigurazioneTariffaRepository Q;
@@ -51,7 +54,8 @@ namespace Configurazione.ViewModels
                 x => x.OperatoriCommand.IsExecuting,
                 x => x.PostazioniCommand.IsExecuting,
                 x => x.SettoriCommand.IsExecuting,
-                x => x.ListiniCommand.IsExecuting
+                x => x.ListiniCommand.IsExecuting,
+                x => x.RientriCommand.IsExecuting
             ).StartWith(false),
             // Se anche uno solo è in esecuzione, restituisce true
             (baseLoad, baseSave, baseEsc, localExec) => baseLoad || baseSave || baseEsc || localExec)
@@ -69,10 +73,12 @@ namespace Configurazione.ViewModels
             OperatoriCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_tariffaToOperatori));
             PostazioniCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_tariffaToPostazioni));
             SettoriCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_tariffaToSettori));
+            RientriCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_tariffaToRientri));
 
             OperatoriCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Operatori: {ex.Message}"));
             PostazioniCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Postazioni: {ex.Message}"));
             SettoriCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Settori: {ex.Message}"));
+            RientriCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Rientri: {ex.Message}"));
 
         }
 
@@ -171,5 +177,8 @@ namespace Configurazione.ViewModels
 
         private readonly Subject<Unit> _tariffaToSettori = new();
         public IObservable<Unit> TariffaToSettori => _tariffaToSettori.AsObservable();
+
+        private readonly Subject<Unit> _tariffaToRientri = new();
+        public IObservable<Unit> TariffaToRientri => _tariffaToRientri.AsObservable();
     }
 }

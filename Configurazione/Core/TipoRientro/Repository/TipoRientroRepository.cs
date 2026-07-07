@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 
 namespace Configurazione.Core.Repository
 {
-    public interface ITipoRientroRepository
+    public interface ITipoRientroRepository : IBaseRepository<TipoRientro>
     {
         Task<ConfigurazioneTipoRientroDTO> FirstTipoRientro(int id);
         Task<List<ConfigurazioneTipoRientroDTO>> Load(int id, CancellationToken ctk = default);

@@ -3,28 +3,25 @@ using System.Diagnostics;
 
 namespace Configurazione.ViewModels
 {
-    public interface ITariffaAddViewModel : IConfigurazioneCrudViewModel { }
+    public interface ITipoRientroAddViewModel : IConfigurazioneCrudViewModel { }
 
-    public class TariffaAddViewModel : TariffaInputBase, ITariffaAddViewModel
+    public class TipoRientroAddViewModel : TipoRientroInputBase, ITipoRientroAddViewModel
     {
-        private IConfigurazioneTariffaRepository Q;
+        private ITipoRientroRepository Q;
 
-        public TariffaAddViewModel(IConfigurazioneTariffaRepository Repository) : base()
+        public TipoRientroAddViewModel(ITipoRientroRepository Repository) : base()
         {
-            Titolo = "Aggiungi Nuova Tariffa";
+            Titolo = "Aggiungi Nuovo Tipo Rientro";
             FieldsVisibile = true;
             FieldsEnabled = true;
             Q = Repository ?? throw new ArgumentNullException(nameof(Repository));
         }
-
         protected override void OnFinalDestruction() => Q = null;
-
         protected override async Task OnLoading()
         {
             await SetFocus(NomeFocus);
-            
-        }
 
+        }
         protected async override Task OnSaving()
         {
             _isClosing = true;
@@ -34,33 +31,26 @@ namespace Configurazione.ViewModels
                 _isClosing = false; // Permette di riprovare dopo la validazione fallita
                 return;
             }
-
             try
             {
                 // 2. Controllo Duplicati
                 if (await Q.EsisteNome(BindingT.ToDto(), Token))
                 {
                     _isClosing = false;
-                    InfoLabel = "Tariffa già registrata";
+                    InfoLabel = "Tipo Rientro già registrato";
                     await SetFocus(NomeFocus);
                     return;
                 }
-
                 InfoLabel = "Salvataggio in corso...";
-
                 // 3. Inserimento a Database
-                int newTariffaId = await Q.Add(BindingT.ToDto(), Token);
-
-                if (newTariffaId == -1)
+                int newTipoRientroId = await Q.Add(BindingT.ToDto(), Token);
+                if (newTipoRientroId == -1)
                 {
                     _isClosing = false;
                     InfoLabel = "Errore Database: inserimento fallito";
                     await SetFocus(NomeFocus);
                     return;
                 }
-
-                // 4. Successo: Ritorno protetto
-                await OnBack(newTariffaId);
             }
             catch (OperationCanceledException) { Debug.WriteLine("Salvataggio annullato."); _isClosing = false; }
             catch (Exception ex)

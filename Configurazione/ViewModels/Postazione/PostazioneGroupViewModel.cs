@@ -30,6 +30,7 @@ namespace Configurazione.ViewModels
         public ReactiveCommand<Unit, Unit> SettoriCommand { get;  }
         public ReactiveCommand<Unit, Unit> TariffeCommand { get;  }
         public ReactiveCommand<Unit, Unit> RepartiCommand { get;  }
+        public ReactiveCommand<Unit, Unit> RientriCommand { get; }
 
         private IConfigurazionePostazioneRepository Q;
         
@@ -56,7 +57,8 @@ namespace Configurazione.ViewModels
                 x => x.OperatoriCommand.IsExecuting,
                 x => x.SettoriCommand.IsExecuting,
                 x => x.TariffeCommand.IsExecuting,
-                x => x.RepartiCommand.IsExecuting
+                x => x.RepartiCommand.IsExecuting,
+                x => x.RientriCommand.IsExecuting
             ).StartWith(false),
             // Se anche uno solo è in esecuzione, restituisce true
             (baseLoad, baseSave, baseEsc, localExec) => baseLoad || baseSave || baseEsc || localExec)
@@ -73,11 +75,14 @@ namespace Configurazione.ViewModels
             OperatoriCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_postazioniToOperatori));
             SettoriCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_postazioniToSettori));
             TariffeCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_postazioniToTariffe));
+            RientriCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_postazioniToRientri));
             RepartiCommand = ReactiveCommand.CreateFromTask(() => OnReparti(), canHasSelection);
 
             OperatoriCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Operatori: {ex.Message}"));
             SettoriCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Settori: {ex.Message}"));
             TariffeCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Tariffe: {ex.Message}"));
+            RepartiCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Reparti: {ex.Message}"));
+            RientriCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Rientri: {ex.Message}"));
         }
 
               

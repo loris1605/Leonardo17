@@ -21,6 +21,7 @@ namespace Configurazione.ViewModels
         IObservable<Unit> SettoriToOperatori { get; }
         IObservable<Unit> SettoriToPostazioni { get; }
         IObservable<Unit> SettoriToTariffe { get; }
+        IObservable<Unit> SettoriToRientri { get; }
     }
 
     public partial class SettoreGroupViewModel : GroupViewModelBase<ConfigurazioneSettoreMap>, 
@@ -29,6 +30,7 @@ namespace Configurazione.ViewModels
         public ReactiveCommand<Unit, Unit> OperatoriCommand { get; }
         public ReactiveCommand<Unit, Unit> PostazioniCommand { get;  }
         public ReactiveCommand<Unit, Unit> TariffeCommand { get;  }
+        public ReactiveCommand<Unit, Unit> RientriCommand { get; }
         public ReactiveCommand<Unit, Unit> ListiniCommand { get;  }
         public ReactiveCommand<Unit, Unit> RepartiCommand { get;  }
 
@@ -57,7 +59,8 @@ namespace Configurazione.ViewModels
                 x => x.PostazioniCommand.IsExecuting,
                 x => x.TariffeCommand.IsExecuting,
                 x => x.ListiniCommand.IsExecuting,
-                x => x.RepartiCommand.IsExecuting
+                x => x.RepartiCommand.IsExecuting,
+                x => x.RientriCommand.IsExecuting
             ).StartWith(false),
             // Se anche uno solo è in esecuzione, restituisce true
             (baseLoad, baseSave, baseEsc, localExec) => baseLoad || baseSave || baseEsc || localExec)
@@ -75,6 +78,7 @@ namespace Configurazione.ViewModels
             OperatoriCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_settoriToOperatori));
             PostazioniCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_settoriToPostazioni));
             TariffeCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_settoriToTariffe));
+            RientriCommand = ReactiveCommand.CreateFromTask(() => GoToGroup(_settoriToRientri));
             ListiniCommand = ReactiveCommand.CreateFromTask(() => OnListini(), canHasSelection);
 
             OperatoriCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Operatori: {ex.Message}"));
@@ -192,5 +196,8 @@ namespace Configurazione.ViewModels
 
         private readonly Subject<Unit> _settoriToTariffe = new();
         public IObservable<Unit> SettoriToTariffe => _settoriToTariffe.AsObservable();
+
+        private readonly Subject<Unit> _settoriToRientri = new();
+        public IObservable<Unit> SettoriToRientri => _settoriToRientri.AsObservable();
     }
 }

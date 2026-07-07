@@ -32,7 +32,7 @@ namespace ViewModels
         private readonly ISettingRepository _settingRepository;
         private bool _isInitialized;
 
-        private readonly CompositeDisposable _currentNavigationDisposables = new();
+        private readonly CompositeDisposable _currentNavigationDisposables = [];
 
         // Iniettiamo le interfacce dei ViewModel per la navigazione
 

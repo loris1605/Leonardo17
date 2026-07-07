@@ -16,5 +16,6 @@ public partial class TipoRientroGroupView : BaseUserControl<TipoRientroGroupView
     public TipoRientroGroupView()
     {
         InitializeComponent();
+
     }
 }

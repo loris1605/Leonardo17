@@ -176,6 +176,15 @@ namespace Configurazione.ViewModels
                         })
                         .DisposeWith(_navigationDisposables);
 
+                    groupVM.OperatoreToRientri
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async _ =>
+                        {
+                            GroupEnabled = false;
+                            await GoToRientroGroup();
+                        })
+                        .DisposeWith(_navigationDisposables);
+
                     groupVM.GroupToOperatoreAdd
                         .ObserveOn(RxSchedulers.MainThreadScheduler)
                         .Subscribe(async _ =>
@@ -275,6 +284,15 @@ namespace Configurazione.ViewModels
                         {
                             GroupEnabled = false;
                             await GoToSettoreGroup();
+                        })
+                        .DisposeWith(_navigationDisposables);
+
+                    groupVM.PostazioniToRientri
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async _ =>
+                        {
+                            GroupEnabled = false;
+                            await GoToRientroGroup();
                         })
                         .DisposeWith(_navigationDisposables);
 
@@ -397,6 +415,15 @@ namespace Configurazione.ViewModels
                         })
                         .DisposeWith(_navigationDisposables);
 
+                    groupVM.SettoriToRientri
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async _ =>
+                        {
+                            GroupEnabled = false;
+                            await GoToRientroGroup();
+                        })
+                        .DisposeWith(_navigationDisposables);
+
                     groupVM.GroupToSettoreAdd
                         .ObserveOn(RxSchedulers.MainThreadScheduler)
                         .Subscribe(async _ =>
@@ -507,6 +534,15 @@ namespace Configurazione.ViewModels
                         })
                         .DisposeWith(_navigationDisposables);
 
+                    groupVM.TariffaToRientri
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async _ =>
+                        {
+                            GroupEnabled = false;
+                            await GoToRientroGroup();
+                        })
+                        .DisposeWith(_navigationDisposables);
+
                     groupVM.GroupToTariffaAdd
                         .ObserveOn(RxSchedulers.MainThreadScheduler)
                         .Subscribe(async _ =>
@@ -533,6 +569,116 @@ namespace Configurazione.ViewModels
                             await GoToInput(Locator.Current.GetService<ITariffaUpdViewModel>(), id);
                         })
                         .DisposeWith(_navigationDisposables);
+
+                    // 3. NAVIGAZIONE SUL MAIN THREAD (Senza usare ScheduleAsync)
+                    var tcs = new TaskCompletionSource();
+
+                    RxSchedulers.MainThreadScheduler.Schedule(() =>
+                    {
+                        // Avviamo il comando sincrono del router di ReactiveUI 
+                        // e usiamo la Subscribe per intercettare il completamento
+                        Router.NavigateAndReset.Execute(groupVM)
+                            .Subscribe(
+                                _ => tcs.SetResult(), // Navigazione completata con successo
+                                ex => tcs.SetException(ex) // Errore catturato
+                            );
+                    });
+
+                    // Attendiamo in modo asincrono puro che la UI abbia finito lo switch visivo
+                    await tcs.Task;
+                }
+                else
+                {
+                    Debug.WriteLine(">>> [ERROR] Impossibile risolvere ITariffaGroupViewModel.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($">>> [EXCEPTION] Errore durante la navigazione: {ex.Message}");
+                throw;
+            }
+        }
+
+        private async Task GoToRientroGroup()
+        {
+            // 1. Puliamo subito i vecchi disposable (previene i memory leak delle vecchie view)
+            _navigationDisposables.Clear();
+
+            // 2. SOLUZIONE DOPPIO CLICK: Spegniamo subito l'interattività della view corrente
+            GroupEnabled = false;
+            await Task.Delay(200); // Assorbe il click "fantasma" hardware
+            GroupEnabled = true;   // Riabilitiamo per la nuova schermata in arrivo
+
+            try
+            {
+                // Risolviamo il ViewModel (può stare fuori dal thread UI, alleggerendolo)
+                var groupVM = Locator.Current.GetService<ITipoRientroGroupViewModel>();
+
+                if (groupVM != null)
+                {
+                    // Colleghiamo l'evento del nuovo ViewModel al ciclo di vita controllato della classe
+                    groupVM.TipoRientroToOperatori
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async _ =>
+                        {
+                            GroupEnabled = false;
+                            await GoToOperatoreGroup();
+                        })
+                        .DisposeWith(_navigationDisposables);
+
+                    groupVM.TipoRientroToPostazioni
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async _ =>
+                        {
+                            GroupEnabled = false;
+                            await GoToPostazioneGroup();
+                        })
+                        .DisposeWith(_navigationDisposables);
+
+                    groupVM.TipoRientroToSettori
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async _ =>
+                        {
+                            GroupEnabled = false;
+                            await GoToSettoreGroup();
+                        })
+                        .DisposeWith(_navigationDisposables);
+
+                    groupVM.TipoRientroToTariffe
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async _ =>
+                        {
+                            GroupEnabled = false;
+                            await GoToTariffaGroup();
+                        })
+                        .DisposeWith(_navigationDisposables);
+
+                    //groupVM.GroupToTariffaAdd
+                    //    .ObserveOn(RxSchedulers.MainThreadScheduler)
+                    //    .Subscribe(async _ =>
+                    //    {
+                    //        GroupEnabled = false;
+                    //        await GoToInput(Locator.Current.GetService<ITariffaAddViewModel>());
+                    //    })
+                    //    .DisposeWith(_navigationDisposables);
+
+                    //groupVM.GroupToTariffaDel
+                    //    .ObserveOn(RxSchedulers.MainThreadScheduler)
+                    //    .Subscribe(async id =>
+                    //    {
+                    //        GroupEnabled = false;
+                    //        await GoToInput(Locator.Current.GetService<ITariffaDelViewModel>(), id);
+                    //    })
+                    //    .DisposeWith(_navigationDisposables);
+
+                    //groupVM.GroupToTariffaUpd
+                    //    .ObserveOn(RxSchedulers.MainThreadScheduler)
+                    //    .Subscribe(async id =>
+                    //    {
+                    //        GroupEnabled = false;
+                    //        await GoToInput(Locator.Current.GetService<ITariffaUpdViewModel>(), id);
+                    //    })
+                    //    .DisposeWith(_navigationDisposables);
 
                     // 3. NAVIGAZIONE SUL MAIN THREAD (Senza usare ScheduleAsync)
                     var tcs = new TaskCompletionSource();
