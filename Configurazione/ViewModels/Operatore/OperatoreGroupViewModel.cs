@@ -3,7 +3,6 @@ using Configurazione.Core.DTO;
 using Configurazione.Core.Repository;
 using Configurazione.ViewModels.Map;
 using ReactiveUI;
-using System.Configuration;
 using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Linq;

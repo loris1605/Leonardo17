@@ -32,7 +32,8 @@
                         FilterCommandVisibile="False"
                         AddCommand="{Binding AddCommand}"
                         DelCommand="{Binding DelCommand}"
-                        UpdCommand="{Binding UpdCommand}"/>
+                        UpdCommand="{Binding UpdCommand}"
+                        CancelFilterCommand="{Binding FilterCommand}"/>
 
         <HeaderedContentControl BorderBrush="Black" 
                                 Grid.Row="1" 

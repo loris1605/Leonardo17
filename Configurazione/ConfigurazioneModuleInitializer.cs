@@ -207,6 +207,24 @@ namespace Configurazione
                 return new TipoRientroGroupViewModel(context);
             }, typeof(ITipoRientroGroupViewModel));
 
+            Locator.CurrentMutable.Register(() =>
+            {
+                var context = Locator.Current.GetService<ITipoRientroRepository>();
+                return new TipoRientroAddViewModel(context);
+            }, typeof(ITipoRientroAddViewModel));
+
+            Locator.CurrentMutable.Register(() =>
+            {
+                var context = Locator.Current.GetService<ITipoRientroRepository>();
+                return new TipoRientroDelViewModel(context);
+            }, typeof(ITipoRientroDelViewModel));
+
+            Locator.CurrentMutable.Register(() =>
+            {
+                var context = Locator.Current.GetService<ITipoRientroRepository>();
+                return new TipoRientroUpdViewModel(context);
+            }, typeof(ITipoRientroUpdViewModel));
+
 
             // 2. REGISTRAZIONE COMPONENTI UI (Modello B - Usa e Getta)
             // CORRETTO: Spostiamo i resolver dentro la Lambda. 
@@ -242,6 +260,10 @@ namespace Configurazione
             Locator.CurrentMutable.Register(() => new TariffaInputView(), typeof(IViewFor<TariffaUpdViewModel>));
 
             Locator.CurrentMutable.Register(() => new TipoRientroGroupView(), typeof(IViewFor<TipoRientroGroupViewModel>));
+            Locator.CurrentMutable.Register(() => new TipoRientroInputView(), typeof(IViewFor<TipoRientroAddViewModel>));
+            Locator.CurrentMutable.Register(() => new TipoRientroInputView(), typeof(IViewFor<TipoRientroDelViewModel>));
+            Locator.CurrentMutable.Register(() => new TipoRientroInputView(), typeof(IViewFor<TipoRientroUpdViewModel>));
+
 
         }
     }

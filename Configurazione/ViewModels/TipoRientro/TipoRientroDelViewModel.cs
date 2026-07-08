@@ -52,6 +52,7 @@ namespace Configurazione.ViewModels
                     return;
                 }
                 // Successo: ritorno alla grid con flag di refresh totale
+                await OnBack(-100);
             }
             catch (OperationCanceledException)
             {

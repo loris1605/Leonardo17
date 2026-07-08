@@ -51,6 +51,7 @@ namespace Configurazione.ViewModels
                     await SetFocus(NomeFocus);
                     return;
                 }
+                await OnBack(newTipoRientroId);
             }
             catch (OperationCanceledException) { Debug.WriteLine("Salvataggio annullato."); _isClosing = false; }
             catch (Exception ex)
