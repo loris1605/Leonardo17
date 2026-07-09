@@ -16,6 +16,7 @@ namespace Configurazione.ViewModels
             FieldsEnabled = true;
             Q = Repository ?? throw new ArgumentNullException(nameof(Repository));
         }
+
         protected override void OnFinalDestruction() => Q = null;
         protected override async Task OnLoading()
         {

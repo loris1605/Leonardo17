@@ -5,7 +5,7 @@ namespace Configurazione.ViewModels
 {
     public interface ITipoRientroUpdViewModel : IConfigurazioneCrudViewModel { }
 
-    public class TipoRientroUpdViewModel : TipoRientroInputBase, ITipoRientroAddViewModel
+    public class TipoRientroUpdViewModel : TipoRientroInputBase, ITipoRientroUpdViewModel
     {
         private ITipoRientroRepository Q;
 

@@ -7,19 +7,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <AvaloniaXaml Remove="Core\Reparto\DTO\**" />
-    <Compile Remove="Core\Reparto\DTO\**" />
-    <EmbeddedResource Remove="Core\Reparto\DTO\**" />
-    <None Remove="Core\Reparto\DTO\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\AppServices\AppServices.csproj" />
     <ProjectReference Include="..\AppSystem\AppSystem.csproj" />
     <ProjectReference Include="..\Contracts\Contracts.csproj" />
+    <ProjectReference Include="..\ControlStyles\ControlStyles.csproj" />
     <ProjectReference Include="..\Models\Models.csproj" />
     <ProjectReference Include="..\ViewModelServices\ViewModelServices.csproj" />
     <ProjectReference Include="..\ViewServices\ViewServices.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Core\" />
+    <Folder Include="ViewModels\Front\" />
+    <Folder Include="ViewModels\Back\" />
   </ItemGroup>
 
 </Project>
