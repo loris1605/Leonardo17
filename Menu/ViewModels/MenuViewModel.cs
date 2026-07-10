@@ -5,6 +5,8 @@ using Models.Entity.Global;
 using ReactiveUI;
 using System.Diagnostics;
 using System.Reactive;
+using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ViewModels;
@@ -23,16 +25,20 @@ namespace Menu.ViewModels
         // Implementazione dell'interfaccia IRoutableViewModel richiesta da ReactiveUI
         public new IScreen HostScreen => _host;
 
+        // Gestore per la pulizia dei flussi OAPH ed evitare Memory Leak al GC
+        private readonly CompositeDisposable _menuDisposables = new();
+
         // ---------------------------------------------------------------------
         // 2. Comandi Reattivi Esposti alla View
         // ---------------------------------------------------------------------
         public ReactiveCommand<string, Unit> NavigateCommand { get; }
-        public ReactiveCommand<int, Unit> SelezionaPostazioneCommand { get; }
+        public ReactiveCommand<int?, Unit> CassaPostazioneCommand { get; }
         public ReactiveCommand<Unit, Unit> LogoutCommand { get; }
         public ReactiveCommand<Unit, Unit> ConnectionCommand { get; }
         public ReactiveCommand<Unit, Unit> ConfigurazioneCommand { get; }
         public ReactiveCommand<Unit, Unit> SociCommand { get; }
         public ReactiveCommand<Unit, Unit> ApriGiornataCommand { get; }
+        
 
         // ---------------------------------------------------------------------
         // 3. Flussi Reattivi Centralizzati (Override Controllo Doppio Clic Senza "base")
@@ -45,7 +51,7 @@ namespace Menu.ViewModels
             this.WhenAnyObservable(x => x.EscPressedCommand.IsExecuting).StartWith(false),
             // 2. Comandi specifici osservati in modo sicuro direttamente tramite le loro proprietà
             this.WhenAnyObservable(
-                x => x.SelezionaPostazioneCommand.IsExecuting,
+                x => x.CassaPostazioneCommand.IsExecuting,
                 x => x.LogoutCommand.IsExecuting,
                 x => x.ConnectionCommand.IsExecuting,
                 x => x.ConfigurazioneCommand.IsExecuting,
@@ -66,15 +72,19 @@ namespace Menu.ViewModels
             _host = host;
 
             // 1. Collegamento e aggiornamento delle proprietà OAPH definite nel file parziale
-            _chiudiGiornataEnabled = this.WhenAnyValue(x => x.ApriGiornataEnabled)
+            var chiudiGiornataObs = this.WhenAnyValue(x => x.ApriGiornataEnabled)
                 .Select(x => !x)
-                .ObserveOn(RxSchedulers.MainThreadScheduler)
-                .ToProperty(this, x => x.ChiudiGiornataEnabled);
+                .ObserveOn(RxSchedulers.MainThreadScheduler);
 
-            _sessioneContabile = this.WhenAnyValue(x => x.ApriGiornataEnabled)
-                .Select(v => $"Sessione Contabile {(v ? "Chiusa" : "Aperta")}")
-                .ObserveOn(RxSchedulers.MainThreadScheduler)
-                .ToProperty(this, x => x.SessioneContabile);
+            _chiudiGiornataEnabled = chiudiGiornataObs.ToProperty(this, x => x.ChiudiGiornataEnabled);
+            chiudiGiornataObs.Subscribe().DisposeWith(_menuDisposables);
+
+            var sessioneContabileObs = this.WhenAnyValue(x => x.ApriGiornataEnabled)
+            .Select(v => $"Sessione Contabile {(v ? "Chiusa" : "Aperta")}")
+            .ObserveOn(RxSchedulers.MainThreadScheduler);
+
+            _sessioneContabile = sessioneContabileObs.ToProperty(this, x => x.SessioneContabile);
+            sessioneContabileObs.Subscribe().DisposeWith(_menuDisposables);
 
             // Vincolo generale di navigazione basato sullo stato globale IsLoading della base
             var canNavigate = this.WhenAnyValue(x => x.IsLoading)
@@ -84,20 +94,22 @@ namespace Menu.ViewModels
             var canApriFinal = this.WhenAnyValue(x => x.ApriGiornataEnabled);
 
             // Inizializzazione dei Comandi
-            SelezionaPostazioneCommand = ReactiveCommand.CreateFromTask<int>(GoToCassa, canNavigate);
+            CassaPostazioneCommand = ReactiveCommand.CreateFromTask<int?>(GoToCassa, canNavigate);
             LogoutCommand = ReactiveCommand.CreateFromTask(() => GoTo(_menuToLogin), canNavigate);
             ConnectionCommand = ReactiveCommand.CreateFromTask(() => GoTo(_menuToConnection), canNavigate);
             ConfigurazioneCommand = ReactiveCommand.CreateFromTask(() => GoTo(_menuToConfigurazione), canNavigate);
             SociCommand = ReactiveCommand.CreateFromTask(() => GoTo(_menuToSoci), canNavigate);
             ApriGiornataCommand = ReactiveCommand.CreateFromTask(ExecuteOpenGiornata, canApriFinal);
+            //CassaCommand = ReactiveCommand.CreateFromTask(() => GoToCassa(SelectedPostazione?.IDPOSTAZIONE ?? 0), canNavigate);
 
             //4.Gestione centralizzata delle Eccezioni(Ciclo di vita del ViewModel)
-            SelezionaPostazioneCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Cassa: {ex.Message}"));
+            CassaPostazioneCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Cassa: {ex.Message}"));
             LogoutCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Logout: {ex.Message}"));
             ConnectionCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Connessione: {ex.Message}"));
             ConfigurazioneCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Configurazione: {ex.Message}"));
             SociCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Soci: {ex.Message}"));
             ApriGiornataCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Apertura Giornata: {ex.Message}"));
+            //CassaCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Cassa: {ex.Message}"));
 
 
         }
@@ -146,6 +158,9 @@ namespace Menu.ViewModels
 
         private readonly Subject<Unit> _menuToConfigurazione = new();
         public IObservable<Unit> MenuToConfigurazione => _menuToConfigurazione.AsObservable();
+
+        private readonly Subject<Unit> _menuToCassa = new();
+        public IObservable<Unit> MenuToCassa => _menuToCassa.AsObservable();
 
         private void AttivaPermessi()
         {
@@ -206,9 +221,12 @@ namespace Menu.ViewModels
         // ---------------------------------------------------------------------
         // 5. Logica Interna (Task dei Comandi)
         // ---------------------------------------------------------------------
-        private async Task GoToCassa(int postazioneId)
+        private async Task GoToCassa(int? postazioneId)
         {
-            //_isClosing = true;
+            _isClosing = true;
+            _menuToCassa.OnNext(Unit.Default);
+            _menuToCassa.OnCompleted();
+            await Task.CompletedTask;
 
             //var cassaVm = Locator.Current.GetService<ICassaViewModel>();
             //if (cassaVm != null)

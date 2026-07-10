@@ -1,27 +1,27 @@
-﻿using ReactiveUI;
+﻿using Contracts;
+using ReactiveUI;
 using Splat;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Metrics;
-using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reactive.Threading.Tasks;
 using ViewModels;
 
 namespace Cassa.ViewModels
 {
-    public interface ICassaViewModel
-    {
 
+    public interface ICassaScreen : IScreen
+    {
+        RoutingState CassaRouter { get; }
+        RoutingState SettingsRouter { get; }
+        
     }
 
-    public partial class CassaViewModel : ViewModelBase, ICassaViewModel
+    public partial class CassaViewModel : ViewModelBase, ICassaViewModel, ICassaScreen
     {
         protected override IObservable<bool> IsAnythingExecuting =>
             Observable.CombineLatest(
@@ -40,26 +40,45 @@ namespace Cassa.ViewModels
         // ---------------------------------------------------------------------
         // 1. Router Interni (Sub-Routing) e Dipendenze
         // ---------------------------------------------------------------------
-        public RoutingState GroupRouter { get; } = new RoutingState();
-        //public RoutingState InputRouter { get; } = new RoutingState();
+        public RoutingState CassaRouter { get; } = new RoutingState();
+        public RoutingState SettingsRouter { get; } = new RoutingState();
 
         // Espone il router principale richiesto dall'infrastruttura ReactiveUI
-        public RoutingState Router => GroupRouter;
-
+        public RoutingState Router => CassaRouter;  
         protected override void OnFinalDestruction()
         {
             // Svuotiamo gli stack di navigazione dei router interni per liberare le View collegate
             _navigationDisposables.Dispose();
-            GroupRouter?.NavigationStack.Clear();
-            
+                        
             base.OnFinalDestruction();
         }
 
         protected override async Task OnLoading() => await GoToPostazione();
 
-        private async Task GoToPostazione()
+        
+
+        private Task GoToPostazione()
         {
-            await Task.Delay(100); // Simula un ritardo per la navigazione
+            return GoToPage<ICassaPostazioneViewModel>(pageVM =>
+            {
+                pageVM.PostazioneToMenu
+                    .ObserveOn(RxSchedulers.MainThreadScheduler)
+                    .Subscribe(async _ => { await GoToMenu(); })
+                    .DisposeWith(_navigationDisposables);
+            });
+
+        }
+
+        private async Task GoToMenu()
+        {
+            // Notifica l'esterno facendolo girare nel prossimo ciclo del MainThread,
+            // dando tempo alla pagina corrente di completare lo smontaggio della View in modo pulito.
+            RxSchedulers.MainThreadScheduler.Schedule(() =>
+            {
+                _cassaToMenu.OnNext(Unit.Default);
+            });
+
+            await Task.CompletedTask;
         }
 
 
@@ -71,38 +90,31 @@ namespace Cassa.ViewModels
         private readonly Subject<Unit> _cassaToMenu = new();
         public IObservable<Unit> CassaToMenu => _cassaToMenu.AsObservable();
 
-        private async Task GoToPageGeneric<TViewModel>(Action<TViewModel> registerSubscriptions)
-                where TViewModel : class, IRoutableViewModel
+        private async Task GoToPage<TViewModel>(Action<TViewModel> registerSubscriptions)
+        where TViewModel : class, IRoutableViewModel
         {
-            // 1. Pulizia dei vecchi disposable (previene i memory leak)
             _navigationDisposables.Clear();
 
-            // 2. SOLUZIONE DOPPIO CLICK
-            await Task.Delay(200);
-            
+            await Task.Delay(200); // Soluzione doppio click
+
             try
             {
-                // Risoluzione dinamica del ViewModel dal Service Locator
-                var groupVM = Locator.Current.GetService<TViewModel>();
+                var pageVM = Locator.Current.GetService<TViewModel>();
 
-                if (groupVM != null)
+                if (pageVM != null)
                 {
-                    // Eseguiamo il blocco di sottoscrizioni personalizzato passato come parametro
-                    registerSubscriptions(groupVM);
+                    registerSubscriptions(pageVM);
 
-                    // 3. NAVIGAZIONE SUL MAIN THREAD
                     var tcs = new TaskCompletionSource();
 
-                    RxSchedulers.MainThreadScheduler.Schedule(() =>
-                    {
-                        Router.NavigateAndReset.Execute(groupVM)
-                            .Subscribe(
-                                _ => tcs.SetResult(),
-                                ex => tcs.SetException(ex)
-                            );
-                    });
+                    await Router.NavigateAndReset.Execute(pageVM)
+                        .Catch<IRoutableViewModel, Exception>(ex =>
+                        {
+                            Debug.WriteLine($">>> [ROUTER EXCEPTION] Errore controllato nella pipeline: {ex.Message}");
+                            return Observable.Empty<IRoutableViewModel>();
+                        })
+                        .ToTask(); // Richiede 'using System.Reactive.Threading.Tasks;'
 
-                    await tcs.Task;
                 }
                 else
                 {
@@ -111,9 +123,11 @@ namespace Cassa.ViewModels
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($">>> [EXCEPTION] Errore durante la navigazione: {ex.Message}");
-                throw;
+                Debug.WriteLine($">>> [EXCEPTION] Errore intercettato durante la navigazione: {ex.Message}");
+                // Non rilanciare l'eccezione con "throw;" se vuoi evitare che uccida l'applicazione, 
+                // gestiscila o loggala.
             }
         }
+
     }
 }

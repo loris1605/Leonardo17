@@ -18,8 +18,15 @@
 
   <ItemGroup>
     <Folder Include="Core\" />
-    <Folder Include="ViewModels\Front\" />
     <Folder Include="ViewModels\Back\" />
+    <Folder Include="Views\Front\" />
+    <Folder Include="Views\Back\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Views\CassaPostazioneView.axaml.cs">
+      <DependentUpon>CassaPostazioneView.axaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 
 </Project>

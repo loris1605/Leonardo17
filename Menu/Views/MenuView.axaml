@@ -94,7 +94,7 @@
                            <!-- Questo stile si applica a ogni MenuItem generato dentro l'ItemsSource -->
                            <Style Selector="MenuItem > MenuItem" x:DataType="dt:MenuPostazioneMap">
                                <Setter Property="Header" Value="{Binding NomePostazione}" />
-                               <Setter Property="Command" Value="{Binding $parent[MenuItem].DataContext.SelezionaPostazioneCommand}" />
+                               <Setter Property="Command" Value="{Binding $parent[MenuItem].DataContext.CassaPostazioneCommand}" />
                                <Setter Property="CommandParameter" Value="{Binding CodicePostazione}" />
                            </Style>
                        </MenuItem.Styles>

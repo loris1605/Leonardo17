@@ -18,7 +18,10 @@ public partial class MenuView : BaseUserControl<MenuViewModel>
         {
             #region TwoWay
 
-
+            this.BindCommand(ViewModel,
+                vm => vm.CassaPostazioneCommand,
+                v => v.CassaPostazioneItem)
+                .DisposeWith(d);
 
             #endregion
 

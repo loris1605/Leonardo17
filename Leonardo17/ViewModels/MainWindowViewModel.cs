@@ -272,6 +272,13 @@ namespace ViewModels
                         .Subscribe()
                         .DisposeWith(_currentNavigationDisposables);
 
+                    menuVM.MenuToCassa
+                        .Take(1)
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .SelectMany(_ => Observable.FromAsync(GoToCassa))
+                        .Subscribe()
+                        .DisposeWith(_currentNavigationDisposables);
+
                     // 4. Esecuzione della navigazione e gestione del completamento del Task
                     Router.NavigateAndReset.Execute(menuVM)
                         .Select(_ => Unit.Default)
@@ -290,7 +297,6 @@ namespace ViewModels
             // 5. Il metodo attende qui finché la navigazione sul thread UI non è conclusa
             await tcs.Task;
         }
-
 
         private async Task GoToSoci()
         {
@@ -344,7 +350,6 @@ namespace ViewModels
             await tcs.Task;
         }
 
-
         private async Task GoToConfigurazione()
         {
             _currentNavigationDisposables.Clear();
@@ -385,6 +390,59 @@ namespace ViewModels
                     else
                     {
                         Debug.WriteLine(">>> [ERROR] Impossibile risolvere IConfigurazioneViewModel.");
+                        tcs.SetResult(Unit.Default);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    tcs.SetException(ex);
+                }
+            });
+
+            // 5. Il metodo attende qui finché la navigazione sul thread UI non è conclusa
+            await tcs.Task;
+        }
+
+        private async Task GoToCassa()
+        {
+            _currentNavigationDisposables.Clear();
+
+            // 1. Carica la DLL in background
+            await Task.Run(() => ModuleLoader.EnsureCassaModuleLoaded());
+
+            // Utilizziamo un TCS per coordinare l'uscita asincrona dal metodo
+            var tcs = new TaskCompletionSource<Unit>();
+
+            // 2. Usiamo .Schedule() SINCRONO (Senza 'await' davanti)
+            RxSchedulers.MainThreadScheduler.Schedule(() =>
+            {
+                try
+                {
+                    // Il costruttore del ConfigurazioneViewModel viene eseguito sul thread UI
+                    var cassaVM = Locator.Current.GetService<ICassaViewModel>();
+
+                    if (cassaVM != null)
+                    {
+                        // 3. Sottoscrizione pulita e sicura all'evento di ritorno al Menu PRIMA della navigazione
+                        cassaVM.CassaToMenu
+                            .Take(1)
+                            .ObserveOn(RxSchedulers.MainThreadScheduler)
+                            .SelectMany(_ => Observable.FromAsync(GoToMenu))
+                            .Subscribe()
+                            .DisposeWith(_currentNavigationDisposables);
+
+                        // 4. Esecuzione della navigazione e gestione del completamento del Task
+                        Router.NavigateAndReset.Execute(cassaVM)
+                            .Select(_ => Unit.Default)
+                            .Subscribe(
+                                _ => { },
+                                ex => tcs.SetException(ex),
+                                () => tcs.SetResult(Unit.Default) // Notifica che la navigazione è completata
+                            );
+                    }
+                    else
+                    {
+                        Debug.WriteLine(">>> [ERROR] Impossibile risolvere ICassaViewModel.");
                         tcs.SetResult(Unit.Default);
                     }
                 }
