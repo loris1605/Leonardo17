@@ -1,4 +1,6 @@
+using Avalonia.Controls;
 using Menu.ViewModels;
+using Menu.ViewModels.Map;
 using ReactiveUI;
 using System.Reactive.Disposables.Fluent;
 using Views;
@@ -13,6 +15,8 @@ public partial class MenuView : BaseUserControl<MenuViewModel>
     {
 
         InitializeComponent();
+
+        
 
         this.WhenActivated(d =>
         {
@@ -111,6 +115,29 @@ public partial class MenuView : BaseUserControl<MenuViewModel>
             
 
         });
+
+
+    }
+
+    private void OnChildMenuItemDataContextChanged(object sender, EventArgs e)
+    {
+        // 1. Verifichiamo che il mittente sia il sotto-menu MenuItem
+        if (sender is MenuItem childMenuItem)
+        {
+            // 2. Recuperiamo il record specifico della riga corrente
+            if (childMenuItem.DataContext is MenuPostazioneMap postazioneData)
+            {
+                // 3. Risaliamo l'albero logico per trovare il ViewModel principale della pagina
+                // CassaPostazioneItem è il nome memorizzato tramite x:Name nel file XAML
+
+                if (CassaPostazioneItem.DataContext is MenuViewModel mainViewModel)
+                {
+                    // 4. Assegniamo comando e parametro direttamente da C#
+                    childMenuItem.Command = mainViewModel.CassaPostazioneCommand;
+                    childMenuItem.CommandParameter = postazioneData.CodicePostazione;
+                }
+            }
+        }
     }
 
 

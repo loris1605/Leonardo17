@@ -21,7 +21,7 @@ namespace Cassa.ViewModels
         
     }
 
-    public partial class CassaViewModel : ViewModelBase, ICassaViewModel, ICassaScreen
+    public partial class CassaViewModel() : ViewModelBase(), ICassaScreen, ICassaViewModel
     {
         protected override IObservable<bool> IsAnythingExecuting =>
             Observable.CombineLatest(
@@ -53,20 +53,31 @@ namespace Cassa.ViewModels
             base.OnFinalDestruction();
         }
 
-        protected override async Task OnLoading() => await GoToPostazione();
+        protected override Task OnLoading()
+        {
+            // Avviamo la navigazione sul thread della UI ma senza fare l'await del Task 
+            // all'interno del ciclo di vita sincrono della classe base
+            RxSchedulers.MainThreadScheduler.Schedule(async () =>
+            {
+                await GoToPostazione();
+            });
 
-        
+            return Task.CompletedTask;
+        }
+
+
 
         private Task GoToPostazione()
         {
-            return GoToPage<ICassaPostazioneViewModel>(pageVM =>
+            return GoToPageGeneric<ICassaPostazioneViewModel>(pageVM =>
             {
                 pageVM.PostazioneToMenu
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async _ => { await GoToMenu(); })
+                    // Sostituiamo il Subscribe(async...) con SelectMany per gestire il Task in modo reattivo
+                    .SelectMany(_ => Observable.FromAsync(() => GoToMenu()))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
             });
-
         }
 
         private async Task GoToMenu()
@@ -90,31 +101,39 @@ namespace Cassa.ViewModels
         private readonly Subject<Unit> _cassaToMenu = new();
         public IObservable<Unit> CassaToMenu => _cassaToMenu.AsObservable();
 
-        private async Task GoToPage<TViewModel>(Action<TViewModel> registerSubscriptions)
+        private async Task GoToPageGeneric<TViewModel>(Action<TViewModel> registerSubscriptions)
         where TViewModel : class, IRoutableViewModel
         {
+            // 1. Pulizia dei vecchi disposable (previene i memory leak)
             _navigationDisposables.Clear();
 
-            await Task.Delay(200); // Soluzione doppio click
+            // 2. SOLUZIONE DOPPIO CLICK (Resta asincrona senza bloccare il thread)
+            await Task.Delay(200);
 
             try
             {
-                var pageVM = Locator.Current.GetService<TViewModel>();
+                // Risoluzione dinamica del ViewModel dal Service Locator
+                var groupVM = Locator.Current.GetService<TViewModel>();
 
-                if (pageVM != null)
+                if (groupVM != null)
                 {
-                    registerSubscriptions(pageVM);
+                    // Eseguiamo il blocco di sottoscrizioni personalizzato passato come parametro
+                    registerSubscriptions(groupVM);
 
-                    var tcs = new TaskCompletionSource();
+                    // 3. NAVIGAZIONE SUL MAIN THREAD (Senza TaskCompletionSource sincrono)
+                    RxSchedulers.MainThreadScheduler.Schedule(() =>
+                    {
+                        // Avviamo la navigazione. ReactiveUI gestirà internamente il cambio di View 
+                        // in modo asincrono sul thread della UI senza che questo thread debba attendere.
+                        Router.NavigateAndReset.Execute(groupVM)
+                            .Subscribe(
+                                _ => Debug.WriteLine($">>> Navigazione completata verso {typeof(TViewModel).Name}"),
+                                ex => Debug.WriteLine($">>> [ERROR] Errore durante NavigateAndReset: {ex.Message}")
+                            );
+                    });
 
-                    await Router.NavigateAndReset.Execute(pageVM)
-                        .Catch<IRoutableViewModel, Exception>(ex =>
-                        {
-                            Debug.WriteLine($">>> [ROUTER EXCEPTION] Errore controllato nella pipeline: {ex.Message}");
-                            return Observable.Empty<IRoutableViewModel>();
-                        })
-                        .ToTask(); // Richiede 'using System.Reactive.Threading.Tasks;'
-
+                    // Restituiamo il controllo al chiamante immediatamente. La UI ora è libera di aggiornarsi.
+                    await Task.CompletedTask;
                 }
                 else
                 {
@@ -123,11 +142,11 @@ namespace Cassa.ViewModels
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($">>> [EXCEPTION] Errore intercettato durante la navigazione: {ex.Message}");
-                // Non rilanciare l'eccezione con "throw;" se vuoi evitare che uccida l'applicazione, 
-                // gestiscila o loggala.
+                Debug.WriteLine($">>> [EXCEPTION] Errore durante l'inizializzazione della navigazione: {ex.Message}");
+                throw;
             }
         }
+
 
     }
 }

@@ -87,31 +87,18 @@
                                MaxHeight="50">
 
                     <MenuItem x:Name="CassaPostazioneItem"
-                             Header="Seleziona Postazione"
-                             ItemsSource="{Binding CassaPostazioniDataSource}">
-                       
-                       <MenuItem.Styles>
-                           <!-- Questo stile si applica a ogni MenuItem generato dentro l'ItemsSource -->
-                           <Style Selector="MenuItem > MenuItem" x:DataType="dt:MenuPostazioneMap">
-                               <Setter Property="Header" Value="{Binding NomePostazione}" />
-                               <Setter Property="Command" Value="{Binding $parent[MenuItem].DataContext.CassaPostazioneCommand}" />
-                               <Setter Property="CommandParameter" Value="{Binding CodicePostazione}" />
-                           </Style>
-                       </MenuItem.Styles>
-                       
-                    </MenuItem>
-
-
-
-                        <!--<MenuItem.ItemTemplate>
-                            <DataTemplate>
-                                <MenuItem Header="{Binding NomePostazione}"
-                                          Command="{Binding #Root.((vm:MenuViewModel)DataContext).CassaCommand}"
-                                          CommandParameter="{Binding NomePostazione}" />
-
+                              Header="Seleziona Postazione"
+                              ItemsSource="{Binding CassaPostazioniDataSource}">
+                        
+                        <MenuItem.ItemTemplate>
+                            <DataTemplate x:DataType="dt:MenuPostazioneMap">
+                                <!-- Usiamo l'evento Loaded o DataContextChanged per agganciare il codice -->
+                                <MenuItem Header="{Binding NomePostazione}" 
+                                          DataContextChanged="OnChildMenuItemDataContextChanged" />
                             </DataTemplate>
-                        </MenuItem.ItemTemplate>-->
-
+                        </MenuItem.ItemTemplate>
+                        
+                    </MenuItem>
                 
                 
                 </ui:UiMenuItem>

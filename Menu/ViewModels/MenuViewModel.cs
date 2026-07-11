@@ -26,13 +26,13 @@ namespace Menu.ViewModels
         public new IScreen HostScreen => _host;
 
         // Gestore per la pulizia dei flussi OAPH ed evitare Memory Leak al GC
-        private readonly CompositeDisposable _menuDisposables = new();
+        private readonly CompositeDisposable _menuDisposables = [];
 
         // ---------------------------------------------------------------------
         // 2. Comandi Reattivi Esposti alla View
         // ---------------------------------------------------------------------
         public ReactiveCommand<string, Unit> NavigateCommand { get; }
-        public ReactiveCommand<int?, Unit> CassaPostazioneCommand { get; }
+        public ReactiveCommand<int, Unit> CassaPostazioneCommand { get; }
         public ReactiveCommand<Unit, Unit> LogoutCommand { get; }
         public ReactiveCommand<Unit, Unit> ConnectionCommand { get; }
         public ReactiveCommand<Unit, Unit> ConfigurazioneCommand { get; }
@@ -94,7 +94,7 @@ namespace Menu.ViewModels
             var canApriFinal = this.WhenAnyValue(x => x.ApriGiornataEnabled);
 
             // Inizializzazione dei Comandi
-            CassaPostazioneCommand = ReactiveCommand.CreateFromTask<int?>(GoToCassa, canNavigate);
+            CassaPostazioneCommand = ReactiveCommand.CreateFromTask<int>(GoToCassa, canNavigate);
             LogoutCommand = ReactiveCommand.CreateFromTask(() => GoTo(_menuToLogin), canNavigate);
             ConnectionCommand = ReactiveCommand.CreateFromTask(() => GoTo(_menuToConnection), canNavigate);
             ConfigurazioneCommand = ReactiveCommand.CreateFromTask(() => GoTo(_menuToConfigurazione), canNavigate);
@@ -221,7 +221,7 @@ namespace Menu.ViewModels
         // ---------------------------------------------------------------------
         // 5. Logica Interna (Task dei Comandi)
         // ---------------------------------------------------------------------
-        private async Task GoToCassa(int? postazioneId)
+        private async Task GoToCassa(int postazioneId)
         {
             _isClosing = true;
             _menuToCassa.OnNext(Unit.Default);
