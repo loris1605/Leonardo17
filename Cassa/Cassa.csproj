@@ -17,9 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Core\Context\" />
-    <Folder Include="Core\Nuova cartella\" />
-    <Folder Include="ViewModels\Back\" />
     <Folder Include="Views\Back\" />
   </ItemGroup>
 

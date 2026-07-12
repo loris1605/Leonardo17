@@ -21,30 +21,23 @@ namespace Cassa.ViewModels
         public ReactiveCommand<Unit, Unit> ListaSociCommand { get; }
         public ReactiveCommand<Unit, Unit> PosizioneEnterCommand { get; }
 
-        private readonly ObservableAsPropertyHelper<bool> _isOpen;
-        public bool IsOpen => _isOpen.Value;
-
-
         protected override IObservable<bool> IsAnythingExecuting =>
-        _isOpen = Observable.CombineLatest(
-            // 1. Comandi ereditati dalla classe base
-            this.WhenAnyObservable(x => x.LoadCommand.IsExecuting).StartWith(false),
-            this.WhenAnyObservable(x => x.SaveCommand.IsExecuting).StartWith(false),
-            this.WhenAnyObservable(x => x.EscPressedCommand.IsExecuting).StartWith(false),
-            // 2. Comandi specifici osservati in modo sicuro direttamente tramite le loro proprietà
-            this.WhenAnyObservable(
-                x => x.EntraSocioCommand.IsExecuting,
-                x => x.EsceSocioCommand.IsExecuting,
-                x => x.ListaSociCommand.IsExecuting,
-                x => x.PosizioneEnterCommand.IsExecuting
+            new[]
+            {
+                base.IsAnythingExecuting,
+                EntraSocioCommand?.IsExecuting ?? Observable.Return(false),
+                EsceSocioCommand?.IsExecuting ?? Observable.Return(false),
+                ListaSociCommand?.IsExecuting ?? Observable.Return(false),
+                PosizioneEnterCommand?.IsExecuting ?? Observable.Return(false)
+            }.CombineLatest(values => values.Any(x => x));
 
-            ).StartWith(false),
-            // Se anche uno solo è in esecuzione, restituisce true
-            (baseLoad, baseSave, baseEsc, localExec) => baseLoad || baseSave || baseEsc || localExec)
-        .DistinctUntilChanged();
+
 
         public CassaPostazioneViewModel() : base(null)
         {
+
+            
+
             EntraSocioCommand = ReactiveCommand.CreateFromTask(GoToEntraSocio);
             EsceSocioCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask); // Placeholder for actual logic
             ListaSociCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask); // Placeholder for actual logic
@@ -83,6 +76,14 @@ namespace Cassa.ViewModels
         private readonly Subject<Unit> _postazioneToMenu = new();
         public IObservable<Unit> PostazioneToMenu => _postazioneToMenu.AsObservable();
 
+        private bool _isOpen = false;
+        public bool IsOpen
+        {
+            get => _isOpen;
+            set => this.RaiseAndSetIfChanged(ref _isOpen, value);
+        }
+        private readonly Subject<bool> _isOpenManualTrigger = new();
+
     }
 
     public partial class CassaPostazioneViewModel
@@ -105,8 +106,5 @@ namespace Cassa.ViewModels
         public Interaction<Unit, Unit> PosizioneFocus { get; } = new();
 
         
-
-        private readonly Subject<bool> _isOpenManualTrigger = new();
-
     }
 }

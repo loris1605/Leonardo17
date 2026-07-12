@@ -2,7 +2,7 @@
 using Models.Tables;
 using ViewModelServices.Core;
 
-namespace DTO.Entity
+namespace Cassa.Core.DTO
 {
     public class CassaSchedaDTO : BaseDTO, IMap
     {

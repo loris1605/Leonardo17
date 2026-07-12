@@ -1,4 +1,4 @@
-﻿using DTO.Entity;
+﻿using Cassa.Core.DTO;
 using ReactiveUI;
 using ViewModelServices.Core.Map;
 
