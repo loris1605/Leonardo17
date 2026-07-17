@@ -159,8 +159,8 @@ namespace Menu.ViewModels
         private readonly Subject<Unit> _menuToConfigurazione = new();
         public IObservable<Unit> MenuToConfigurazione => _menuToConfigurazione.AsObservable();
 
-        private readonly Subject<Unit> _menuToCassa = new();
-        public IObservable<Unit> MenuToCassa => _menuToCassa.AsObservable();
+        private readonly Subject<int> _menuToCassa = new();
+        public IObservable<int> MenuToCassa => _menuToCassa.AsObservable();
 
         private void AttivaPermessi()
         {
@@ -224,7 +224,7 @@ namespace Menu.ViewModels
         private async Task GoToCassa(int postazioneId)
         {
             _isClosing = true;
-            _menuToCassa.OnNext(Unit.Default);
+            _menuToCassa.OnNext(postazioneId);
             _menuToCassa.OnCompleted();
             await Task.CompletedTask;
 

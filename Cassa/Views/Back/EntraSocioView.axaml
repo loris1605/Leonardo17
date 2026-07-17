@@ -1,0 +1,81 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Cassa.ViewModels"
+             xmlns:lc="using:Views"
+             xmlns:vw="using:Cassa.Views"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             KeyboardNavigation.TabNavigation="Cycle"
+             Background="LightSteelBlue"
+             x:DataType="vm:EntraSocioViewModel"
+             x:Class="Cassa.Views.EntraSocioView">
+
+    <Grid x:Name="MainGrid">
+    
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> 
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>      
+    
+        <lc:TitleView TitoloPagina="ACCESSO NUOVO SOCIO"
+                      x:Name="Title"
+                      ButtonText="Esci"
+                      ToolTipText="TORNA A MENU PRINCIPALE"
+                      ExitCommand="{Binding EscPressedCommand}"/>
+
+        <Grid x:Name="ControlsGrid" Grid.Row="1">
+			
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>    
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+           </Grid.ColumnDefinitions>
+
+            <Viewbox Grid.Column="1" MinWidth="250"
+                     x:Name="ContenitoreAnagrafica"
+                     Grid.Row="1"
+                     Grid.ColumnSpan="2"
+                     Grid.RowSpan="5">
+                    
+                <vw:EntraSocioAnagraficaView x:Name="AnagraficaInput"/>
+                     
+            </Viewbox>
+
+            <!--<vw:EntraSocioIngressoView x:Name="EntraIngresso"
+                                       Height="{Binding #ContenitoreAnagrafica.Bounds.Height}"
+                                       Grid.Column="4" MinWidth="250"
+                                       Grid.Row="1"
+                                       Grid.ColumnSpan="2"
+                                       Grid.RowSpan="5"/>-->
+
+
+           
+
+        </Grid>
+    
+    </Grid>
+  
+</UserControl>

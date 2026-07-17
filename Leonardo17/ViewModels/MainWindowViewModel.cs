@@ -275,7 +275,7 @@ namespace ViewModels
                     menuVM.MenuToCassa
                         .Take(1)
                         .ObserveOn(RxSchedulers.MainThreadScheduler)
-                        .SelectMany(_ => Observable.FromAsync(GoToCassa))
+                        .SelectMany(postazioneId => Observable.FromAsync(() => GoToCassa(postazioneId)))
                         .Subscribe()
                         .DisposeWith(_currentNavigationDisposables);
 
@@ -403,7 +403,7 @@ namespace ViewModels
             await tcs.Task;
         }
 
-        private async Task GoToCassa()
+        private async Task GoToCassa(int postazioneId)
         {
             _currentNavigationDisposables.Clear();
 
@@ -423,6 +423,8 @@ namespace ViewModels
 
                     if (cassaVM != null)
                     {
+                        cassaVM.SetPostazioneId(postazioneId);
+
                         // 3. Sottoscrizione pulita e sicura all'evento di ritorno al Menu PRIMA della navigazione
                         cassaVM.CassaToMenu
                             .Take(1)

@@ -50,7 +50,20 @@ namespace Cassa
 
 
             Locator.CurrentMutable.Register(() => new CassaViewModel(), typeof(ICassaViewModel));
-            Locator.CurrentMutable.Register(() => new CassaPostazioneViewModel(), typeof(ICassaPostazioneViewModel));
+            Locator.CurrentMutable.Register(() =>
+            {
+                var repository = Locator.Current.GetService<ICassaPostazioneRepository>();
+                return new CassaPostazioneViewModel(repository);
+            }, typeof(ICassaPostazioneViewModel));
+
+
+            Locator.CurrentMutable.Register(() =>
+            {
+                var repository1 = Locator.Current.GetService<IStrisciataRepository>();
+                var repository2 = Locator.Current.GetService<IEntraSocioRepository>();
+                return new EntraSocioViewModel(repository1, repository2);
+            }, typeof(IEntraSocioViewModel));
+
 
 
             // 2. REGISTRAZIONE COMPONENTI UI (Modello B - Usa e Getta)
@@ -59,6 +72,8 @@ namespace Cassa
             Locator.CurrentMutable.Register(() => new CassaView(), typeof(IViewFor<CassaViewModel>));
 
             Locator.CurrentMutable.Register(() => new CassaPostazioneView(), typeof(IViewFor<CassaPostazioneViewModel>));
+
+            Locator.CurrentMutable.Register(() => new EntraSocioView(), typeof(IViewFor<EntraSocioViewModel>));
 
         }
     }

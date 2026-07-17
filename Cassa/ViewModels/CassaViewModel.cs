@@ -8,7 +8,6 @@ using System.Reactive.Disposables;
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Reactive.Threading.Tasks;
 using ViewModels;
 
 namespace Cassa.ViewModels
@@ -36,6 +35,7 @@ namespace Cassa.ViewModels
             .DistinctUntilChanged();
 
         private readonly CompositeDisposable _navigationDisposables = [];
+        private int _cassaPostazioneId;
 
         // ---------------------------------------------------------------------
         // 1. Router Interni (Sub-Routing) e Dipendenze
@@ -53,13 +53,18 @@ namespace Cassa.ViewModels
             base.OnFinalDestruction();
         }
 
+        public void SetPostazioneId(int id)
+        {
+            _cassaPostazioneId = id;
+        }
+
         protected override Task OnLoading()
         {
             // Avviamo la navigazione sul thread della UI ma senza fare l'await del Task 
             // all'interno del ciclo di vita sincrono della classe base
             RxSchedulers.MainThreadScheduler.Schedule(async () =>
             {
-                await GoToPostazione();
+                await GoToPostazione(_cassaPostazioneId, "");
             });
 
             return Task.CompletedTask;
@@ -67,14 +72,24 @@ namespace Cassa.ViewModels
 
 
 
-        private Task GoToPostazione()
+        private Task GoToPostazione(int postazioneId, string posizione)
         {
             return GoToPageGeneric<ICassaPostazioneViewModel>(pageVM =>
             {
+                pageVM.SetPostazioneId(postazioneId);
+                pageVM.SetPosizione(posizione);
+
                 pageVM.PostazioneToMenu
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
                     // Sostituiamo il Subscribe(async...) con SelectMany per gestire il Task in modo reattivo
                     .SelectMany(_ => Observable.FromAsync(() => GoToMenu()))
+                    .Subscribe()
+                    .DisposeWith(_navigationDisposables);
+
+                pageVM.PostazioneToEntraSocio
+                    .ObserveOn(RxSchedulers.MainThreadScheduler)
+                    // Sostituiamo il Subscribe(async...) con SelectMany per gestire il Task in modo reattivo
+                    .SelectMany(tuple => Observable.FromAsync(() => GoToEntraSocio(tuple.postazioneId, tuple.posizione)))
                     .Subscribe()
                     .DisposeWith(_navigationDisposables);
             });
@@ -90,6 +105,21 @@ namespace Cassa.ViewModels
             });
 
             await Task.CompletedTask;
+        }
+
+        private async Task GoToEntraSocio(int postazioneId, string posizione)
+        {
+            await GoToPageGeneric<IEntraSocioViewModel>(pageVM =>
+            {
+                pageVM.SetPostazioneId(postazioneId);
+                pageVM.SetPosizione(posizione);
+
+                pageVM.EntraSocioToPostazione
+                    .ObserveOn(RxSchedulers.MainThreadScheduler)
+                    .SelectMany(tuple => Observable.FromAsync(() => GoToPostazione(tuple.postazioneId, tuple.posizione)))
+                    .Subscribe()
+                    .DisposeWith(_navigationDisposables);
+            });
         }
 
 

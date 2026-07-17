@@ -1,6 +1,5 @@
 ﻿using Cassa.Core.Context;
 using Microsoft.EntityFrameworkCore;
-using Models.Context;
 using Models.Repository;
 using Models.Tables;
 

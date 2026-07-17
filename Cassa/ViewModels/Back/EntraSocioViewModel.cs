@@ -1,10 +1,11 @@
-﻿using Cassa.Core.Repository;
+﻿using AppSystem;
+using Cassa.Core.Repository;
 using Cassa.ViewModels.Map;
 using ReactiveUI;
-using Splat;
 using System.Reactive;
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using ViewModels;
 
 namespace Cassa.ViewModels
@@ -14,6 +15,8 @@ namespace Cassa.ViewModels
         void SetHost(ICassaScreen host);
         void SetPostazioneId(int id);
         void SetPosizione(string numPosizione);
+
+        IObservable<(int postazioneId, string posizione)> EntraSocioToPostazione { get; }
     }
 
     public partial class EntraSocioViewModel : ViewModelBase, IEntraSocioViewModel
@@ -92,7 +95,7 @@ namespace Cassa.ViewModels
         {
             await _strisciataRepository.DevelopStrisciate(Token);
             var data  = await Q.GetIngressiByPostazione(_postazioneId, Token);
-            IngressiList = data.Select(data => new EntraIngressiMap(data)).ToList();
+            IngressiList = [.. data.Select(data => new EntraIngressiMap(data))];
             if (IngressiList.Count > 0)
             {
                 SelectedIngresso = IngressiList[0];
@@ -102,29 +105,15 @@ namespace Cassa.ViewModels
 
         public void SetHost(ICassaScreen host) => _host = host;
 
-        public void SetPostazioneId(int posizioneId)
-        {
-            _postazioneId = posizioneId;
-        }
+        public void SetPostazioneId(int posizioneId) => _postazioneId = posizioneId;
 
-        public void SetPosizione(string posizione)
-        {
-            _posizione = posizione;
-        }
+        public void SetPosizione(string posizione) => _posizione = posizione;
 
         protected async override Task OnEsc()
         {
-            //_isClosing = true; // Imposta il flag per indicare che stiamo chiudendo la pagina
-            //var cassaPostazioneVm = Locator.Current.GetService<ICassaPostazioneViewModel>();
-            //if (cassaPostazioneVm is not null)
-            //{
-            //    cassaPostazioneVm.SetHost(_host);
-            //    cassaPostazioneVm.SetPostazioneId(_postazioneId);
-            //    cassaPostazioneVm.SetPosizione(_posizione);
-
-            //    await _host.CassaRouter.NavigateAndReset.Execute(cassaPostazioneVm);
-            //}
-            //else _isClosing = false; // Se non riesce a navigare, resetta il flag per evitare di bloccare la pagina
+            _isClosing = true; // Imposta il flag per indicare che stiamo chiudendo la pagina
+            _entraSocioToPostazione.OnNext((_postazioneId, _posizione)); // Notifica l'esterno
+            _entraSocioToPostazione.OnCompleted(); // Completa l'osservabile per evitare memory leak    
             await Task.CompletedTask;
 
         }
@@ -132,7 +121,7 @@ namespace Cassa.ViewModels
         private async Task OnTesseraEnter()
         {
 
-            var data = new EntraSocioMap(await Q.GetPersonByTessera(BindingT.NumeroTessera, token));
+            var data = new EntraSocioMap(await Q.GetPersonByTessera(BindingT.NumeroTessera, Token));
 
             if (data.CodiceSocio == 0)
             {
@@ -187,6 +176,9 @@ namespace Cassa.ViewModels
         public Interaction<Unit, Unit> TesseraFocus { get; } = new();
         public Interaction<Unit, Unit> PosizioneFocus { get; } = new();
 
+        private readonly Subject<(int postazioneId, string posizione)> _entraSocioToPostazione = new();
+        public IObservable<(int postazioneId, string posizione)> EntraSocioToPostazione => _entraSocioToPostazione.AsObservable();
+
 
         private EntraSocioMap _bindingt = new();
         public EntraSocioMap BindingT
@@ -216,7 +208,7 @@ namespace Cassa.ViewModels
         private readonly ObservableAsPropertyHelper<string> _infoLabel;
         public string InfoLabel => _infoLabel.Value;
 
-        private List<EntraIngressiMap> _ingressiList = new();
+        private List<EntraIngressiMap> _ingressiList = [];
         public List<EntraIngressiMap> IngressiList
         {
             get => _ingressiList;

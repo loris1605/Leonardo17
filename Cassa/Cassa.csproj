@@ -17,10 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Views\Back\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Update="Views\Front\CassaPostazioneView.axaml.cs">
       <DependentUpon>CassaPostazioneView.axaml</DependentUpon>
     </Compile>

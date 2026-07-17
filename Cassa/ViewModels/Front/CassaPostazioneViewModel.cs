@@ -1,4 +1,5 @@
-﻿using Cassa.ViewModels.Map;
+﻿using Cassa.Core.Repository;
+using Cassa.ViewModels.Map;
 using ReactiveUI;
 using System.Diagnostics;
 using System.Reactive;
@@ -12,6 +13,9 @@ namespace Cassa.ViewModels
     {
         // Define any properties or methods that the CassaPostazioneViewModel should implement
         IObservable<Unit> PostazioneToMenu { get; }
+        IObservable<(int postazioneId, string posizione)> PostazioneToEntraSocio { get; }
+        void SetPostazioneId(int postazioneId);
+        void SetPosizione(string posizione);
     }
 
     public partial class CassaPostazioneViewModel : ViewModelBase, ICassaPostazioneViewModel
@@ -20,6 +24,9 @@ namespace Cassa.ViewModels
         public ReactiveCommand<Unit, Unit> EsceSocioCommand { get; }
         public ReactiveCommand<Unit, Unit> ListaSociCommand { get; }
         public ReactiveCommand<Unit, Unit> PosizioneEnterCommand { get; }
+
+        private readonly ICassaPostazioneRepository Q;
+        private int _postazioneId;
 
         protected override IObservable<bool> IsAnythingExecuting =>
             new[]
@@ -33,20 +40,19 @@ namespace Cassa.ViewModels
 
 
 
-        public CassaPostazioneViewModel() : base(null)
+        public CassaPostazioneViewModel(ICassaPostazioneRepository Repository) : base(null)
         {
+           Q = Repository ?? throw new ArgumentNullException(nameof(Repository));
 
-            
+           EntraSocioCommand = ReactiveCommand.CreateFromTask(GoToEntraSocio);
+           EsceSocioCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask); // Placeholder for actual logic
+           ListaSociCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask); // Placeholder for actual logic
+           PosizioneEnterCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask); // Placeholder for actual logic
 
-            EntraSocioCommand = ReactiveCommand.CreateFromTask(GoToEntraSocio);
-            EsceSocioCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask); // Placeholder for actual logic
-            ListaSociCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask); // Placeholder for actual logic
-            PosizioneEnterCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask); // Placeholder for actual logic
-
-            EntraSocioCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Entra Socio: {ex.Message}"));
-            EsceSocioCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Postazioni: {ex.Message}"));
-            ListaSociCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Lista Soci: {ex.Message}"));
-            PosizioneEnterCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Posizione: {ex.Message}"));
+           EntraSocioCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Entra Socio: {ex.Message}"));
+           EsceSocioCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Postazioni: {ex.Message}"));
+           ListaSociCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Lista Soci: {ex.Message}"));
+           PosizioneEnterCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Posizione: {ex.Message}"));
         }
 
         protected override void OnFinalDestruction()
@@ -63,11 +69,28 @@ namespace Cassa.ViewModels
             return Task.CompletedTask;
         }
 
-        private async Task GoToEntraSocio()
+        protected override async Task OnLoading()
+        {
+            Titolo = "POSTAZIONE " + await Q.GetPostazioneName(_postazioneId, Token);
+            await SetFocus(PosizioneFocus);
+            await Task.CompletedTask;
+        }
+
+        public void SetPostazioneId(int postazioneId)
+        {
+            _postazioneId = postazioneId;
+        }
+
+        public void SetPosizione(string posizione)
+        {
+            BindingT.Posizione = posizione;
+        }
+
+        private Task GoToEntraSocio()
         {
             // Logic for navigating to the "Entra Socio" view
-            
-            await Task.CompletedTask;
+            _postazioneToEntraSocio.OnNext((_postazioneId, BindingT.Posizione));
+            return Task.CompletedTask;
         }
     }
 
@@ -75,6 +98,10 @@ namespace Cassa.ViewModels
     {
         private readonly Subject<Unit> _postazioneToMenu = new();
         public IObservable<Unit> PostazioneToMenu => _postazioneToMenu.AsObservable();
+
+        
+        private readonly Subject<(int postazioneId, string posizione)> _postazioneToEntraSocio = new();
+        public IObservable<(int postazioneId, string posizione)> PostazioneToEntraSocio => _postazioneToEntraSocio.AsObservable();
 
         private bool _isOpen = false;
         public bool IsOpen
