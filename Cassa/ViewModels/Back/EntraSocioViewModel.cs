@@ -2,6 +2,7 @@
 using Cassa.Core.Repository;
 using Cassa.ViewModels.Map;
 using ReactiveUI;
+using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
@@ -31,6 +32,7 @@ namespace Cassa.ViewModels
         public ReactiveCommand<Unit, Unit> TesseraCommand { get; private set; }
         public ReactiveCommand<Unit, Unit> F5Command { get; private set; }
         public ReactiveCommand<Unit, Unit> PosizioneEscCommand { get; private set; }
+        public ReactiveCommand<Unit, Unit> EntraCommand { get; private set; }
 
         protected override IObservable<bool> IsAnythingExecuting =>
             new[]
@@ -38,6 +40,7 @@ namespace Cassa.ViewModels
                 base.IsAnythingExecuting,
                 TesseraCommand?.IsExecuting ?? Observable.Return(false),
                 PosizioneEscCommand?.IsExecuting ?? Observable.Return(false),
+                EntraCommand?.IsExecuting ?? Observable.Return(false),
                 F5Command?.IsExecuting ?? Observable.Return(false)
 
             }.CombineLatest(values => values.Any(x => x));
@@ -67,15 +70,12 @@ namespace Cassa.ViewModels
             TesseraCommand = ReactiveCommand.CreateFromTask(async vm => await OnTesseraEnter());
             F5Command = ReactiveCommand.CreateFromTask(async vm => await OnF5Pressed());
             PosizioneEscCommand = ReactiveCommand.CreateFromTask(async vm => await OnPosizioneEsc());
+            EntraCommand = ReactiveCommand.CreateFromTask(async vm => await OnEntra());
 
-            this.WhenActivated(d =>
-            {
-                TesseraCommand?.DisposeWith(d);
-                F5Command?.DisposeWith(d);
-                PosizioneEscCommand?.DisposeWith(d);
-                _tesseraLabel?.DisposeWith(d);
-                _infoLabel?.DisposeWith(d);
-            });
+            TesseraCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Tessera: {ex.Message}"));
+            F5Command.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione F5: {ex.Message}"));
+            PosizioneEscCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Posizione Esc: {ex.Message}"));
+            EntraCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Entra: {ex.Message}"));
         }
 
         protected override void OnFinalDestruction()
@@ -120,26 +120,52 @@ namespace Cassa.ViewModels
 
         private async Task OnTesseraEnter()
         {
+            // 1. Validazione preliminare per evitare chiamate a vuoto
+            if (string.IsNullOrWhiteSpace(BindingT.NumeroTessera)) return;
 
-            var data = new EntraSocioMap(await Q.GetPersonByTessera(BindingT.NumeroTessera, Token));
-
-            if (data.CodiceSocio == 0)
+            try
             {
+                // 2. Chiamata asincrona diretta
+                var personData = await Q.GetPersonByTessera(BindingT.NumeroTessera, Token);
+                var data = new EntraSocioMap(personData);
+
+                if (data.CodiceSocio == 0)
+                {
+                    IsSocioFound = false;
+
+                    // 3. Reset dei campi senza distruggere l'istanza di binding (se possibile)
+                    // Altrimenti, se devi ricreare l'oggetto, mantieni il valore prima del reset
+                    string tesseraCorrente = BindingT.NumeroTessera;
+
+                    BindingT = new EntraSocioMap
+                    {
+                        NumeroTessera = tesseraCorrente
+                    }; // Sostituisci con il tuo tipo originale se diverso
+                    Eta = string.Empty;
+                }
+                else
+                {
+                    IsSocioFound = true;
+                    BindingT = data;
+                    Eta = BindingT.Natoil.DateIntToEta().ToString();
+                }
+            }
+            catch (Exception ex)
+            {
+                // 4. Gestisci l'errore (es. log o mostra un avviso all'utente)
                 IsSocioFound = false;
-                string tessera = BindingT.NumeroTessera;
-                BindingT = new(); // Resetta i dati
-                Eta = string.Empty;
-                BindingT.NumeroTessera = tessera; // Mantieni la tessera inserita
+                Debug.WriteLine($"Errore durante la ricerca del socio: {ex.Message}");
+            }
+            finally
+            {
+                // 5. Forza l'aggiornamento della UI prima del focus (fondamentale in Blazor/MAUI)
+               
+
+                // 6. Rimuovi il Delay fisso e sposta il focus alla fine del ciclo di rendering
                 await SetFocus(TesseraFocus);
             }
-            else
-            {
-                IsSocioFound = true;
-                BindingT = data;
-                Eta = BindingT.Natoil.DateIntToEta().ToString();
-                
-            }
         }
+
 
         private async Task OnF5Pressed()
         {
@@ -169,7 +195,42 @@ namespace Cassa.ViewModels
 
             // Qui puoi fare ulteriori operazioni con virtualSocio, come salvarlo o passarlo ad altri componenti
         }
+
+        private async Task OnEntra()
+        {
+            if (BindingT.CodiceSocio == 0)
+            {
+                IsSocioFound = false;
+                await SetFocus(TesseraFocus);
+                return;
+            }
+
+            _isClosing = true; // Imposta il flag per indicare che stiamo chiudendo la pagina
+
+            try
+            {
+                int result = await Q.AddNewScheda(BindingT.ToDto(), Token);
+                _entraSocioToPostazione.OnNext((_postazioneId, _posizione));
+                _entraSocioToPostazione.OnCompleted();
+            }
+            catch (OperationCanceledException)
+            {
+                Debug.WriteLine("Salvataggio annullato.");
+                _isClosing = false;
+                return;
+            }
+            catch (Exception ex)
+            {
+                _isClosing = false;
+                Debug.WriteLine($"Errore: {ex.Message}");
+                await SetFocus(TesseraFocus);
+                return;
+            }
+
+            ; // Completa l'osservabile per evitare memory leak
+        }
     }
+
 
     public partial class EntraSocioViewModel
     {
@@ -222,5 +283,12 @@ namespace Cassa.ViewModels
             set => this.RaiseAndSetIfChanged(ref _selectedIngressi, value);
 
         }
+
+        //private string infolabel = string.Empty;
+        //public string InfoLabel
+        //{
+        //    get => infolabel;
+        //    set => this.RaiseAndSetIfChanged(ref infolabel, value);
+        //}
     }
 }

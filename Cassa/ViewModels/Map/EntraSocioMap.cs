@@ -11,13 +11,38 @@ namespace Cassa.ViewModels.Map
         public EntraSocioMap(EntraSocioDTO dto)
         {
             this.NumeroTessera = dto.NumeroTessera;
+            this.CodiceTessera = dto.CodiceTessera;
             this.Cognome = dto.Cognome;
             this.Nome = dto.Nome;
             this.Natoil = dto.Natoil;
-            this.CodiceSocio = dto.CodicePerson;
+            this.CodiceSocio = dto.CodiceSocio;
             this.NumeroSocio = dto.NumeroSocio;
+            this.CodicePerson = dto.CodicePerson;
             this.Scadenza = dto.ScadenzaTessera;
             this.CodiceUnivoco = dto.CodiceUnivoco;
+            this.Posizione = dto.Posizione;
+            this.Consumazione = dto.Consumazione;
+            this.Note = dto.Note;
+        }
+
+        public EntraSocioDTO ToDto()
+        {
+            return new EntraSocioDTO
+            {
+                NumeroTessera = this.NumeroTessera,
+                CodiceTessera = this.CodiceTessera,
+                Cognome = this.Cognome,
+                Nome = this.Nome,
+                Natoil = this.Natoil,
+                CodicePerson = this.CodiceSocio,
+                CodiceSocio = this.CodiceSocio,
+                NumeroSocio = this.NumeroSocio,
+                ScadenzaTessera = this.Scadenza,
+                CodiceUnivoco = this.CodiceUnivoco,
+                Posizione = this.Posizione,
+                Consumazione = this.Consumazione,
+                Note = this.Note
+            };
         }
 
 
@@ -92,5 +117,33 @@ namespace Cassa.ViewModels.Map
 
         }
 
+        private string _posizione = string.Empty;
+        public string Posizione
+        {
+            get => _posizione;
+            set => this.RaiseAndSetIfChanged(ref _posizione, value);
+
+        }
+
+        private int _codiceperson;
+        public int CodicePerson
+        {
+            get => _codiceperson;
+            set => this.RaiseAndSetIfChanged(ref _codiceperson, value);
+        }
+
+        private decimal _consumazione;
+        public decimal Consumazione
+        {
+            get => _consumazione;
+            set => this.RaiseAndSetIfChanged(ref _consumazione, value);
+        }
+
+        private string _note = string.Empty;
+        public string Note
+        {
+            get => _note;
+            set => this.RaiseAndSetIfChanged(ref _note, value);
+        }
     }
 }

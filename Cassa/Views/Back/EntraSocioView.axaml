@@ -5,6 +5,7 @@
              xmlns:vm="using:Cassa.ViewModels"
              xmlns:lc="using:Views"
              xmlns:vw="using:Cassa.Views"
+             xmlns:ui="using:ControlStyles" 
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
@@ -64,6 +65,15 @@
                      
             </Viewbox>
 
+            <ui:UiButton Grid.Column="4" MinWidth="250"
+                      Grid.Row="1"
+                      Grid.ColumnSpan="2"
+                      Grid.RowSpan="5"
+                      x:Name="EntraIngressoButton"
+                      Command="{Binding EntraCommand}"
+                      Content="ENTRA SOCIO"/>
+
+
             <!--<vw:EntraSocioIngressoView x:Name="EntraIngresso"
                                        Height="{Binding #ContenitoreAnagrafica.Bounds.Height}"
                                        Grid.Column="4" MinWidth="250"
@@ -71,7 +81,7 @@
                                        Grid.ColumnSpan="2"
                                        Grid.RowSpan="5"/>-->
 
-
+            
            
 
         </Grid>

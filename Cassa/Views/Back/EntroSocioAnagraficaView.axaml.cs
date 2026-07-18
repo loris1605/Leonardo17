@@ -163,16 +163,7 @@ public partial class EntraSocioAnagraficaView : BaseUserControl<EntraSocioViewMo
 
             #region TwoWays Ottimizzato con Throttle
 
-            // 1. Dalla View al ViewModel con Throttle (Scrittura controllata)
-            this.TesseraBox.GetObservable(TextBox.TextProperty) // Nota: Se usi WPF usa: Observable.FromEventPattern per il TextChanged
-                .Throttle(TimeSpan.FromMilliseconds(400), RxSchedulers.MainThreadScheduler)
-                .DistinctUntilChanged()
-                .Where(_ => ViewModel?.BindingT != null)
-                .Subscribe(testo => ViewModel!.BindingT.NumeroTessera = testo)
-                .DisposeWith(d);
-
-            // 2. Dal ViewModel alla View (Lettura standard)
-            this.OneWayBind(ViewModel,
+            this.Bind(ViewModel,
                     vm => vm.BindingT.NumeroTessera,
                     v => v.TesseraBox.Text)
                 .DisposeWith(d);

@@ -15,6 +15,10 @@ namespace Cassa.Core.Context
         DbSet<Listino> Listini { get; set; }
         DbSet<Reparto> Reparti { get; set; }
 
+        DbSet<Scheda> Schede { get; set; }
+
+        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+
     }
 
     public class EntraSocioDbContext : BaseContext, IEntraSocioDbContext
@@ -27,5 +31,6 @@ namespace Cassa.Core.Context
         public DbSet<Postazione> Postazioni { get; set; } = null!;
         public DbSet<Listino> Listini { get; set; } = null!;
         public DbSet<Reparto> Reparti { get; set; } = null!;
+        public DbSet<Scheda> Schede { get; set; } = null!;
     }
 }

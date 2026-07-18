@@ -10,6 +10,7 @@ namespace Cassa.Core.Repository
     {
         Task<EntraSocioDTO> GetPersonByTessera(string numeroTessera, CancellationToken ctk = default);
         Task<List<EntraIngressiDTO>> GetIngressiByPostazione(int postazioneId, CancellationToken ctk = default);
+        Task<int> AddNewScheda(EntraSocioDTO dto, CancellationToken ctk = default);
     }
 
     public class EntraSocioRepository(IEntraSocioDbContext ctx) : BaseRepository<EntraSocioDbContext, Scheda>, IEntraSocioRepository
@@ -60,6 +61,28 @@ namespace Cassa.Core.Repository
                 IsFreeDrink = t.IsFreeDrink
             })];
 
+        }
+
+        public async Task<int> AddNewScheda(EntraSocioDTO dto, CancellationToken ctk = default)
+        {
+            var scheda = new Scheda
+            {
+                Posizione = dto.Posizione, // Imposta la posizione desiderata
+                NumeroTessera = dto.NumeroTessera,
+                PersonId = dto.CodicePerson,
+                Cognome = dto.Cognome,
+                Nome = dto.Nome,
+                Natoil = dto.Natoil,
+                CheckinTime = DateTime.Now,
+                CheckoutTime = DateTime.MaxValue, // Imposta un valore predefinito per il checkout
+                Consumazione = dto.Consumazione,
+                Blocco = dto.Blocco,
+                Note = dto.Note
+            };
+
+            _ctx.Schede.Add(scheda);
+            await _ctx.SaveChangesAsync(ctk);
+            return scheda.Id;
         }
     }
 }
