@@ -3,6 +3,7 @@ using Cassa.Core.DTO;
 using Microsoft.EntityFrameworkCore;
 using Models.Repository;
 using Models.Tables;
+using System.Diagnostics;
 
 namespace Cassa.Core.Repository
 {
@@ -80,9 +81,20 @@ namespace Cassa.Core.Repository
                 Note = dto.Note
             };
 
-            _ctx.Schede.Add(scheda);
-            await _ctx.SaveChangesAsync(ctk);
-            return scheda.Id;
+
+
+            await _ctx.Schede.AddAsync(scheda, ctk);
+
+            try
+            {
+                await _ctx.SaveChangesAsync(ctk);
+                return scheda.Id;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Errore Add: {ex.InnerException?.Message ?? ex.Message}");
+                return -1;
+            }
         }
     }
 }

@@ -45,6 +45,10 @@ namespace Cassa.ViewModels
 
             }.CombineLatest(values => values.Any(x => x));
 
+        protected IObservable<bool> CanEntra => this.WhenAnyValue(
+            x => x.BindingT,
+            (item) => item != null && item.CodicePerson != 0);
+
 
         public EntraSocioViewModel(IStrisciataRepository strisciataRepository, IEntraSocioRepository Repository) : base()
         {
@@ -70,7 +74,7 @@ namespace Cassa.ViewModels
             TesseraCommand = ReactiveCommand.CreateFromTask(async vm => await OnTesseraEnter());
             F5Command = ReactiveCommand.CreateFromTask(async vm => await OnF5Pressed());
             PosizioneEscCommand = ReactiveCommand.CreateFromTask(async vm => await OnPosizioneEsc());
-            EntraCommand = ReactiveCommand.CreateFromTask(async vm => await OnEntra());
+            EntraCommand = ReactiveCommand.CreateFromTask(async vm => await OnEntra(), CanEntra);
 
             TesseraCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Tessera: {ex.Message}"));
             F5Command.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione F5: {ex.Message}"));
@@ -129,7 +133,7 @@ namespace Cassa.ViewModels
                 var personData = await Q.GetPersonByTessera(BindingT.NumeroTessera, Token);
                 var data = new EntraSocioMap(personData);
 
-                if (data.CodiceSocio == 0)
+                if (data.NumeroSocio == "0")
                 {
                     IsSocioFound = false;
 
@@ -198,18 +202,28 @@ namespace Cassa.ViewModels
 
         private async Task OnEntra()
         {
-            if (BindingT.CodiceSocio == 0)
+            _isClosing = true; // Imposta il flag per indicare che stiamo chiudendo la pagina
+
+            if (BindingT.NumeroSocio == "0")
             {
                 IsSocioFound = false;
+                _isClosing = false; // Reset del flag perché non stiamo chiudendo la pagina
                 await SetFocus(TesseraFocus);
                 return;
             }
-
-            _isClosing = true; // Imposta il flag per indicare che stiamo chiudendo la pagina
+            
 
             try
             {
                 int result = await Q.AddNewScheda(BindingT.ToDto(), Token);
+                if (result == -1)
+                {
+                    Debug.WriteLine("Errore durante l'aggiunta della scheda.");
+                    _isClosing = false; // Reset del flag perché non stiamo chiudendo la pagina
+                    await SetFocus(TesseraFocus);
+                    return;
+                }
+
                 _entraSocioToPostazione.OnNext((_postazioneId, _posizione));
                 _entraSocioToPostazione.OnCompleted();
             }

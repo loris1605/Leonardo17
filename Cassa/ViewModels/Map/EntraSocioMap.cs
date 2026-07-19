@@ -34,7 +34,7 @@ namespace Cassa.ViewModels.Map
                 Cognome = this.Cognome,
                 Nome = this.Nome,
                 Natoil = this.Natoil,
-                CodicePerson = this.CodiceSocio,
+                CodicePerson = this.CodicePerson,
                 CodiceSocio = this.CodiceSocio,
                 NumeroSocio = this.NumeroSocio,
                 ScadenzaTessera = this.Scadenza,
