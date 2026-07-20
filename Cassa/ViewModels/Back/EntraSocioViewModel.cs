@@ -46,8 +46,14 @@ namespace Cassa.ViewModels
             }.CombineLatest(values => values.Any(x => x));
 
         protected IObservable<bool> CanEntra => this.WhenAnyValue(
-            x => x.BindingT,
-            (item) => item != null && item.CodicePerson != 0);
+                x => x.BindingT,
+                x => x.BindingT.CodicePerson,
+                x => x.BindingT.Posizione,
+                (bindingT, codice, posizione) =>
+                    bindingT != null &&
+                    codice != 0 &&
+                    !string.IsNullOrEmpty(posizione)
+            );
 
 
         public EntraSocioViewModel(IStrisciataRepository strisciataRepository, IEntraSocioRepository Repository) : base()
@@ -65,10 +71,20 @@ namespace Cassa.ViewModels
                                 .ToProperty(this, x => x.TesseraLabel, initialValue: "TESSERA :");
 
             // 3. Allinea l'initialValue vuoto per l'avvio
-            _infoLabel = socioFoundStream
-                                .Select(found => found ? "" : "Socio non Trovato")
-                                .Skip(1)
-                                .ToProperty(this, x => x.InfoLabel, initialValue: "");
+            _infoLabel = this.WhenAnyValue(
+                        x => x.IsSocioFound,
+                        x => x.IsRicercaEffettuata,
+                        (found, effettuata) =>
+                        {
+                            // Se la ricerca è stata fatta e il socio NON è trovato
+                            if (effettuata && !found)
+                                return "Socio non Trovato";
+
+                            // In tutti gli altri casi (caricamento, socio trovato, reset) la label è vuota
+                            return "";
+                        })
+                    .ObserveOn(RxSchedulers.MainThreadScheduler)
+                    .ToProperty(this, x => x.InfoLabel, initialValue: "");
 
 
             TesseraCommand = ReactiveCommand.CreateFromTask(async vm => await OnTesseraEnter());
@@ -124,6 +140,8 @@ namespace Cassa.ViewModels
 
         private async Task OnTesseraEnter()
         {
+            IsRicercaEffettuata = false;
+
             // 1. Validazione preliminare per evitare chiamate a vuoto
             if (string.IsNullOrWhiteSpace(BindingT.NumeroTessera)) return;
 
@@ -133,7 +151,7 @@ namespace Cassa.ViewModels
                 var personData = await Q.GetPersonByTessera(BindingT.NumeroTessera, Token);
                 var data = new EntraSocioMap(personData);
 
-                if (data.NumeroSocio == "0")
+                if (data.NumeroSocio is null)
                 {
                     IsSocioFound = false;
 
@@ -167,6 +185,7 @@ namespace Cassa.ViewModels
 
                 // 6. Rimuovi il Delay fisso e sposta il focus alla fine del ciclo di rendering
                 await SetFocus(TesseraFocus);
+                IsRicercaEffettuata = true;
             }
         }
 
@@ -186,6 +205,8 @@ namespace Cassa.ViewModels
         {
             BindingT = new(); // Resetta i dati
             Eta = string.Empty;
+            IsSocioFound = false;
+            IsRicercaEffettuata = false;
             await SetFocus(TesseraFocus);
         }
 
@@ -269,12 +290,20 @@ namespace Cassa.ViewModels
             set => this.RaiseAndSetIfChanged(ref _eta, value);
         }
 
-        private bool _isSocioFound = true;
+        private bool _isSocioFound = false;
         public bool IsSocioFound
         {
             get => _isSocioFound;
             set => this.RaiseAndSetIfChanged(ref _isSocioFound, value);
         }
+
+        private bool _isRicercaEffettuata;
+        public bool IsRicercaEffettuata
+        {
+            get => _isRicercaEffettuata;
+            set => this.RaiseAndSetIfChanged(ref _isRicercaEffettuata, value);
+        }
+
 
         // 2. Proprietà calcolata (OAPH) per la Label
         private readonly ObservableAsPropertyHelper<string> _tesseraLabel;

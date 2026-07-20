@@ -168,6 +168,22 @@ public partial class EntraSocioAnagraficaView : BaseUserControl<EntraSocioViewMo
                     v => v.TesseraBox.Text)
                 .DisposeWith(d);
 
+            this.Bind(ViewModel,
+                    vm => vm.BindingT.Posizione,
+                    v => v.PosizioneBox.Text)
+                .DisposeWith(d);
+
+            this.OneWayBind(ViewModel,
+                vm => vm.IsSocioFound,
+                v => v.TesseraBox.IsEnabled,
+                isFound => !isFound) // <--- Inverte il valore
+            .DisposeWith(d);
+
+            this.OneWayBind(ViewModel,
+                    vm => vm.IsSocioFound,
+                    v => v.PosizioneBox.IsEnabled)
+                .DisposeWith(d);
+
             #endregion
 
         });

@@ -66,9 +66,8 @@
             </Viewbox>
 
             <ui:UiButton Grid.Column="4" MinWidth="250"
-                      Grid.Row="1"
+                      Grid.Row="7"
                       Grid.ColumnSpan="2"
-                      Grid.RowSpan="5"
                       x:Name="EntraIngressoButton"
                       Command="{Binding EntraCommand}"
                       Content="ENTRA SOCIO"/>
