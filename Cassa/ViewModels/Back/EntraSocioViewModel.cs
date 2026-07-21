@@ -153,7 +153,7 @@ namespace Cassa.ViewModels
 
                 if (data.NumeroSocio is null)
                 {
-                    IsSocioFound = false;
+                    IsSocioFound = false; // questo fa apparire la label "Socio non Trovato"
 
                     // 3. Reset dei campi senza distruggere l'istanza di binding (se possibile)
                     // Altrimenti, se devi ricreare l'oggetto, mantieni il valore prima del reset
@@ -168,6 +168,7 @@ namespace Cassa.ViewModels
                 else
                 {
                     IsSocioFound = true;
+                    IsRicercaEffettuata = true;
                     BindingT = data;
                     Eta = BindingT.Natoil.DateIntToEta().ToString();
                 }
@@ -188,7 +189,6 @@ namespace Cassa.ViewModels
                 IsRicercaEffettuata = true;
             }
         }
-
 
         private async Task OnF5Pressed()
         {
