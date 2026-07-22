@@ -13,6 +13,7 @@ namespace Cassa.Core.Repository
         Task<List<EntraIngressiDTO>> GetIngressiByPostazione(int postazioneId, CancellationToken ctk = default);
         Task<int> AddNewScheda(EntraSocioDTO dto, CancellationToken ctk = default);
         Task<bool> EsisteSocioInside(EntraSocioDTO dto, CancellationToken ctk = default);
+        Task<IEnumerable<string>> GetPosizioniAsync();
     }
 
     public class EntraSocioRepository(IEntraSocioDbContext ctx) : BaseRepository<EntraSocioDbContext, Scheda>, IEntraSocioRepository
@@ -102,5 +103,15 @@ namespace Cassa.Core.Repository
         {
             return await _ctx.Schede.Where(x => x.PersonId == dto.CodicePerson).AnyAsync(ctk);
         }
+
+        public async Task<IEnumerable<string>> GetPosizioniAsync()
+        {
+            // Esempio con Entity Framework / Dapper
+            return await _ctx.Schede
+                .Select(p => p.Posizione)
+                .ToListAsync(); // ToListAsync() va benissimo perché implementa IEnumerable
+        }
     }
+
+
 }

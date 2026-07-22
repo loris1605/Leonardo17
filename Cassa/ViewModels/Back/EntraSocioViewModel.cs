@@ -28,6 +28,8 @@ namespace Cassa.ViewModels
         private IStrisciataRepository _strisciataRepository;
         private IEntraSocioRepository Q;
 
+        private HashSet<string> posizioniEsistentiHash;
+
         public ReactiveCommand<Unit, Unit> TesseraCommand { get; private set; }
         public ReactiveCommand<Unit, Unit> F5Command { get; private set; }
         public ReactiveCommand<Unit, Unit> PosizioneEscCommand { get; private set; }
@@ -80,28 +82,44 @@ namespace Cassa.ViewModels
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
                     .ToProperty(this, x => x.InfoLabel, initialValue: "");
 
+            _isPosizioneEsistente = this.WhenAnyValue(x => x.BindingT.Posizione)
+                .Throttle(TimeSpan.FromMilliseconds(300)) // Evita sovraccarichi durante la digitazione veloce
+                .Select(posizione =>
+                {
+                    if (string.IsNullOrWhiteSpace(posizione))
+                        return false;
+
+                    // Ricerca immediata O(1) nell'HashSet
+                    return posizioniEsistentiHash.Contains(posizione);
+                })
+                .ObserveOn(RxSchedulers.MainThreadScheduler)
+                .ToProperty(this, x => x.IsPosizioneEsistente, initialValue: false);
+
             _canEntraLabel = this.WhenAnyValue(
                     x => x.IsSocioFound,
-                    x => x.IsSocioInside, // 1. Monitoriamo anche questa nuova proprietà
-                    x => x.BindingT,
-                    (found, inside, bindingT) =>
+                    x => x.IsSocioInside,
+                    x => x.BindingT,             // Monitoriamo l'oggetto per evitare NullReference
+                    x => x.BindingT.Posizione,    // Monitoriamo la stringa digitata
+                    x => x.IsPosizioneEsistente,  // 2. Monitoriamo lo stato della verifica in memoria
+                    (found, inside, bindingT, posizione, esiste) =>
                     {
                         // Caso 1: Socio non trovato
                         if (!found)
                             return "Warning Identificazione";
 
-                        // Caso 2: Nuovo controllo - Il socio è già dentro
+                        // Caso 2: Il socio è già dentro
                         if (inside)
                             return "Socio già all'interno";
 
-                        if (bindingT == null)
-                            return "bINDINGt nULL";
+                        // Caso 3: L'oggetto o la stringa sono vuoti
+                        if (bindingT == null || string.IsNullOrWhiteSpace(posizione))
+                            return "Posizione Mancante";
 
-                        // Caso 3: Socio trovato MA l'oggetto o la posizione sono vuoti
-                        //if (bindingT == null || string.IsNullOrWhiteSpace(bindingT.Posizione))
-                        //    return "Posizione Mancante";
+                        // Caso 4: Nuovo controllo - La posizione digitata non è censita nel DB
+                        if (esiste)
+                            return "Posizione Già Occupata";
 
-                        // Caso 4: Tutto regolare
+                        // Caso 5: Tutto regolare
                         return "";
                     })
                 .ObserveOn(RxSchedulers.MainThreadScheduler)
@@ -196,6 +214,9 @@ namespace Cassa.ViewModels
                     IsSocioFound = true;
                     IsRicercaEffettuata = true;
                     IsSocioInside = await Q.EsisteSocioInside(data.ToDto(), Token);
+                    posizioniEsistentiHash = new HashSet<string>(
+                                        await Q.GetPosizioniAsync(),
+                                        StringComparer.OrdinalIgnoreCase );
                     BindingT = data;
                     Eta = BindingT.Natoil.DateIntToEta().ToString();
                 }
@@ -335,6 +356,9 @@ namespace Cassa.ViewModels
             set => this.RaiseAndSetIfChanged(ref _isSocioInside, value);
         }
 
+        private readonly ObservableAsPropertyHelper<bool> _isPosizioneEsistente;
+        // Proprietà di sola lettura alimentata dal flusso reattivo
+        public bool IsPosizioneEsistente => _isPosizioneEsistente.Value;
 
         // 2. Proprietà calcolata (OAPH) per la Label
         private readonly ObservableAsPropertyHelper<string> _tesseraLabel;
