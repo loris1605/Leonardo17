@@ -4,7 +4,6 @@ using Cassa.ViewModels.Map;
 using ReactiveUI;
 using System.Diagnostics;
 using System.Reactive;
-using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ViewModels;
@@ -46,14 +45,9 @@ namespace Cassa.ViewModels
             }.CombineLatest(values => values.Any(x => x));
 
         protected IObservable<bool> CanEntra => this.WhenAnyValue(
-                x => x.BindingT,
-                x => x.BindingT.CodicePerson,
-                x => x.BindingT.Posizione,
-                (bindingT, codice, posizione) =>
-                    bindingT != null &&
-                    codice != 0 &&
-                    !string.IsNullOrEmpty(posizione)
-            );
+            x => x.CanEntraLabel,
+            (canEntraLabel) => string.IsNullOrEmpty(canEntraLabel)
+        );
 
 
         public EntraSocioViewModel(IStrisciataRepository strisciataRepository, IEntraSocioRepository Repository) : base()
@@ -85,6 +79,33 @@ namespace Cassa.ViewModels
                         })
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
                     .ToProperty(this, x => x.InfoLabel, initialValue: "");
+
+            _canEntraLabel = this.WhenAnyValue(
+                    x => x.IsSocioFound,
+                    x => x.IsSocioInside, // 1. Monitoriamo anche questa nuova proprietà
+                    x => x.BindingT,
+                    (found, inside, bindingT) =>
+                    {
+                        // Caso 1: Socio non trovato
+                        if (!found)
+                            return "Warning Identificazione";
+
+                        // Caso 2: Nuovo controllo - Il socio è già dentro
+                        if (inside)
+                            return "Socio già all'interno";
+
+                        if (bindingT == null)
+                            return "bINDINGt nULL";
+
+                        // Caso 3: Socio trovato MA l'oggetto o la posizione sono vuoti
+                        //if (bindingT == null || string.IsNullOrWhiteSpace(bindingT.Posizione))
+                        //    return "Posizione Mancante";
+
+                        // Caso 4: Tutto regolare
+                        return "";
+                    })
+                .ObserveOn(RxSchedulers.MainThreadScheduler)
+                .ToProperty(this, x => x.CanEntraLabel, initialValue: "");
 
 
             TesseraCommand = ReactiveCommand.CreateFromTask(async vm => await OnTesseraEnter());
@@ -140,55 +161,58 @@ namespace Cassa.ViewModels
 
         private async Task OnTesseraEnter()
         {
+            // Stato iniziale: reset della ricerca prima di iniziare
             IsRicercaEffettuata = false;
+            IsSocioFound = false;
 
-            // 1. Validazione preliminare per evitare chiamate a vuoto
             if (string.IsNullOrWhiteSpace(BindingT.NumeroTessera)) return;
 
             try
             {
-                // 2. Chiamata asincrona diretta
                 var personData = await Q.GetPersonByTessera(BindingT.NumeroTessera, Token);
                 var data = new EntraSocioMap(personData);
 
                 if (data.NumeroSocio is null)
                 {
-                    IsSocioFound = false; // questo fa apparire la label "Socio non Trovato"
+                    // NOTA: Rimane false per attivare la InfoLabel "Socio non Trovato" 
+                    // grazie alla logica (effettuata && !found) se decidi di metterla a true qui.
+                    // Per coerenza con la tua InfoLabel, la ricerca DEVE essere considerata effettuata.
+                    IsSocioFound = false;
+                    IsRicercaEffettuata = true;
 
-                    // 3. Reset dei campi senza distruggere l'istanza di binding (se possibile)
-                    // Altrimenti, se devi ricreare l'oggetto, mantieni il valore prima del reset
                     string tesseraCorrente = BindingT.NumeroTessera;
 
+                    // Al fine di evitare che _canEntraLabel mostri "Posizione Mancante" 
+                    // sovrascrivendo "Socio non Trovato", azzeriamo la posizione o gestiamo l'oggetto.
                     BindingT = new EntraSocioMap
                     {
-                        NumeroTessera = tesseraCorrente
-                    }; // Sostituisci con il tuo tipo originale se diverso
+                        NumeroTessera = tesseraCorrente,
+                        Posizione = null // Verrà intercettato da !IsSocioFound dando la precedenza a "Warning Identificazione"
+                    };
                     Eta = string.Empty;
                 }
                 else
                 {
                     IsSocioFound = true;
                     IsRicercaEffettuata = true;
+                    IsSocioInside = await Q.EsisteSocioInside(data.ToDto(), Token);
                     BindingT = data;
                     Eta = BindingT.Natoil.DateIntToEta().ToString();
                 }
             }
             catch (Exception ex)
             {
-                // 4. Gestisci l'errore (es. log o mostra un avviso all'utente)
                 IsSocioFound = false;
+                IsRicercaEffettuata = false; // La ricerca è fallita tecnicamente, non è "Socio non trovato"
                 Debug.WriteLine($"Errore durante la ricerca del socio: {ex.Message}");
             }
             finally
             {
-                // 5. Forza l'aggiornamento della UI prima del focus (fondamentale in Blazor/MAUI)
-               
-
-                // 6. Rimuovi il Delay fisso e sposta il focus alla fine del ciclo di rendering
+                // Sposta il focus alla fine del ciclo di rendering
                 await SetFocus(TesseraFocus);
-                IsRicercaEffettuata = true;
             }
         }
+
 
         private async Task OnF5Pressed()
         {
@@ -225,13 +249,13 @@ namespace Cassa.ViewModels
         {
             _isClosing = true; // Imposta il flag per indicare che stiamo chiudendo la pagina
 
-            if (BindingT.NumeroSocio == "0")
-            {
-                IsSocioFound = false;
-                _isClosing = false; // Reset del flag perché non stiamo chiudendo la pagina
-                await SetFocus(TesseraFocus);
-                return;
-            }
+            //if (BindingT.NumeroSocio == "0")
+            //{
+            //    IsSocioFound = false;
+            //    _isClosing = false; // Reset del flag perché non stiamo chiudendo la pagina
+            //    await SetFocus(TesseraFocus);
+            //    return;
+            //}
             
 
             try
@@ -304,6 +328,13 @@ namespace Cassa.ViewModels
             set => this.RaiseAndSetIfChanged(ref _isRicercaEffettuata, value);
         }
 
+        private bool _isSocioInside;
+        public bool IsSocioInside
+        {
+            get => _isSocioInside;
+            set => this.RaiseAndSetIfChanged(ref _isSocioInside, value);
+        }
+
 
         // 2. Proprietà calcolata (OAPH) per la Label
         private readonly ObservableAsPropertyHelper<string> _tesseraLabel;
@@ -311,6 +342,9 @@ namespace Cassa.ViewModels
 
         private readonly ObservableAsPropertyHelper<string> _infoLabel;
         public string InfoLabel => _infoLabel.Value;
+
+        private readonly ObservableAsPropertyHelper<string> _canEntraLabel;
+        public string CanEntraLabel => _canEntraLabel.Value;
 
         private List<EntraIngressiMap> _ingressiList = [];
         public List<EntraIngressiMap> IngressiList

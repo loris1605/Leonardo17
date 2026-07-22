@@ -20,6 +20,11 @@ public partial class EntraSocioView : BaseUserControl<EntraSocioViewModel>
                 vm => vm.TesseraFocus,
                 view => view.AnagraficaInput.TesseraFocus)
             .DisposeWith(d);
+
+            this.OneWayBind(ViewModel,
+                    vm => vm.CanEntraLabel,
+                    v => v.CanEntraLabel.Text)
+            .DisposeWith(d);
         });
     }
 }

@@ -110,7 +110,9 @@
                                      x:Name="PosizioneBox"
                                      Grid.Column="1"
                                      Margin="5,2,5,2"
-                                     VerticalAlignment="Center"/>
+                                     VerticalAlignment="Center"
+                                     Text="{Binding BindingT.Posizione, 
+                                            UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
 
                  <TextBlock x:Name="InfoLabel"
                             Grid.Row="7"

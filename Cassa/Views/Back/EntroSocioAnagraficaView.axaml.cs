@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Input;
 using Cassa.ViewModels;
 using ReactiveUI;
@@ -72,7 +73,7 @@ public partial class EntraSocioAnagraficaView : BaseUserControl<EntraSocioViewMo
             // 1. Definisci il flusso sorgente centralizzato e rendilo condiviso (.Publish().RefCount())
             var isPosizioneEnabled = this.WhenAnyValue(
                     x => x.ViewModel.BindingT.NumeroSocio,
-                    codice => string.IsNullOrWhiteSpace(codice)) // Esprime la tua condizione (0 = disabilitato, -1 o altri = abilitato)
+                    codice => !string.IsNullOrWhiteSpace(codice)) // Esprime la tua condizione (0 = disabilitato, -1 o altri = abilitato)
                 .ObserveOn(RxSchedulers.MainThreadScheduler)
                 .Publish()
                 .RefCount();
@@ -168,10 +169,9 @@ public partial class EntraSocioAnagraficaView : BaseUserControl<EntraSocioViewMo
                     v => v.TesseraBox.Text)
                 .DisposeWith(d);
 
-            this.Bind(ViewModel,
-                    vm => vm.BindingT.Posizione,
-                    v => v.PosizioneBox.Text)
-                .DisposeWith(d);
+            
+
+
 
             this.OneWayBind(ViewModel,
                 vm => vm.IsSocioFound,

@@ -12,6 +12,7 @@ namespace Cassa.Core.Repository
         Task<EntraSocioDTO> GetPersonByTessera(string numeroTessera, CancellationToken ctk = default);
         Task<List<EntraIngressiDTO>> GetIngressiByPostazione(int postazioneId, CancellationToken ctk = default);
         Task<int> AddNewScheda(EntraSocioDTO dto, CancellationToken ctk = default);
+        Task<bool> EsisteSocioInside(EntraSocioDTO dto, CancellationToken ctk = default);
     }
 
     public class EntraSocioRepository(IEntraSocioDbContext ctx) : BaseRepository<EntraSocioDbContext, Scheda>, IEntraSocioRepository
@@ -95,6 +96,11 @@ namespace Cassa.Core.Repository
                 Debug.WriteLine($"Errore Add: {ex.InnerException?.Message ?? ex.Message}");
                 return -1;
             }
+        }
+
+        public async Task<bool> EsisteSocioInside(EntraSocioDTO dto, CancellationToken ctk = default)
+        {
+            return await _ctx.Schede.Where(x => x.PersonId == dto.CodicePerson).AnyAsync(ctk);
         }
     }
 }

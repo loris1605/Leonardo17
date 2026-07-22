@@ -72,6 +72,34 @@
                       Command="{Binding EntraCommand}"
                       Content="ENTRA SOCIO"/>
 
+            <TextBlock x:Name="CanEntraLabel"
+                            Grid.Row="9"
+                            Grid.Column="2"
+                            Grid.ColumnSpan="6"
+                            FontSize="20"
+                            Foreground="Red"
+                            HorizontalAlignment="Center"
+                            Margin="20,10">
+
+                     <TextBlock.Styles>
+                         <Style Selector="TextBlock">
+                             <Style.Animations>
+                                 <Animation Duration="0:0:1"
+                                            IterationCount="Infinite"
+                                            PlaybackDirection="Alternate">
+                                     <KeyFrame KeyTime="0:0:0">
+                                         <Setter Property="Opacity" Value="1.0"/>
+                                     </KeyFrame>
+                                     <KeyFrame KeyTime="0:0:1">
+                                         <Setter Property="Opacity" Value="0.3"/>
+                                     </KeyFrame>
+                                 </Animation>
+                             </Style.Animations>
+                         </Style>
+                     </TextBlock.Styles>
+
+                </TextBlock>
+
 
             <!--<vw:EntraSocioIngressoView x:Name="EntraIngresso"
                                        Height="{Binding #ContenitoreAnagrafica.Bounds.Height}"

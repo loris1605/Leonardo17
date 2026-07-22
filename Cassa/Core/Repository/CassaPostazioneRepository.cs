@@ -19,5 +19,6 @@ namespace Cassa.Core.Repository
             return result.Nome;
         }
     }
+   
 
 }
