@@ -15,6 +15,7 @@ namespace Cassa.ViewModels.Map
             this.NumeroTessera = dto.NumeroTessera;
             this.CodicePerson = dto.CodicePerson;
             this.Cognome = dto.Cognome;
+            this.Nome = dto.Nome;
             this.Natoil = dto.Natoil;
             this.CheckinTime = dto.CheckinTime;
             this.CheckoutTime = dto.CheckoutTime;
@@ -38,6 +39,7 @@ namespace Cassa.ViewModels.Map
                 NumeroTessera = this.NumeroTessera,
                 CodicePerson = this.CodicePerson,
                 Cognome = this.Cognome,
+                Nome = this.Nome,
                 Natoil = this.Natoil,
                 CheckinTime = this.CheckinTime,
                 CheckoutTime = this.CheckoutTime,

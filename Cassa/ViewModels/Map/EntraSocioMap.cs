@@ -53,7 +53,7 @@ namespace Cassa.ViewModels.Map
             set => this.RaiseAndSetIfChanged(ref _numeroTessera, value);
         }
 
-        private string _cognome;
+        private string _cognome = String.Empty;
         public string Cognome
         {
             get => _cognome;

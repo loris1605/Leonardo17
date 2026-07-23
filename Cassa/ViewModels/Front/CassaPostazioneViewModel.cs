@@ -47,7 +47,7 @@ namespace Cassa.ViewModels
            EntraSocioCommand = ReactiveCommand.CreateFromTask(GoToEntraSocio);
            EsceSocioCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask); // Placeholder for actual logic
            ListaSociCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask); // Placeholder for actual logic
-           PosizioneEnterCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask); // Placeholder for actual logic
+           PosizioneEnterCommand = ReactiveCommand.CreateFromTask(ApriScheda); // Placeholder for actual logic
 
            EntraSocioCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Entra Socio: {ex.Message}"));
            EsceSocioCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Postazioni: {ex.Message}"));
@@ -91,6 +91,22 @@ namespace Cassa.ViewModels
             // Logic for navigating to the "Entra Socio" view
             _postazioneToEntraSocio.OnNext((_postazioneId, BindingT.Posizione));
             return Task.CompletedTask;
+        }
+
+        private async Task ApriScheda()
+        {
+            var schedaData = await Q.GetSchedaByPosizione(BindingT.Posizione, Token);
+            if (schedaData == null)
+            {
+                // Handle the case where no "Scheda" is found for the given position
+                Debug.WriteLine($"No Scheda found for position: {BindingT.Posizione}");
+                BindingT = new CassaSchedaMap();
+                await SetFocus(PosizioneFocus);
+                return ;
+            }
+            BindingT = new CassaSchedaMap(schedaData);
+            await SetFocus(PosizioneFocus);
+            // Logic for opening the "Scheda" view
         }
     }
 

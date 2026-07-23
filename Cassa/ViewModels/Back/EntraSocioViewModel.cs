@@ -290,6 +290,7 @@ namespace Cassa.ViewModels
                     return;
                 }
 
+                _posizione = BindingT.Posizione; // Salva la posizione corrente prima di chiudere
                 _entraSocioToPostazione.OnNext((_postazioneId, _posizione));
                 _entraSocioToPostazione.OnCompleted();
             }
