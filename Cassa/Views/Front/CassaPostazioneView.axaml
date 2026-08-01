@@ -1,0 +1,110 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ctrls="using:Cassa.Views"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:lc="using:Views"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Cassa.ViewModels"
+             xmlns:ui="using:ControlStyles"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             KeyboardNavigation.TabNavigation="Cycle"
+             Background="LightSteelBlue"
+             x:DataType="vm:CassaPostazioneViewModel"
+             x:Class="Cassa.Views.CassaPostazioneView">
+
+    <Grid x:Name="MainGrid" 
+          HorizontalAlignment="Stretch" 
+          VerticalAlignment="Stretch">
+    
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- TITOLO -->
+            <RowDefinition Height="100"/>
+            <RowDefinition Height="*"/> <!-- GRID CENTRALE -->
+            <RowDefinition Height="Auto"/> <!-- BARRA INFERIORE -->
+        </Grid.RowDefinitions>  
+
+        <lc:TitleView Grid.Row="0"
+                      TitoloPagina="POSTAZIONE CASSA"
+                      x:Name="Title"
+                      ButtonText="Esci"
+                      ToolTipText="TORNA A MENU PRINCIPALE"
+                      ExitCommand="{Binding EscPressedCommand}"/>
+
+        
+        <ctrls:PulsantiPostazioneView
+                Grid.Row="1"
+                x:Name="PulsantiPostazione"
+                Margin="0,10,0,10"/>
+        
+        
+        
+        <Grid x:Name="CentralGrid" 
+              Grid.Row="2">
+        
+            <Grid.RowDefinitions>
+            
+                <RowDefinition Height="1*" />
+                <RowDefinition Height="1*" />
+                <RowDefinition Height="1*" />
+                <RowDefinition Height="1*" />
+                <RowDefinition Height="1*" />
+                <RowDefinition Height="1*" />
+                <RowDefinition Height="1*" />
+            
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+            
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="1*" />
+            
+            </Grid.ColumnDefinitions>
+
+                    
+        
+        </Grid>
+
+        <Grid Grid.Row="3" 
+             ColumnDefinitions="*,*,Auto"
+             Margin="80,20">
+		   
+            <ui:UiInfoBorder Grid.Column="2"
+                             IsVisible="{Binding IsOpen}">
+		        
+                <StackPanel Orientation="Horizontal" 
+                            Margin="20">
+                         
+                    <TextBlock Text="{Binding BindingT.Cognome, StringFormat='{}{0} '}" 
+                       x:Name="CognomeTextBlock"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"
+                       Foreground="Black" 
+                       FontSize="16"/>
+                 
+                    <TextBlock Text="{Binding BindingT.Nome}" 
+                               x:Name="NomeTextBlock"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Center"
+                               Foreground="Black" 
+                               FontSize="16"/>
+
+                 </StackPanel>
+           
+           </ui:UiInfoBorder>
+
+       </Grid>
+      
+    
+    </Grid>
+
+
+</UserControl>

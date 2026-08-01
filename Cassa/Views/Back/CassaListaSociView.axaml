@@ -1,0 +1,114 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ctrls="using:Cassa.Views"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:lc="using:Views"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Cassa.ViewModels"
+             xmlns:ui="using:ControlStyles"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             KeyboardNavigation.TabNavigation="Cycle"
+             Background="LightSteelBlue"
+             x:DataType="vm:CassaListaSociViewModel"
+             x:Class="Cassa.Views.CassaListaSociView">
+
+    <Grid x:Name="MainGrid" 
+          HorizontalAlignment="Stretch" 
+          VerticalAlignment="Stretch">
+          
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- TITOLO -->
+            <RowDefinition Height="20"/> <!-- INFOS -->
+            <RowDefinition Height="*"/> <!-- GRID CENTRALE -->
+            <RowDefinition Height="Auto"/> <!-- BARRA INFERIORE -->
+        </Grid.RowDefinitions>      
+
+        <lc:TitleView Grid.Row="0"
+              TitoloPagina="POSTAZIONE CASSA - LISTA SOCI ALL'INTERNO"
+              x:Name="Title"
+              ButtonText="Torna a Postazione"
+              ToolTipText="TORNA A POSTAZIONE CASSSA"
+              ExitCommand="{Binding EscPressedCommand}"/>
+
+        <DataGrid Grid.Row="2" Margin="50"
+                  ItemsSource="{Binding DataSource}"
+                  x:Name="SociInCassaDataGrid"
+                  SelectedItem="{Binding BindingT}"
+
+                  IsReadOnly="True">
+            
+            <DataGrid.Columns>
+
+                <DataGridTextColumn Header="Cod." 
+                                    x:DataType="vm:Map.CassaSchedaMap"
+                                    Binding="{Binding Id}" 
+                                    IsVisible="False" />
+
+                <DataGridTextColumn Header="Pos." 
+                                    x:DataType="vm:Map.CassaSchedaMap"
+                                    Binding="{Binding Posizione}"/>
+
+                <DataGridTextColumn Header="Cognome" 
+                                    x:DataType="vm:Map.CassaSchedaMap"
+                                    Binding="{Binding Cognome}"/>
+
+                <DataGridTextColumn Header="Nome" 
+                                    x:DataType="vm:Map.CassaSchedaMap"
+                                    Binding="{Binding Nome}"/>
+
+                <DataGridTextColumn Header="Data Nasc." 
+                                    x:DataType="vm:Map.CassaSchedaMap"
+                                    Binding="{Binding NatoilFormattato}"/>
+
+                <DataGridTextColumn Header="Nr.Tessera" 
+                                    x:DataType="vm:Map.CassaSchedaMap"
+                                    Binding="{Binding NumeroTessera}"/>
+
+                <DataGridTextColumn Header="Checkin" 
+                                    x:DataType="vm:Map.CassaSchedaMap"
+                                    Binding="{Binding CheckinTime}"/>
+
+                <DataGridTextColumn Header="Grb 1" 
+                                    x:DataType="vm:Map.CassaSchedaMap"
+                                    Binding="{Binding Grb1}"/>
+
+                <DataGridTextColumn Header="Grb 2" 
+                                    x:DataType="vm:Map.CassaSchedaMap"
+                                    Binding="{Binding Grb2}"/>
+
+                <DataGridTextColumn Header="Grb 3" 
+                                    x:DataType="vm:Map.CassaSchedaMap"
+                                    Binding="{Binding Grb3}"/>
+
+                <DataGridTextColumn Header="Grb 4" 
+                                    x:DataType="vm:Map.CassaSchedaMap"
+                                    Binding="{Binding Grb4}"/>
+
+                <DataGridTextColumn Header="Cons." 
+                                    x:DataType="vm:Map.CassaSchedaMap"
+                                    Binding="{Binding Consumazione}"/>
+
+                <DataGridTemplateColumn Header="Blocco" IsReadOnly="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <!-- Usiamo il Binding con TwoWay per aggiornare subito il ViewModel -->
+                            <CheckBox IsChecked="{Binding Blocco, 
+                                      Mode=OneWay,
+                                      UpdateSourceTrigger=PropertyChanged}" 
+                                      HorizontalAlignment="Center"
+                                      IsEnabled="false"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                
+            </DataGrid.Columns>
+
+        </DataGrid>
+
+          
+    </Grid>
+  
+</UserControl>

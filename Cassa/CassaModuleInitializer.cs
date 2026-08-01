@@ -1,0 +1,90 @@
+﻿using Cassa.Core.Context;
+using Cassa.Core.Repository;
+using Cassa.ViewModels;
+using Cassa.Views;
+using Contracts;
+using ReactiveUI;
+using Splat;
+
+namespace Cassa
+{
+    public static class CassaModuleInitializer
+    {
+        public static void Initialize()
+        {
+
+            // 1. REGISTRAZIONE COMPONENTI DATI (Interni alla DLL)
+            // Registriamo il DbContext specifico del modulo
+            Locator.CurrentMutable.Register(() => new CassaPostazioneDbContext(), typeof(ICassaPostazioneDbContext));
+            Locator.CurrentMutable.Register(() => new EntraSocioDbContext(), typeof(IEntraSocioDbContext));
+            Locator.CurrentMutable.Register(() => new StrisciateDbContext(), typeof(IStrisciateDbContext));
+
+
+            // CORRETTO: Spostiamo il GetService dentro l'ambito della Lambda () => ...
+            // In questo modo, il DbContext verrà cercato solo quando verrà creato il Repository
+            Locator.CurrentMutable.Register(() =>
+            {
+                var context = Locator.Current.GetService<ICassaPostazioneDbContext>();
+                return new CassaPostazioneRepository(context);
+            }, typeof(ICassaPostazioneRepository));
+
+            
+            Locator.CurrentMutable.Register(() =>
+            {
+                var context = Locator.Current.GetService<IEntraSocioDbContext>();
+                return new EntraSocioRepository(context);
+            }, typeof(IEntraSocioRepository));
+
+            Locator.CurrentMutable.Register(() =>
+            {
+                var context = Locator.Current.GetService<IStrisciateDbContext>();
+                return new StrisciataRepository(context);
+            }, typeof(IStrisciataRepository));
+
+            Locator.CurrentMutable.Register(() =>
+            {
+                var context = Locator.Current.GetService<ICassaPostazioneDbContext>();
+                return new CassaListaSociRepository(context);
+            }, typeof(ICassaListaSociRepository));
+
+
+
+            Locator.CurrentMutable.Register(() => new CassaViewModel(), typeof(ICassaViewModel));
+
+            Locator.CurrentMutable.Register(() =>
+            {
+                var repository = Locator.Current.GetService<ICassaPostazioneRepository>();
+                return new CassaPostazioneViewModel(repository);
+            }, typeof(ICassaPostazioneViewModel));
+
+
+            Locator.CurrentMutable.Register(() =>
+            {
+                var repository1 = Locator.Current.GetService<IStrisciataRepository>();
+                var repository2 = Locator.Current.GetService<IEntraSocioRepository>();
+                return new EntraSocioViewModel(repository1, repository2);
+            }, typeof(IEntraSocioViewModel));
+
+            Locator.CurrentMutable.Register(() =>
+            {
+                var repository1 = Locator.Current.GetService<ICassaListaSociRepository>();
+                return new CassaListaSociViewModel(repository1);
+            }, typeof(ICassaListaSociViewModel));
+
+
+
+
+
+            // 2. REGISTRAZIONE COMPONENTI UI (Modello B - Usa e Getta)
+            // CORRETTO: Spostiamo i resolver dentro la Lambda. 
+            // Il ViewModel nascerà solo quando il costruttore verrà invocato dal thread UI di MainWindow
+            Locator.CurrentMutable.Register(() => new CassaView(), typeof(IViewFor<CassaViewModel>));
+
+            Locator.CurrentMutable.Register(() => new CassaPostazioneView(), typeof(IViewFor<CassaPostazioneViewModel>));
+
+            Locator.CurrentMutable.Register(() => new EntraSocioView(), typeof(IViewFor<EntraSocioViewModel>));
+
+            Locator.CurrentMutable.Register(() => new CassaListaSociView(), typeof(IViewFor<CassaListaSociViewModel>));
+        }
+    }
+}

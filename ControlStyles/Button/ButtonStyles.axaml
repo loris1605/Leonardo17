@@ -1,0 +1,146 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:ControlStyles">
+
+    <Styles.Resources>
+        <LinearGradientBrush x:Key="GlassButtonBackground"
+                             StartPoint="0%,0%"
+                             EndPoint="0%,100%">
+            <GradientStop Offset="0" Color="#70FFFFFF"/>
+            <GradientStop Offset="0.45" Color="#302A3342"/>
+            <GradientStop Offset="1" Color="#70101824"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="GlassButtonHoverBackground"
+                             StartPoint="0%,0%"
+                             EndPoint="0%,100%">
+            <GradientStop Offset="0" Color="#90FFFFFF"/>
+            <GradientStop Offset="0.45" Color="#50485868"/>
+            <GradientStop Offset="1" Color="#80202B3B"/>
+        </LinearGradientBrush>
+
+        <!-- Reversed lighting makes the surface appear depressed. -->
+        <LinearGradientBrush x:Key="GlassButtonPressedBackground"
+                             StartPoint="0%,0%"
+                             EndPoint="0%,100%">
+            <GradientStop Offset="0" Color="#60202B3B"/>
+            <GradientStop Offset="0.55" Color="#40364250"/>
+            <GradientStop Offset="1" Color="#70FFFFFF"/>
+        </LinearGradientBrush>
+    </Styles.Resources>
+
+    <Design.PreviewWith>
+        <Border Padding="30" Background="#263442">
+            <local:UiButton Content="Glass button"
+                            ToolTipText="Press me"/>
+        </Border>
+    </Design.PreviewWith>
+
+    <Style Selector="local|UiButton.UiButtonStyle">
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Cursor" Value="Hand"/>
+
+        <Setter Property="MinHeight" Value="44"/>
+        <Setter Property="Padding" Value="20,10"/>
+
+        <Setter Property="Background"
+                Value="{DynamicResource GlassButtonBackground}"/>
+        <Setter Property="BorderBrush" Value="#A0FFFFFF"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="12"/>
+
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
+
+        <Setter Property="ToolTip.Tip"
+                Value="{Binding ToolTipText,
+                                RelativeSource={RelativeSource Self}}"/>
+
+        <Setter Property="Transitions">
+            <Transitions>
+                <TransformOperationsTransition
+                    Property="RenderTransform"
+                    Duration="0:0:0.08"/>
+            </Transitions>
+        </Setter>
+
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border x:Name="PART_GlassBorder"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        BoxShadow="0 6 12 0 #80000000">
+
+                    <Grid ClipToBounds="True">
+                        <!-- Bright reflection along the top edge. -->
+                        <Border Height="1"
+                                Margin="8,1,8,0"
+                                VerticalAlignment="Top"
+                                CornerRadius="12"
+                                Background="#C0FFFFFF"
+                                IsHitTestVisible="False"/>
+
+                        <!-- Dark lower edge gives the button thickness. -->
+                        <Border Height="2"
+                                VerticalAlignment="Bottom"
+                                CornerRadius="0,0,12,12"
+                                Background="#50000000"
+                                IsHitTestVisible="False"/>
+
+                        <ContentPresenter
+                            x:Name="PART_ContentPresenter"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Padding="{TemplateBinding Padding}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <!-- The button rises slightly when hovered. -->
+    <Style Selector="local|UiButton.UiButtonStyle:pointerover">
+        <Setter Property="Background"
+                Value="{DynamicResource GlassButtonHoverBackground}"/>
+        <Setter Property="BorderBrush" Value="#E0FFFFFF"/>
+        <Setter Property="RenderTransform"
+                Value="translate(0px, -1px)"/>
+    </Style>
+
+    <!-- Downward movement, compression, and reversed light simulate pressing. -->
+    <Style Selector="local|UiButton.UiButtonStyle:pressed">
+        <Setter Property="Background"
+                Value="{DynamicResource GlassButtonPressedBackground}"/>
+        <Setter Property="BorderBrush" Value="#80FFFFFF"/>
+        <Setter Property="RenderTransform"
+                Value="translate(0px, 3px) scale(0.98)"/>
+    </Style>
+
+    <!-- The shadow becomes smaller when the button is pressed. -->
+    <Style Selector="local|UiButton.UiButtonStyle:pressed
+                     /template/ Border#PART_GlassBorder">
+        <Setter Property="BoxShadow"
+                Value="0 1 3 0 #70000000"/>
+    </Style>
+
+    <!-- Keyboard focus indicator. -->
+    <Style Selector="local|UiButton.UiButtonStyle:focus-visible
+                     /template/ Border#PART_GlassBorder">
+        <Setter Property="BoxShadow"
+                Value="0 0 0 2 #B0FFFFFF, 0 6 12 0 #80000000"/>
+    </Style>
+
+    <Style Selector="local|UiButton.UiButtonStyle:disabled">
+        <Setter Property="Opacity" Value="0.45"/>
+        <Setter Property="Cursor" Value="Arrow"/>
+        <Setter Property="RenderTransform" Value="none"/>
+    </Style>
+
+</Styles>
