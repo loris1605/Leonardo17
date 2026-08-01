@@ -29,9 +29,8 @@ namespace Login
             // Il ViewModel nascerà solo quando il costruttore verrà invocato dal thread UI di MainWindow
             Locator.CurrentMutable.Register(() =>
             {
-                var screen = Locator.Current.GetService<IScreen>();
                 var repository = Locator.Current.GetService<ILoginRepository>();
-                return new LoginViewModel(screen, repository);
+                return new LoginViewModel(repository);
             }, typeof(ILoginViewModel));
 
             // Registriamo la View associata all'interfaccia e alla classe concreta per il Router

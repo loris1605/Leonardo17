@@ -1,6 +1,7 @@
 ﻿using Contracts;
 using Login.Core.Repository;
 using Login.ViewModels.Map;
+using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using System.Diagnostics;
 using System.Reactive;
@@ -11,14 +12,13 @@ using ViewModels;
 namespace Login.ViewModels
 {
 
-    public partial class LoginViewModel(IScreen host, ILoginRepository Repository) : ViewModelBase(host), ILoginViewModel
+    public partial class LoginViewModel(ILoginRepository Repository) : ViewModelBase(), ILoginViewModel
     {
         // ---------------------------------------------------------------------
         // 1. Dipendenze e Campi Privati
         // ---------------------------------------------------------------------
         private ILoginRepository Q = Repository ?? throw new ArgumentNullException(nameof(Repository));
-        private IScreen _host = host;
-
+        
 
         // ---------------------------------------------------------------------
         // 3. Condizioni di Esecuzione (Override)
@@ -38,7 +38,6 @@ namespace Login.ViewModels
         {
             // Pulizia esplicita per agevolare il Garbage Collector forzato della Base
             Q = null;
-            _host = null;
             DataSource = null;
             BindingT = null;
             PasswordText = null;

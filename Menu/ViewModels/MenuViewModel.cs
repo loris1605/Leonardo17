@@ -20,11 +20,9 @@ namespace Menu.ViewModels
         // 1. Dipendenze e Campi Privati
         // ---------------------------------------------------------------------
         private IMenuRepository Q;
-        private IScreen _host;
-
+        
         // Implementazione dell'interfaccia IRoutableViewModel richiesta da ReactiveUI
-        public new IScreen HostScreen => _host;
-
+        
         // Gestore per la pulizia dei flussi OAPH ed evitare Memory Leak al GC
         private readonly CompositeDisposable _menuDisposables = [];
 
@@ -66,11 +64,10 @@ namespace Menu.ViewModels
         // ---------------------------------------------------------------------
         // Constructor
         // ---------------------------------------------------------------------
-        public MenuViewModel(IScreen host, IMenuRepository Repository) : base(null)
+        public MenuViewModel(IMenuRepository Repository) : base(null)
         {
             Q = Repository ?? throw new ArgumentNullException(nameof(Repository));
-            _host = host;
-
+            
             // 1. Collegamento e aggiornamento delle proprietà OAPH definite nel file parziale
             var chiudiGiornataObs = this.WhenAnyValue(x => x.ApriGiornataEnabled)
                 .Select(x => !x)
@@ -141,8 +138,7 @@ namespace Menu.ViewModels
         {
             CassaPostazioniDataSource?.Clear();
             Q = null;
-            _host = null;
-
+            _menuDisposables.Dispose();
             base.OnFinalDestruction();
         }
 

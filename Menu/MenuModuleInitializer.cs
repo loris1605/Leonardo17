@@ -24,9 +24,8 @@ namespace Menu
             // Il ViewModel nascerà solo quando il costruttore verrà invocato dal thread UI di MainWindow
             Locator.CurrentMutable.Register(() =>
             {
-                var screen = Locator.Current.GetService<IScreen>();
                 var repository = Locator.Current.GetService<IMenuRepository>();
-                return new MenuViewModel(screen, repository);
+                return new MenuViewModel(repository);
             }, typeof(IMenuViewModel));
 
             // Registriamo la View associata all'interfaccia e alla classe concreta per il Router
