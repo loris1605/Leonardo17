@@ -30,7 +30,7 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions> -->  
+        </Grid.ColumnDefinitions>-->
 
         <lc:TitleView x:Name="Title"
                       TitoloPagina="MENU PRINCIPALE"
@@ -56,10 +56,10 @@
 
                         <ui:UiMenuItem x:Name="SociItem"
                                        Header="  SOCI  "
-                                       Command="{Binding #Root.((vm:MenuViewModel)DataContext).SociCommand}"
+                                       Command="{Binding SociCommand}"
                                        MaxHeight="50"/>
 
-                        <!--<ui:UiMenuItem x:Name="ConfigurazioneItem"
+                        <ui:UiMenuItem x:Name="ConfigurazioneItem"
                                        Header="  CONFIGURAZIONE  " 
                                        Command="{Binding ConfigurazioneCommand}"
                                        MaxHeight="50"/>
@@ -100,18 +100,6 @@
                        </MenuItem.Styles>
                        
                     </MenuItem>
-
-
-
-                        <!--<MenuItem.ItemTemplate>
-                            <DataTemplate>
-                                <MenuItem Header="{Binding NomePostazione}"
-                                          Command="{Binding #Root.((vm:MenuViewModel)DataContext).CassaCommand}"
-                                          CommandParameter="{Binding NomePostazione}" />
-
-                            </DataTemplate>
-                        </MenuItem.ItemTemplate>-->
-
                 
                 
                 </ui:UiMenuItem>
@@ -219,3 +207,5 @@
 
     </Grid>
 </UserControl>
+
+
