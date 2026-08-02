@@ -15,12 +15,9 @@ namespace Login
             // 1. REGISTRAZIONE COMPONENTI DATI (Interni alla DLL)
             Locator.CurrentMutable.Register(() => new LoginDbContext(), typeof(ILoginDbContext));
 
-            // Registrazione del repository (lazy)
-            Locator.CurrentMutable.Register(() =>
-            {
-                return new LoginRepository(() => new LoginDbContext());
-            }, typeof(ILoginRepository));
-
+            // Registrazione del repository (lazy) - usa il costruttore esistente senza parametri
+            Locator.CurrentMutable.Register(() => new LoginRepository(), typeof(ILoginRepository));
+            
             // 2. REGISTRAZIONE COMPONENTI UI (Modello B - Usa e Getta)
             Locator.CurrentMutable.Register(() =>
             {

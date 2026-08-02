@@ -75,7 +75,7 @@ namespace Login.Core.Repository
                     foreach (var settore in postazione.SETTORI)
                     {
                         ct.ThrowIfCancellationRequested();
-                        settore.TARIFFE = await SelectTariffeX(settore.CODICESETTORE, ct).ConfigureAwait(false) ?? new List<TariffaXC>();
+                        settore.TARIFFE = await SelectTariffeX(settore.CODICESETTORE, ct).ConfigureAwait(false) ?? [];
                     }
                 }
             }
