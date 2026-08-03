@@ -16,12 +16,11 @@ namespace Menu
             // Registriamo il DbContext specifico del modulo
             Locator.CurrentMutable.Register(() => new MenuDbContext(), typeof(IMenuDbContext));
 
+            // Registrazione repository con factory, coerente con gli altri moduli (lazy)
             Locator.CurrentMutable.Register(() => new MenuRepository(), typeof(IMenuRepository));
-            
+
 
             // 2. REGISTRAZIONE COMPONENTI UI (Modello B - Usa e Getta)
-            // CORRETTO: Spostiamo i resolver dentro la Lambda. 
-            // Il ViewModel nascerà solo quando il costruttore verrà invocato dal thread UI di MainWindow
             Locator.CurrentMutable.Register(() =>
             {
                 var repository = Locator.Current.GetService<IMenuRepository>();

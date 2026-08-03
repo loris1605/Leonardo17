@@ -11,21 +11,21 @@ namespace DTO.Repository
     {
         Task<List<MenuDTO>> CaricaPostazioniCassa(int CodiceOperatore, CancellationToken ctk = default);
         Task<bool> EsisteGiornataAperta(CancellationToken ctk = default);
-        bool OpenGiornata(CancellationToken ctk = default);
-
+        Task<bool> OpenGiornata(CancellationToken ctk = default);
     }
 
-    public class MenuRepository : BaseRepository<MenuDbContext, Permesso>, IMenuRepository
+    public class MenuRepository : RepositoryBase<MenuDbContext, Permesso>, IMenuRepository
     {
+        public MenuRepository() : base() { }
+        public MenuRepository(Func<MenuDbContext> factory) : base(factory) { }
+
         public async Task<bool> EsisteGiornataAperta(CancellationToken ctk = default)
         {
             ctk.ThrowIfCancellationRequested();
-            using MenuDbContext _ctx = new();
-
             try
             {
-                var result = await _ctx.Giornate.AnyAsync(p => p.Aperta, ctk);
-                return result;
+                return await UsingContextAsync(ctx =>
+                    ctx.Giornate.AsNoTracking().AnyAsync(p => p.Aperta, ctk));
             }
             catch (OperationCanceledException)
             {
@@ -34,64 +34,70 @@ namespace DTO.Repository
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($">>> [ERROR] Add: {ex.InnerException?.Message ?? ex.Message}");
+                Debug.WriteLine($">>> [ERROR] EsisteGiornataAperta: {ex.InnerException?.Message ?? ex.Message}");
                 return false;
             }
-            
         }
 
         public async Task<List<MenuDTO>> CaricaPostazioniCassa(int CodiceOperatore, CancellationToken ctk = default)
         {
             ctk.ThrowIfCancellationRequested();
 
-            using MenuDbContext _ctx = new();
-            IQueryable<Permesso> query =
-                _ctx.Permessi
-                    .AsNoTracking()
-                    .Where(p => p.OperatoreId == CodiceOperatore)
-                    .Where(p => p.Postazione!.TipoPostazioneId == 2)
-                    .Where(p => p.PostazioneId > 0);
-
             try
             {
-                var result = await query.Select(MenuDTO.ToPermessoDTO).ToListAsync(ctk);
-                return result;
+                return await UsingContextAsync(async ctx =>
+                {
+                    IQueryable<Permesso> query =
+                        ctx.Permessi
+                            .AsNoTracking()
+                            .Where(p => p.OperatoreId == CodiceOperatore)
+                            .Where(p => p.Postazione != null && p.Postazione.TipoPostazioneId == 2)
+                            .Where(p => p.PostazioneId > 0);
+
+                    return await query.Select(MenuDTO.ToPermessoDTO).ToListAsync(ctk).ConfigureAwait(false);
+                }).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
                 Debug.WriteLine(">>> [INFO] Operazione annullata dall'utente.");
-                return new List<MenuDTO>();
+                return [];
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($">>> [ERROR] Add: {ex.InnerException?.Message ?? ex.Message}");
-                return new List<MenuDTO>();
+                Debug.WriteLine($">>> [ERROR] CaricaPostazioniCassa: {ex.InnerException?.Message ?? ex.Message}");
+                return [];
             }
-
         }
 
-        public bool OpenGiornata(CancellationToken ctk = default)
+        public async Task<bool> OpenGiornata(CancellationToken ctk = default)
         {
+            ctk.ThrowIfCancellationRequested();
 
-            using MenuDbContext _ctx = new();
             try
             {
-                var giornata = new Giornata
+                return await UsingContextAsync(async ctx =>
                 {
-                    Aperta = true,
-                    DataInizio = DateTime.Now,
-                    DataFine = DateTime.MaxValue
-                };
+                    var giornata = new Giornata
+                    {
+                        Aperta = true,
+                        DataInizio = DateTime.Now,
+                        DataFine = DateTime.MaxValue
+                    };
 
-                _ctx.Giornate.Add(giornata);
-                _ctx.SaveChanges();
-                return true;
+                    await ctx.Giornate.AddAsync(giornata, ctk).ConfigureAwait(false);
+                    await ctx.SaveChangesAsync(ctk).ConfigureAwait(false);
+                    return true;
+                }).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                Debug.WriteLine(">>> [INFO] Operazione annullata dall'utente.");
+                return false;
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($">>> [ERROR] OpenGiornata: {ex.InnerException?.Message ?? ex.Message}");
                 return false;
-
             }
         }
     }
