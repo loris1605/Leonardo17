@@ -1,6 +1,8 @@
 using Menu.ViewModels;
 using ReactiveUI;
 using System.Reactive.Disposables.Fluent;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using Views;
 
 namespace Menu.Views;
@@ -16,99 +18,64 @@ public partial class MenuView : BaseUserControl<MenuViewModel>
 
         this.WhenActivated(d =>
         {
-            #region TwoWay
+            // Contenitore per le sottoscrizioni legate al ViewModel corrente
+            CompositeDisposable currentVmDisposables = null;
 
+            // Osserviamo il ViewModel: quando cambia, smaltiamo le vecchie sottoscrizioni e ne creiamo di nuove
+            this.WhenAnyValue(x => x.ViewModel)
+                .Where(vm => vm is not null)
+                .Subscribe(vmObj =>
+                {
+                    // Dispose del precedente (se esiste) per evitare accumulo di sottoscrizioni
+                    currentVmDisposables?.Dispose();
 
+                    // Nuovo container per le sottoscrizioni legate al nuovo ViewModel
+                    currentVmDisposables = new CompositeDisposable();
 
-            #endregion
+                    // Sicuro: vmObj non è null qui
+                    var vm = vmObj!;
 
-            #region OneWay
+                    // One-way bindings (usando l'istanza del ViewModel per rimuovere warning nullable)
+                    this.OneWayBind(vm, v => v.AmministratoreVisible, vctrl => vctrl.AmministratoreItem.IsVisible)
+                        .DisposeWith(currentVmDisposables);
+                    this.OneWayBind(vm, v => v.CassaVisible, vctrl => vctrl.CassaItem.IsVisible)
+                        .DisposeWith(currentVmDisposables);
+                    this.OneWayBind(vm, v => v.ChiudiGiornataEnabled, vctrl => vctrl.CassaItem.IsEnabled)
+                        .DisposeWith(currentVmDisposables);
+                    this.OneWayBind(vm, v => v.BarVisible, vctrl => vctrl.BarItem.IsVisible)
+                        .DisposeWith(currentVmDisposables);
+                    this.OneWayBind(vm, v => v.ChiudiGiornataEnabled, vctrl => vctrl.BarItem.IsEnabled)
+                        .DisposeWith(currentVmDisposables);
+                    this.OneWayBind(vm, v => v.PulizieVisible, vctrl => vctrl.PulizieItem.IsVisible)
+                        .DisposeWith(currentVmDisposables);
+                    this.OneWayBind(vm, v => v.ChiudiGiornataEnabled, vctrl => vctrl.PulizieItem.IsEnabled)
+                        .DisposeWith(currentVmDisposables);
+                    this.OneWayBind(vm, v => v.GuardarobaVisible, vctrl => vctrl.GuardarobaItem.IsVisible)
+                        .DisposeWith(currentVmDisposables);
+                    this.OneWayBind(vm, v => v.ChiudiGiornataEnabled, vctrl => vctrl.GuardarobaItem.IsEnabled)
+                        .DisposeWith(currentVmDisposables);
+                    //this.OneWayBind(vm, v => v.ReportVisible, vctrl => vctrl.ReportItem.IsVisible)
+                    //    .DisposeWith(currentVmDisposables);
+                    this.OneWayBind(vm, v => v.ApriGiornataEnabled, vctrl => vctrl.ApriGiornataItem.IsEnabled)
+                        .DisposeWith(currentVmDisposables);
+                    this.OneWayBind(vm, v => v.ChiudiGiornataEnabled, vctrl => vctrl.ChiudiGiornataItem.IsEnabled)
+                        .DisposeWith(currentVmDisposables);
+                    //this.OneWayBind(vm, v => v.ChiudiGiornataEnabled, vctrl => vctrl.ApriTurnoItem.IsEnabled)
+                    //    .DisposeWith(currentVmDisposables);
+                    //this.OneWayBind(vm, v => v.ChiudiGiornataEnabled, vctrl => vctrl.ChiudiTurnoItem.IsEnabled)
+                    //    .DisposeWith(currentVmDisposables);
+                    this.OneWayBind(vm, v => v.IsMenuReady, vctrl => vctrl.MainMenu.IsVisible)
+                        .DisposeWith(currentVmDisposables);
 
-            this.OneWayBind(ViewModel,
-                            vm => vm.AmministratoreVisible,
-                            v => v.AmministratoreItem.IsVisible)
+                    // Dispose del container del VM quando la view viene disattivata
+                    currentVmDisposables.DisposeWith(d);
+                })
                 .DisposeWith(d);
-
-            this.OneWayBind(ViewModel,
-                            vm => vm.CassaVisible,
-                            v => v.CassaItem.IsVisible)
-                .DisposeWith(d);
-
-            this.OneWayBind(ViewModel,
-                            vm => vm.ChiudiGiornataEnabled,
-                            v => v.CassaItem.IsEnabled)
-                .DisposeWith(d);
-
-            this.OneWayBind(ViewModel,
-                            vm => vm.BarVisible,
-                            v => v.BarItem.IsVisible)
-                .DisposeWith(d);
-
-            this.OneWayBind(ViewModel,
-                            vm => vm.ChiudiGiornataEnabled,
-                            v => v.BarItem.IsEnabled)
-                .DisposeWith(d);
-
-            this.OneWayBind(ViewModel,
-                            vm => vm.PulizieVisible,
-                            v => v.PulizieItem.IsVisible)
-                .DisposeWith(d);
-
-            this.OneWayBind(ViewModel,
-                            vm => vm.ChiudiGiornataEnabled,
-                            v => v.PulizieItem.IsEnabled)
-                .DisposeWith(d);
-
-            this.OneWayBind(ViewModel,
-                            vm => vm.GuardarobaVisible,
-                            v => v.GuardarobaItem.IsVisible)
-                .DisposeWith(d);
-
-            this.OneWayBind(ViewModel,
-                            vm => vm.ChiudiGiornataEnabled,
-                            v => v.GuardarobaItem.IsEnabled)
-                .DisposeWith(d);
-
-            this.OneWayBind(ViewModel,
-                            vm => vm.ReportVisible,
-                            v => v.ReportItem.IsVisible)
-                .DisposeWith(d);
-
-            this.OneWayBind(ViewModel,
-                            vm => vm.ApriGiornataEnabled,
-                            v => v.ApriGiornataItem.IsEnabled)
-                .DisposeWith(d);
-
-            this.OneWayBind(ViewModel,
-                            vm => vm.ChiudiGiornataEnabled,
-                            v => v.ChiudiGiornataItem.IsEnabled)
-                .DisposeWith(d);
-
-            this.OneWayBind(ViewModel,
-                            vm => vm.ChiudiGiornataEnabled,
-                            v => v.ApriTurnoItem.IsEnabled)
-                .DisposeWith(d);
-
-            this.OneWayBind(ViewModel,
-                            vm => vm.ChiudiGiornataEnabled,
-                            v => v.ChiudiTurnoItem.IsEnabled)
-                .DisposeWith(d);
-
-            this.OneWayBind(ViewModel,
-                            vm => vm.IsMenuReady,
-                            v => v.MainMenu.IsVisible)
-                .DisposeWith(d);
-
-            #endregion
-
-            // 4. BINDING COMANDI (Se non fatti in XAML)
-            //this.Bind(ViewModel, vm => vm.LogoutCommand, v => v.Title.ExitCommand).DisposeWith(d);
-
-            
-            
 
         });
+
     }
 
-
 }
+
+            // eventuali binding della View non legati al ViewModel rimangono qui

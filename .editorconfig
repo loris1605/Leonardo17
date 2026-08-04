@@ -9,7 +9,7 @@ dotnet_style_null_propagation = true:suggestion
 dotnet_style_prefer_is_null_check_over_reference_equality_method = true:suggestion
 dotnet_style_prefer_auto_properties = true:silent
 dotnet_style_object_initializer = true:suggestion
-dotnet_style_collection_initializer = true:suggestion
+dotnet_style_collection_initializer = true:none
 dotnet_style_prefer_simplified_boolean_expressions = true:suggestion
 dotnet_style_prefer_conditional_expression_over_assignment = true:silent
 dotnet_style_prefer_conditional_expression_over_return = true:silent
@@ -25,6 +25,9 @@ dotnet_style_prefer_collection_expression = when_types_loosely_match:suggestion
 dotnet_style_namespace_match_folder = true:suggestion
 dotnet_diagnostic.CA1822.severity = none
 dotnet_diagnostic.CA1510.severity = none
+
+# IDE0028: Semplifica l'inizializzazione della raccolta
+dotnet_diagnostic.IDE0028.severity = none
 
 [*.cs]
 #### Stili di denominazione ####

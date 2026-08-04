@@ -22,14 +22,23 @@ public partial class LoginView : BaseUserControl<LoginViewModel>
 
         this.WhenActivated(d =>
         {
+            // Conserviamo il CompositeDisposable corrente per il ViewModel attualmente agganciato
+            CompositeDisposable? currentVmDisposables = null;
+
             // BLINDARE L'ATTIVAZIONE: Eseguiamo i binding e i comandi solo quando
             // il ViewModel è realmente presente e agganciato alla View
             this.WhenAnyValue(x => x.ViewModel)
-                .Where(vm => vm != null)
-                .Subscribe(vm =>
+                .Where(vm => vm is not null)
+                .Subscribe(vmObj =>
                 {
-                    // Crea un CompositeDisposable dedicato al ciclo di vita del singolo ViewModel agganciato
-                    var vmDisposables = new CompositeDisposable();
+                    // Dispose del precedente (se esiste) per evitare accumulo di sottoscrizioni
+                    currentVmDisposables?.Dispose();
+
+                    // Nuovo container per le sottoscrizioni legate al nuovo ViewModel
+                    currentVmDisposables = new CompositeDisposable();
+
+                    // sicuro: vmObj non è null qui
+                    var vm = vmObj!;
 
                     // 1. Gestione Focus Interaction
                     vm.PasswordFocus
@@ -42,39 +51,61 @@ public partial class LoginView : BaseUserControl<LoginViewModel>
                             });
                             interaction.SetOutput(Unit.Default);
                         })
-                        .DisposeWith(vmDisposables);
+                        .DisposeWith(currentVmDisposables);
 
                     // 2. Gestione Tasto ESCAPE
                     Observable.FromEventPattern<KeyEventArgs>(this, nameof(this.KeyDown))
                         .Where(e => e.EventArgs.Key == Key.Escape)
                         .Select(_ => Unit.Default)
                         .InvokeCommand(vm.EscPressedCommand)
-                        .DisposeWith(vmDisposables);
+                        .DisposeWith(currentVmDisposables);
 
                     // 3. Gestione Tasto ENTER sulla PasswordBox (Bypass del blocco nativo)
-                    Observable.Create<EventPattern<KeyEventArgs>>(observer =>
+                    var target = PasswordBox;
+                    var enterSequence = Observable.Create<EventPattern<KeyEventArgs>>(observer =>
                     {
-                        void handler(object s, KeyEventArgs e) => observer.OnNext(new EventPattern<KeyEventArgs>(s, e));
+                        if (target is null)
+                        {
+                            // Se il controllo non è presente, non sottoscriviamo nulla
+                            return Disposable.Empty;
+                        }
 
-                        // CORRETTO: Usiamo RoutingStrategies.Tunneling (con la -ing finale)
-                        PasswordBox.AddHandler(InputElement.KeyDownEvent, handler, RoutingStrategies.Tunnel, true);
+#pragma warning disable IDE0039 // Usa la funzione locale
+                        EventHandler<KeyEventArgs> handler = (s, e) => observer.OnNext(new EventPattern<KeyEventArgs>(s, e));
+#pragma warning restore IDE0039 // Usa la funzione locale
 
-                        return Disposable.Create(() => PasswordBox.RemoveHandler(InputElement.KeyDownEvent, handler));
-                    })
-                    .Where(e => e.EventArgs.Key == Key.Enter)
-                    .Select(_ => Unit.Default)
-                    .InvokeCommand(vm.SaveCommand) // Ora sicuro perché 'vm' non è nullo
-                    .DisposeWith(vmDisposables);
+                        // Aggiungiamo l'handler in modo esplicito
+                        target.AddHandler(InputElement.KeyDownEvent, handler, RoutingStrategies.Tunnel, true);
+
+                        return Disposable.Create(() =>
+                        {
+                            try
+                            {
+                                target.RemoveHandler(InputElement.KeyDownEvent, handler);
+                            }
+                            catch
+                            {
+                                // ignora errori di rimozione (control potrebbe essere già distrutto)
+                            }
+                        });
+                    });
+
+                    enterSequence
+                        .Where(e => e.EventArgs.Key == Key.Enter)
+                        .Select(_ => Unit.Default)
+                        .InvokeCommand(vm.SaveCommand) // uso di vm non-null
+                        .DisposeWith(currentVmDisposables);
 
                     // 4. BINDING REATTIVI
                     this.Bind(vm, viewModel => viewModel.PasswordText, view => view.PasswordBox.Text)
-                        .DisposeWith(vmDisposables);
+                        .DisposeWith(currentVmDisposables);
 
                     this.Bind(vm, viewModel => viewModel.BindingT, view => view.OperatoreCombo.SelectedItem)
-                        .DisposeWith(vmDisposables);
+                        .DisposeWith(currentVmDisposables);
 
-                    // Pulisce tutto se il ViewModel cambia o la View viene disattivata
-                    vmDisposables.DisposeWith(d);
+                    // Assicuriamo che le sottoscrizioni legate al VM vengano rimosse
+                    // quando la view viene disattivata (d è il disposable fornito da WhenActivated)
+                    currentVmDisposables.DisposeWith(d);
                 })
                 .DisposeWith(d);
 
@@ -94,6 +125,4 @@ public partial class LoginView : BaseUserControl<LoginViewModel>
                 .DisposeWith(d);
         });
     }
-
-
 }

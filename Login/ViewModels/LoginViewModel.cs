@@ -4,10 +4,11 @@ using Login.ViewModels.Map;
 using ReactiveUI;
 using System.Diagnostics;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ViewModels;
-using ViewModelServices; // necessario per RunOnMainThread
+using ViewModelServices; // RunOnMainThread
 
 namespace Login.ViewModels
 {
@@ -17,8 +18,8 @@ namespace Login.ViewModels
         // ---------------------------------------------------------------------
         // 1. Dipendenze e Campi Privati
         // ---------------------------------------------------------------------
-        private ILoginRepository Q = Repository ?? throw new ArgumentNullException(nameof(Repository));
-
+        private readonly ILoginRepository Q = Repository ?? throw new ArgumentNullException(nameof(Repository));
+        private readonly CompositeDisposable _disposables = new();
 
         // ---------------------------------------------------------------------
         // 3. Condizioni di Esecuzione (Override)
@@ -30,25 +31,61 @@ namespace Login.ViewModels
                 !string.IsNullOrWhiteSpace(pass) &&
                 operatore != null &&
                 pass == operatore.Password)
-            // Evita che ogni singolo carattere digitato intasi il flusso CombineLatest della base
             .DistinctUntilChanged()
             .ObserveOn(RxSchedulers.MainThreadScheduler);
 
         protected override void OnFinalDestruction()
         {
-            // Pulizia esplicita per agevolare il Garbage Collector forzato della Base
+            // Pulizia esplicita per agevolare il Garbage Collector della Base
             try
             {
-                _loginSuccesso?.OnCompleted();
-                _loginSuccesso?.Dispose();
+                try
+                {
+                    // Completiamo il flusso prima di rilasciare le risorse
+                    _loginSuccesso.OnCompleted();
+                }
+                catch (ObjectDisposedException) { /* già rilasciato, silenzioso */ }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($">>> [WARN] Errore OnCompleted _loginSuccesso: {ex.Message}");
+                }
+
+                try
+                {
+                    _loginSuccesso.Dispose();
+                }
+                catch (ObjectDisposedException) { /* già rilasciato, silenzioso */ }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($">>> [WARN] Errore Dispose _loginSuccesso: {ex.Message}");
+                }
+
+                // Dispose delle sottoscrizioni locali (CompositeDisposable è non-nullable)
+                try
+                {
+                    _disposables.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($">>> [WARN] Errore Dispose _disposables: {ex.Message}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($">>> [WARN] Errore durante OnFinalDestruction: {ex.Message}");
+            }
+
+            // Non impostare a null campi non-nullable: svuota o resetta in modo safe
+            try
+            {
+                DataSource?.Clear();
             }
             catch { /* silenzioso */ }
 
-            Q = null;
-            DataSource = null;
             BindingT = null;
             PasswordText = string.Empty;
 
+            // Non impostare Q = null (è non-nullable). Se necessita cleanup, gestiscilo nel DI o in IDisposable dell'implementazione.
             base.OnFinalDestruction();
         }
 
@@ -58,36 +95,41 @@ namespace Login.ViewModels
         protected override async Task OnLoading()
         {
             var dbData = await Q.GetOperatoriAbilitati(Token).ConfigureAwait(false);
-
             if (Token.IsCancellationRequested) return;
 
             if (dbData?.Count > 0)
             {
-                // Mappatura CPU-bound eseguita in background
+                // Mappatura CPU-bound in background
                 var localList = dbData.Select(dto => new LoginMap(dto)).ToList();
 
-                // Aggiorna le proprietà della UI sul Main Thread per evitare cross-thread issues
-                await RxSchedulers.MainThreadScheduler.RunOnMainThread<Unit>(() =>
+                // Assegna le proprietà UI sul Main Thread per evitare cross-thread issues
+                await RxSchedulers.MainThreadScheduler.RunOnMainThread(() =>
                 {
                     DataSource = localList;
-                    // Piccolo delay UI non necessario quando si esegue sul MainThread, ma manteniamo la logica
                     BindingT = localList.Count > 0 ? localList[0] : null;
                     return Unit.Default;
-                });
+                }).ConfigureAwait(false);
 
                 if (Token.IsCancellationRequested) return;
+            }
+            else
+            {
+                await RxSchedulers.MainThreadScheduler.RunOnMainThread(() =>
+                {
+                    DataSource = new List<LoginMap>();
+                    BindingT = null;
+                    return Unit.Default;
+                }).ConfigureAwait(false);
             }
 
             if (!_isClosing && !Token.IsCancellationRequested)
             {
                 await SetFocus(PasswordFocus);
             }
-
         }
 
         protected override async Task OnSaving()
         {
-
             try
             {
                 if (BindingT is null)
@@ -96,14 +138,17 @@ namespace Login.ViewModels
                     return;
                 }
 
-                // Salva le impostazioni dell'operatore selezionato (esegue IO; non blocca UI)
+                // Salva le impostazioni dell'operatore selezionato (IO-bound)
                 await Q.SaveSettings(BindingT.ToDto(), Token).ConfigureAwait(false);
 
-                // Naviga al Menu principale resettando lo stack di navigazione
-                // 2. Al posto di GoToMenu(), suoniamo il campanello!
-                _isClosing = true;
-                _loginSuccesso.OnNext(Unit.Default);
-                _loginSuccesso.OnCompleted(); // Chiude il canale per sempre
+                // Notifica di login riuscito (sul Main Thread)
+                await RxSchedulers.MainThreadScheduler.RunOnMainThread(() =>
+                {
+                    _isClosing = true;
+                    _loginSuccesso.OnNext(Unit.Default);
+                    _loginSuccesso.OnCompleted();
+                    return Unit.Default;
+                }).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
@@ -114,17 +159,13 @@ namespace Login.ViewModels
             {
                 _isClosing = false;
                 Debug.WriteLine($">>> [ERROR] Login fallito durante il salvataggio o la navigazione: {ex.Message}");
-                // Qui potresti aggiungere un'interaction per mostrare un messaggio di errore all'utente
-                throw; // Rilancia l'eccezione se vuoi che venga gestita a un livello superiore
+                throw;
             }
-
         }
-
-
 
         protected override Task OnEsc()
         {
-            OnAppShutDown(); // Riutilizza il metodo centralizzato della base per spegnere l'app
+            OnAppShutDown();
             return Task.CompletedTask;
         }
 
@@ -146,15 +187,14 @@ namespace Login.ViewModels
             set => this.RaiseAndSetIfChanged(ref _passwordText, value);
         }
 
-        // Nota: LoginMap ha costruttore parameterless, inizializziamo per evitare null-reference nelle binding
-        private LoginMap _bindingT = null!;
-        public LoginMap BindingT
+        private LoginMap? _bindingT;
+        public LoginMap? BindingT
         {
             get => _bindingT;
             set => this.RaiseAndSetIfChanged(ref _bindingT, value);
         }
 
-        private List<LoginMap> _dataSource = [];
+        private List<LoginMap> _dataSource = new();
         public List<LoginMap> DataSource
         {
             get => _dataSource;

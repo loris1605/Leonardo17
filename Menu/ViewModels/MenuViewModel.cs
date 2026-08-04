@@ -114,7 +114,7 @@ namespace Menu.ViewModels
         // ---------------------------------------------------------------------
         // 4. Ciclo di Vita (Override dei Metodi Virtuali della Base)
         // ---------------------------------------------------------------------
-        
+
         protected override async Task OnLoading()
         {
             if (GlobalValuesC.MySetting == null) return;
@@ -122,17 +122,20 @@ namespace Menu.ViewModels
             AttivaPermessi();
 
             // Caricamento dei dati asincroni passando correttamente il Token della base
-            var listaDto = await Q.CaricaPostazioniCassa(GlobalValuesC.MySetting.IDOPERATORE, Token);
+            var listaDto = await Q.CaricaPostazioniCassa(GlobalValuesC.MySetting.IDOPERATORE, Token).ConfigureAwait(false);
 
-            CassaPostazioniDataSource = [.. listaDto.Select(dto => new MenuPostazioneMap(dto))];
+            // Mappiamo e creiamo una List concreta (evita null per il binding)
+            var mapped = listaDto?.Select(dto => new MenuPostazioneMap(dto)).ToList() ?? new List<MenuPostazioneMap>();
+            CassaPostazioniDataSource = mapped;
 
-            ApriGiornataEnabled = !(await Q.EsisteGiornataAperta(Token));
+            ApriGiornataEnabled = !(await Q.EsisteGiornataAperta(Token).ConfigureAwait(false));
 
             if (GlobalValuesC.MySetting.POSTAZIONI?.Count == 0)
             {
                 ApriPostazioneEnabled = false;
             }
         }
+
         protected override async Task OnEsc() => await GoTo(_menuToLogin);
         protected override void OnFinalDestruction()
         {
@@ -341,13 +344,15 @@ namespace Menu.ViewModels
             set => this.RaiseAndSetIfChanged(ref _myoperatorename, value);
         }
 
-        private List<MenuPostazioneMap> _mycassapostazionidatasource = null;
+        // Inizializziamo la collezione per evitare che il binding riceva null
+        private List<MenuPostazioneMap> _mycassapostazionidatasource = new();
         public List<MenuPostazioneMap> CassaPostazioniDataSource
         {
             get => _mycassapostazionidatasource;
-            set => this.RaiseAndSetIfChanged(ref _mycassapostazionidatasource, value);
+            set => this.RaiseAndSetIfChanged(ref _mycassapostazionidatasource, value ?? new List<MenuPostazioneMap>());
         }
 
+        // SelectedPostazione può essere nulla (nessuna selezione)
         private MenuPostazioneMap _selectedPostazione;
         public MenuPostazioneMap SelectedPostazione
         {

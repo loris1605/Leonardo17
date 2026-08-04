@@ -20,8 +20,12 @@ namespace Login.Core.Context
         DbSet<TipoSettore> TipiSettore { get; set; }
     }
 
-    public class LoginDbContext : BaseContext, ILoginDbContext
+    public class LoginDbContext : ContextBase<LoginDbContext>, ILoginDbContext
     {
+        public LoginDbContext() { }
+
+        public LoginDbContext(DbContextOptions<LoginDbContext> options) : base(options) { }
+
         public DbSet<Person> People { get; set; } = null!;
         public DbSet<Operatore> Operatori { get; set; } = null!;
         public DbSet<Postazione> Postazioni { get; set; } = null!;

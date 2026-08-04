@@ -10,6 +10,8 @@ namespace Login.ViewModels.Map
 
         public LoginMap(LoginDTO dto)
         {
+            if (dto is null) throw new ArgumentNullException(nameof(dto));
+
             Id = dto.Id;
             NomeOperatore = dto.NomeOperatore;
             Password = dto.Password;
@@ -20,27 +22,27 @@ namespace Login.ViewModels.Map
             return new LoginDTO
             {
                 Id = Id,
-                NomeOperatore = NomeOperatore,
-                Password = Password
+                NomeOperatore = NomeOperatore ?? string.Empty,
+                Password = Password ?? string.Empty
             };
         }
-        
-        private string _nomeoperatore;
+
+        private string _nomeoperatore = string.Empty;
         public string NomeOperatore
         {
             get => _nomeoperatore;
-            set => this.RaiseAndSetIfChanged(ref _nomeoperatore, value);
+            set => this.RaiseAndSetIfChanged(ref _nomeoperatore, value ?? string.Empty);
         }
 
-        private string _password;
+        private string _password = string.Empty;
         public string Password
         {
             get => _password;
-            set => this.RaiseAndSetIfChanged(ref _password, value);
+            set => this.RaiseAndSetIfChanged(ref _password, value ?? string.Empty);
         }
 
         public override string Titolo => $"Login: {NomeOperatore}";
 
-        
+
     }
 }

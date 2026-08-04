@@ -19,5 +19,9 @@ namespace Menu.Core.Context
         public DbSet<Postazione> Postazioni { get; set; } = null!;
         public DbSet<Permesso> Permessi { get; set; } = null!;
 
+        public MenuDbContext CreateDbContext()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -17,6 +17,9 @@ namespace Login.Core.Repository
     {
         public LoginRepository() : base() { }
 
+        // Costruttore che accetta la factory del DbContext — permette registrazione lazy/test più robusta
+        public LoginRepository(Func<LoginDbContext> factory) : base(factory) { }
+
         public async Task<List<LoginDTO>> GetOperatoriAbilitati(CancellationToken ctk = default)
         {
             return await GetAll(
@@ -85,7 +88,7 @@ namespace Login.Core.Repository
             GlobalValuesC.MySetting = XOperatore;
         }
 
-        private async Task<GiornataXC> GetGiornataOpen(CancellationToken ct)
+        private async Task<GiornataXC?> GetGiornataOpen(CancellationToken ct)
         {
             return await UsingContextAsync(async ctx =>
                 await ctx.Giornate

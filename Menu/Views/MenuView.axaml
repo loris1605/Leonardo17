@@ -2,11 +2,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              xmlns:vm="using:Menu.ViewModels"
-             xmlns:dt="using:Menu.ViewModels.Map"
-             xmlns:ui="using:ControlStyles"
-             xmlns:lc="using:Views"
+             xmlns:conv="using:ViewServices"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
              KeyboardNavigation.TabNavigation="Cycle"
              Background="#F3F3F3"
              x:DataType="vm:MenuViewModel"
@@ -14,7 +14,14 @@
              x:Name="Root"
              UseLayoutRounding="True">
 
-   <Grid x:Name="RootGrid">
+    <UserControl.Resources>
+        <ResourceDictionary>
+          <conv:BoolToBrushConverter x:Key="BoolToBrushConverter"/>
+          <conv:CmdToVisibleConverter x:Key="CmdToVisibleConverter"/>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+   <!--<Grid x:Name="RootGrid">
 
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/> 
@@ -24,13 +31,13 @@
             
         </Grid.RowDefinitions>
 
-        <!--<Grid.ColumnDefinitions>
+        --><!--<Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>-->
+        </Grid.ColumnDefinitions>--><!--
 
         <lc:TitleView x:Name="Title"
                       TitoloPagina="MENU PRINCIPALE"
@@ -68,7 +75,7 @@
                                        Header="  SERVIZI  " 
                                        MaxHeight="50"
                                        Command="{Binding NavigateCommand}"
-                                       CommandParameter="Servizi"/>-->
+                                       CommandParameter="Servizi"/>
                     
                     
                     </ui:UiMenuItem>
@@ -91,7 +98,7 @@
                              ItemsSource="{Binding CassaPostazioniDataSource}">
                        
                        <MenuItem.Styles>
-                           <!-- Questo stile si applica a ogni MenuItem generato dentro l'ItemsSource -->
+                           --><!-- Questo stile si applica a ogni MenuItem generato dentro l'ItemsSource --><!--
                            <Style Selector="MenuItem > MenuItem" x:DataType="dt:MenuPostazioneMap">
                                <Setter Property="Header" Value="{Binding NomePostazione}" />
                                <Setter Property="Command" Value="{Binding $parent[MenuItem].DataContext.CassaPostazioneCommand}" />
@@ -205,7 +212,116 @@
        
 
 
+    </Grid>-->
+
+    <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="220,*">
+    
+     <!-- HEADER -->
+        <Border Grid.ColumnSpan="2" Background="#FF1F2937" Padding="12" x:Name="HeaderBorder">
+          <DockPanel>
+            <StackPanel Orientation="Vertical" DockPanel.Dock="Left">
+              <TextBlock Text="{Binding OperatoreName}" Foreground="White" FontSize="16" FontWeight="Bold"/>
+              <TextBlock Text="{Binding SessioneContabile}" Foreground="#FFD1D5DB" FontSize="12"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+              <TextBlock Text="Ready:" Foreground="#FFD1D5DB" VerticalAlignment="Center"/>
+              <Ellipse Width="12" Height="12" Margin="4,0"
+                       Fill="{Binding IsMenuReady, Converter={StaticResource BoolToBrushConverter}}"/>
+            </StackPanel>
+          </DockPanel>
+        </Border>
+
+    <!-- NAV (LEFT) - racchiuso in MainMenu per compatibilità code-behind -->
+        <Border Grid.Row="1" Margin="8" Padding="8" x:Name="MainMenu">
+          <StackPanel Spacing="6">
+            <TextBlock Text="Menu" FontSize="14" FontWeight="SemiBold" Margin="6,0"/>
+
+            <Button x:Name="AmministratoreItem" Content="Cassa" Command="{Binding ConfigurazioneCommand, Mode=OneWay}" IsVisible="{Binding CassaVisible}" />
+            <Button x:Name="CassaItem" Content="Configurazione" Command="{Binding ConfigurazioneCommand}" IsVisible="{Binding ConfigurazioneCommand, Converter={StaticResource CmdToVisibleConverter}}"/>
+            <Button x:Name="BarItem" Content="Soci" Command="{Binding SociCommand}" IsVisible="{Binding SociCommand, Converter={StaticResource CmdToVisibleConverter}}"/>
+            <Button x:Name="PulizieItem" Content="Connessione" Command="{Binding ConnectionCommand}"/>
+            <Button x:Name="GuardarobaItem" Content="Logout" Command="{Binding LogoutCommand}"/>
+
+            <Separator Margin="0,8"/>
+
+            <TextBlock Text="Postazioni consentite" FontWeight="SemiBold" Margin="6,4"/>
+            <!-- Lista semplice: mostra le postazioni e permette selezione -->
+            <ListBox x:Name="CassaPostazioniList"
+                     ItemsSource="{Binding CassaPostazioniDataSource}"
+                     SelectedItem="{Binding SelectedPostazione, Mode=TwoWay}"
+                     Height="220">
+              <ListBox.ItemTemplate>
+                <DataTemplate>
+                  <Border Padding="8" Margin="4" Background="#FFF7F7F7" CornerRadius="6">
+                    <Grid ColumnDefinitions="*,Auto">
+                      <StackPanel>
+                        <TextBlock Text="{Binding NomePostazione}" FontWeight="Bold"/>
+                        <TextBlock Text="{Binding NomeTipoPostazione}" FontSize="12" Foreground="#666"/>
+                      </StackPanel>
+                      <Button Grid.Column="1" VerticalAlignment="Center" Margin="8,0,0,0" Padding="8,4"
+                              Content="Apri"
+                              Command="{Binding DataContext.CassaPostazioneCommand, ElementName=Root}"
+                              CommandParameter="{Binding CodicePostazione}" />
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+
+            <!-- Pulsanti rapidi (named per coerenza) -->
+            <StackPanel Orientation="Horizontal" Spacing="8" Margin="6,8,0,0">
+              <Button x:Name="ApriGiornataItem" Content="Apri Giornata" Command="{Binding ApriGiornataCommand}" IsEnabled="{Binding ApriGiornataEnabled}"/>
+              <Button x:Name="ChiudiGiornataItem" Content="Chiudi Giornata" Command="{Binding LogoutCommand}" IsEnabled="{Binding ChiudiGiornataEnabled}"/>
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
+     <Border Grid.Column="1" Grid.Row="1" Margin="8" Background="White" CornerRadius="6" Padding="12" x:Name="MainContent">
+          <StackPanel Spacing="12">
+            <TextBlock Text="Azioni rapide" FontSize="16" FontWeight="SemiBold"/>
+
+            <WrapPanel ItemHeight="48" ItemWidth="180" Orientation="Horizontal">
+              <Button Content="Apri Giornata"
+                      Command="{Binding ApriGiornataCommand}"
+                      IsEnabled="{Binding ApriGiornataEnabled}"
+                      Width="180" Height="48"
+                      Margin="0,0,10,10"/>
+              <Button Content="Chiudi Giornata"
+                      Command="{Binding LogoutCommand}"
+                      IsEnabled="{Binding ChiudiGiornataEnabled}"
+                      Width="180" Height="48"
+                      Margin="0,0,10,10"/>
+              <Button Content="Report"
+                      Command="{Binding ConfigurazioneCommand}"
+                      IsEnabled="{Binding ReportVisible}"
+                      Width="180" Height="48"
+                      Margin="0,0,10,10"/>
+            </WrapPanel>
+            
+            <Border Background="#FFF8FAFB" Padding="10" CornerRadius="6">
+              <StackPanel>
+                <TextBlock Text="Stato sessione" FontWeight="Bold"/>
+                <TextBlock Text="{Binding SessioneContabile}" Foreground="#444"/>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </Border>
+
+        <!-- STATUS BAR -->
+        <Border Grid.Row="2" Grid.ColumnSpan="2" Background="#FFF1F5F9" Padding="8">
+          <DockPanel>
+            <TextBlock Text="{Binding OperatoreName}" DockPanel.Dock="Left" Margin="6,0"/>
+            <TextBlock Text="{Binding SessioneContabile}" DockPanel.Dock="Left" Margin="16,0"/>
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" Spacing="8">
+              <Button Content="Apri Giornata" Command="{Binding ApriGiornataCommand}" IsEnabled="{Binding ApriGiornataEnabled}"/>
+              <Button Content="Logout" Command="{Binding LogoutCommand}"/>
+            </StackPanel>
+          </DockPanel>
+        </Border>
+    
     </Grid>
+
 </UserControl>
 
 
