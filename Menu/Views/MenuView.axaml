@@ -3,12 +3,14 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:Menu.ViewModels"
+             xmlns:ui="using:ControlStyles"
              xmlns:conv="using:ViewServices"
+             xmlns:lc="using:Views"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
+             Background="LightSteelBlue"
              KeyboardNavigation.TabNavigation="Cycle"
-             Background="#F3F3F3"
              x:DataType="vm:MenuViewModel"
              x:Class="Menu.Views.MenuView"
              x:Name="Root"
@@ -217,7 +219,7 @@
     <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="220,*">
     
      <!-- HEADER -->
-        <Border Grid.ColumnSpan="2" Background="#FF1F2937" Padding="12" x:Name="HeaderBorder">
+        <!--<Border Grid.ColumnSpan="2" Background="#FF1F2937" Padding="12" x:Name="HeaderBorder">
           <DockPanel>
             <StackPanel Orientation="Vertical" DockPanel.Dock="Left">
               <TextBlock Text="{Binding OperatoreName}" Foreground="White" FontSize="16" FontWeight="Bold"/>
@@ -230,12 +232,24 @@
                        Fill="{Binding IsMenuReady, Converter={StaticResource BoolToBrushConverter}}"/>
             </StackPanel>
           </DockPanel>
-        </Border>
+        </Border>-->
+
+    <lc:TitleView x:Name="Title"
+                    Grid.ColumnSpan="2"
+                    TitoloPagina="MENU PRINCIPALE"
+                    ButtonText=" Logout "
+                    ToolTipText="CAMBIO OPERATORE"
+                    ExitCommand="{Binding LogoutCommand}"/>
 
     <!-- NAV (LEFT) - racchiuso in MainMenu per compatibilità code-behind -->
         <Border Grid.Row="1" Margin="8" Padding="8" x:Name="MainMenu">
           <StackPanel Spacing="6">
             <TextBlock Text="Menu" FontSize="14" FontWeight="SemiBold" Margin="6,0"/>
+
+            <ui:UiButton x:Name="SociItem" 
+                         Content="Soci" 
+                         Foreground="Black"
+                         Command="{Binding SociCommand}"/>
 
             <Button x:Name="AmministratoreItem" Content="Cassa" Command="{Binding ConfigurazioneCommand, Mode=OneWay}" IsVisible="{Binding CassaVisible}" />
             <Button x:Name="CassaItem" Content="Configurazione" Command="{Binding ConfigurazioneCommand}" IsVisible="{Binding ConfigurazioneCommand, Converter={StaticResource CmdToVisibleConverter}}"/>

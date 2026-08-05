@@ -38,6 +38,8 @@ public partial class MenuView : BaseUserControl<MenuViewModel>
                     // One-way bindings (usando l'istanza del ViewModel per rimuovere warning nullable)
                     this.OneWayBind(vm, v => v.AmministratoreVisible, vctrl => vctrl.AmministratoreItem.IsVisible)
                         .DisposeWith(currentVmDisposables);
+                    this.OneWayBind(vm, v => v.AmministratoreVisible, vctrl => vctrl.SociItem.IsVisible)
+                        .DisposeWith(currentVmDisposables);
                     this.OneWayBind(vm, v => v.CassaVisible, vctrl => vctrl.CassaItem.IsVisible)
                         .DisposeWith(currentVmDisposables);
                     this.OneWayBind(vm, v => v.ChiudiGiornataEnabled, vctrl => vctrl.CassaItem.IsEnabled)
