@@ -41,13 +41,15 @@
         <Setter Property="BorderBrush" Value="#A0FFFFFF"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
 
         <Setter Property="Template">
             <ControlTemplate>
                 <Grid ClipToBounds="True">
                   <!-- Ombra: non usa più Margin che influisce sulla misura; spostamento visivo con RenderTransform -->
                   <Border x:Name="PART_Shadow"
-                          Background="#22000000"
+                          Background="Transparent"
                           CornerRadius="{TemplateBinding CornerRadius}"
                           IsHitTestVisible="False">
                     <Border.RenderTransform>

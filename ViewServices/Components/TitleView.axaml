@@ -31,6 +31,7 @@
                         <Image Source="avares://ControlStyles/Resources/ExitIcon.png" 
                                Width="44" Height="44" />
                         <TextBlock Text="{Binding #Root.ButtonText}"
+                                   Foreground="{Binding #Root.ButtonForeground}"
                                    Margin="5"
                                    VerticalAlignment="Center"/>
                     </StackPanel>

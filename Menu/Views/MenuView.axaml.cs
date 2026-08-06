@@ -36,26 +36,23 @@ public partial class MenuView : BaseUserControl<MenuViewModel>
                     var vm = vmObj!;
 
                     // One-way bindings (usando l'istanza del ViewModel per rimuovere warning nullable)
-                    this.OneWayBind(vm, v => v.AmministratoreVisible, vctrl => vctrl.AmministratoreItem.IsVisible)
-                        .DisposeWith(currentVmDisposables);
                     this.OneWayBind(vm, v => v.AmministratoreVisible, vctrl => vctrl.SociItem.IsVisible)
                         .DisposeWith(currentVmDisposables);
-                    this.OneWayBind(vm, v => v.CassaVisible, vctrl => vctrl.CassaItem.IsVisible)
-                        .DisposeWith(currentVmDisposables);
+
                     this.OneWayBind(vm, v => v.ChiudiGiornataEnabled, vctrl => vctrl.CassaItem.IsEnabled)
                         .DisposeWith(currentVmDisposables);
-                    this.OneWayBind(vm, v => v.BarVisible, vctrl => vctrl.BarItem.IsVisible)
-                        .DisposeWith(currentVmDisposables);
-                    this.OneWayBind(vm, v => v.ChiudiGiornataEnabled, vctrl => vctrl.BarItem.IsEnabled)
-                        .DisposeWith(currentVmDisposables);
-                    this.OneWayBind(vm, v => v.PulizieVisible, vctrl => vctrl.PulizieItem.IsVisible)
-                        .DisposeWith(currentVmDisposables);
-                    this.OneWayBind(vm, v => v.ChiudiGiornataEnabled, vctrl => vctrl.PulizieItem.IsEnabled)
-                        .DisposeWith(currentVmDisposables);
-                    this.OneWayBind(vm, v => v.GuardarobaVisible, vctrl => vctrl.GuardarobaItem.IsVisible)
-                        .DisposeWith(currentVmDisposables);
-                    this.OneWayBind(vm, v => v.ChiudiGiornataEnabled, vctrl => vctrl.GuardarobaItem.IsEnabled)
-                        .DisposeWith(currentVmDisposables);
+                    //this.OneWayBind(vm, v => v.BarVisible, vctrl => vctrl.BarItem.IsVisible)
+                    //    .DisposeWith(currentVmDisposables);
+                    //this.OneWayBind(vm, v => v.ChiudiGiornataEnabled, vctrl => vctrl.BarItem.IsEnabled)
+                    //    .DisposeWith(currentVmDisposables);
+                    //this.OneWayBind(vm, v => v.PulizieVisible, vctrl => vctrl.PulizieItem.IsVisible)
+                    //    .DisposeWith(currentVmDisposables);
+                    //this.OneWayBind(vm, v => v.ChiudiGiornataEnabled, vctrl => vctrl.PulizieItem.IsEnabled)
+                    //    .DisposeWith(currentVmDisposables);
+                    //this.OneWayBind(vm, v => v.GuardarobaVisible, vctrl => vctrl.GuardarobaItem.IsVisible)
+                    //    .DisposeWith(currentVmDisposables);
+                    //this.OneWayBind(vm, v => v.ChiudiGiornataEnabled, vctrl => vctrl.GuardarobaItem.IsEnabled)
+                    //    .DisposeWith(currentVmDisposables);
                     //this.OneWayBind(vm, v => v.ReportVisible, vctrl => vctrl.ReportItem.IsVisible)
                     //    .DisposeWith(currentVmDisposables);
                     this.OneWayBind(vm, v => v.ApriGiornataEnabled, vctrl => vctrl.ApriGiornataItem.IsEnabled)

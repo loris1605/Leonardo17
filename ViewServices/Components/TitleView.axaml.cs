@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Media;
 using ReactiveUI;
 using System.Reactive;
 
@@ -30,6 +31,16 @@ public partial class TitleView : UserControl
     {
         get => GetValue(ButtonTextProperty);
         set => SetValue(ButtonTextProperty, value);
+    }
+
+    // Nuova proprietà per il colore del content del button
+    public static readonly StyledProperty<IBrush> ButtonForegroundProperty =
+        AvaloniaProperty.Register<TitleView, IBrush>(nameof(ButtonForeground), defaultValue: Brushes.White);
+
+    public IBrush ButtonForeground
+    {
+        get => GetValue(ButtonForegroundProperty);
+        set => SetValue(ButtonForegroundProperty, value);
     }
 
     public static readonly StyledProperty<string> ToolTipTextProperty =

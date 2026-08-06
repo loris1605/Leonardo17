@@ -57,7 +57,7 @@
                         <RowDefinition Height="5"/>
 						<RowDefinition Height="Auto" MinHeight="35"/>
                         <RowDefinition Height="Auto" MinHeight="35"/>
-                        <RowDefinition Height="Auto" MinHeight="55"/>
+                        <RowDefinition Height="Auto" MinHeight="75"/>
                         
                     </Grid.RowDefinitions>
 
@@ -92,12 +92,11 @@
                                   VerticalAlignment="Center"/>
                 
                 </Grid>
-
-                
                 
                 <Grid x:Name="ButtonGrid"
                              Grid.Row="3"
-                             Margin="20">
+                             Margin="10"
+                             MinHeight="50">
                 
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -114,7 +113,8 @@
                         
                                 <StackPanel Orientation="Horizontal"
                                             Spacing="8"
-                                            HorizontalAlignment="Center">
+                                            HorizontalAlignment="Center"
+                                            >
                         
                                     <Image Source="avares://ControlStyles/Resources/CredenzialiIcon.png"
                                            Width="34"
