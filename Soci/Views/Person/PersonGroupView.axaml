@@ -61,6 +61,7 @@
             </HeaderedContentControl.Header>
 
             <DataGrid ItemsSource="{Binding GroupedDataSource}"
+                      Classes="DataGridProf"
                       x:CompileBindings="False"
                       x:Name="SociDataGrid"
                       SelectedItem="{Binding GroupBindingT}"

@@ -33,6 +33,7 @@
               ExitCommand="{Binding EscPressedCommand}"/>
 
         <DataGrid Grid.Row="2" Margin="50"
+                  Classes="DataGridProf"
                   ItemsSource="{Binding DataSource}"
                   x:Name="SociInCassaDataGrid"
                   SelectedItem="{Binding BindingT}"

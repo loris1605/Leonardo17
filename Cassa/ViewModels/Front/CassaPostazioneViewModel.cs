@@ -3,6 +3,7 @@ using Cassa.ViewModels.Map;
 using ReactiveUI;
 using System.Diagnostics;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ViewModels;
@@ -17,10 +18,12 @@ namespace Cassa.ViewModels
         IObservable<(int postazioneId, string posizione)> PostazioneToListaSoci { get; }
         void SetPostazioneId(int postazioneId);
         void SetPosizione(string posizione);
+        Task ApriScheda();
     }
 
     public partial class CassaPostazioneViewModel : ViewModelBase, ICassaPostazioneViewModel
     {
+        // Commands
         public ReactiveCommand<Unit, Unit> EntraSocioCommand { get; }
         public ReactiveCommand<Unit, Unit> EsceSocioCommand { get; }
         public ReactiveCommand<Unit, Unit> ListaSociCommand { get; }
@@ -30,105 +33,136 @@ namespace Cassa.ViewModels
         private readonly ICassaPostazioneRepository Q;
         private int _postazioneId;
 
+        // disposables and subjects
+        private readonly CompositeDisposable _disposables = new();
+
         protected override IObservable<bool> IsAnythingExecuting =>
-            new[]
+            Observable.CombineLatest(new IObservable<bool>[]
             {
-                base.IsAnythingExecuting,
-                EntraSocioCommand?.IsExecuting ?? Observable.Return(false),
-                EsceSocioCommand?.IsExecuting ?? Observable.Return(false),
-                ListaSociCommand?.IsExecuting ?? Observable.Return(false),
-                PosizioneEnterCommand?.IsExecuting ?? Observable.Return(false),
-                PosizioneEscCommand?.IsExecuting ?? Observable.Return(false)
+                base.IsAnythingExecuting ?? Observable.Return(false),
 
-            }.CombineLatest(values => values.Any(x => x));
+                this.WhenAnyValue(vm => vm.EntraSocioCommand)
+                    .Select(cmd => cmd?.IsExecuting ?? Observable.Return(false))
+                    .Switch(),
 
+                this.WhenAnyValue(vm => vm.EsceSocioCommand)
+                    .Select(cmd => cmd?.IsExecuting ?? Observable.Return(false))
+                    .Switch(),
 
+                this.WhenAnyValue(vm => vm.ListaSociCommand)
+                    .Select(cmd => cmd?.IsExecuting ?? Observable.Return(false))
+                    .Switch(),
 
-        public CassaPostazioneViewModel(ICassaPostazioneRepository Repository) : base(null)
+                this.WhenAnyValue(vm => vm.PosizioneEnterCommand)
+                    .Select(cmd => cmd?.IsExecuting ?? Observable.Return(false))
+                    .Switch(),
+
+                this.WhenAnyValue(vm => vm.PosizioneEscCommand)
+                    .Select(cmd => cmd?.IsExecuting ?? Observable.Return(false))
+                    .Switch()
+            }, results => results.Any(x => x))
+            .DistinctUntilChanged();
+
+        public CassaPostazioneViewModel(ICassaPostazioneRepository repository) : base(null)
         {
-           Q = Repository ?? throw new ArgumentNullException(nameof(Repository));
+            Q = repository ?? throw new ArgumentNullException(nameof(repository));
 
-           EntraSocioCommand = ReactiveCommand.CreateFromTask(GoToEntraSocio);
-           EsceSocioCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask); // Placeholder for actual logic
-           ListaSociCommand = ReactiveCommand.CreateFromTask(GoToListaSoci); // Placeholder for actual logic
-           PosizioneEnterCommand = ReactiveCommand.CreateFromTask(ApriScheda); // Placeholder for actual logic
-           PosizioneEscCommand = ReactiveCommand.CreateFromTask(PosizioneEsc); // Placeholder for actual logic
+            EntraSocioCommand = ReactiveCommand.CreateFromTask(GoToEntraSocio);
+            EsceSocioCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);
+            ListaSociCommand = ReactiveCommand.CreateFromTask(GoToListaSoci);
+            PosizioneEnterCommand = ReactiveCommand.CreateFromTask(ApriScheda);
+            PosizioneEscCommand = ReactiveCommand.CreateFromTask(PosizioneEsc);
 
-           EntraSocioCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Entra Socio: {ex.Message}"));
-           EsceSocioCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Postazioni: {ex.Message}"));
-           ListaSociCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Lista Soci: {ex.Message}"));
-           PosizioneEnterCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Posizione: {ex.Message}"));
-           PosizioneEscCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Esc: {ex.Message}"));
+            // Subscriptions: capture thrown exceptions and dispose them with the CompositeDisposable
+            _disposables.Add(EntraSocioCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Entra Socio: {ex.Message}")));
+            _disposables.Add(EsceSocioCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Postazioni: {ex.Message}")));
+            _disposables.Add(ListaSociCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Lista Soci: {ex.Message}")));
+            _disposables.Add(PosizioneEnterCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Posizione: {ex.Message}")));
+            _disposables.Add(PosizioneEscCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Esc: {ex.Message}")));
+
+            // Ensure subjects are disposed
+            _disposables.Add(_postazioneToMenu);
+            _disposables.Add(_postazioneToEntraSocio);
+            _disposables.Add(_postazioneToListaSoci);
         }
 
         protected override void OnFinalDestruction()
         {
-            // Assicuriamoci che la collezione sia nulla per il GC
-            //Q = null;
+            // Dispose of all subscriptions and subjects
+            _disposables.Dispose();
             base.OnFinalDestruction();
         }
 
         protected override Task OnEsc()
         {
-            // Logic for handling the "Esc" command
             _postazioneToMenu.OnNext(Unit.Default);
             return Task.CompletedTask;
         }
 
         protected Task PosizioneEsc()
         {
-            // Logic for handling the "Esc" command
             IsOpen = false;
-            BindingT = new();
+            BindingT = new CassaSchedaMap();
             return Task.CompletedTask;
         }
 
         protected override async Task OnLoading()
         {
-            Titolo = "POSTAZIONE " + await Q.GetPostazioneName(_postazioneId, Token);
+            try
+            {
+                Titolo = "POSTAZIONE " + await Q.GetPostazioneName(_postazioneId, Token);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Errore OnLoading GetPostazioneName: {ex.Message}");
+                Titolo = "POSTAZIONE -";
+            }
+
             await SetFocus(PosizioneFocus);
-            await Task.CompletedTask;
         }
 
-        public void SetPostazioneId(int postazioneId)
-        {
-            _postazioneId = postazioneId;
-        }
+        public void SetPostazioneId(int postazioneId) => _postazioneId = postazioneId;
 
-        public void SetPosizione(string posizione)
-        {
-            BindingT.Posizione = posizione;
-        }
+        public void SetPosizione(string posizione) => BindingT.Posizione = posizione;
 
         private Task GoToEntraSocio()
         {
-            // Logic for navigating to the "Entra Socio" view
             _postazioneToEntraSocio.OnNext((_postazioneId, BindingT.Posizione));
             return Task.CompletedTask;
         }
 
         private Task GoToListaSoci()
         {
-            // Logic for navigating to the "Lista Soci" view
             _postazioneToListaSoci.OnNext((_postazioneId, BindingT.Posizione));
             return Task.CompletedTask;
         }
 
-        private async Task ApriScheda()
+        public async Task ApriScheda()
         {
-            var schedaData = await Q.GetSchedaByPosizione(BindingT.Posizione, Token);
-            if (schedaData == null)
+            if (string.IsNullOrWhiteSpace(BindingT?.Posizione))
+                return;
+
+            try
             {
-                // Handle the case where no "Scheda" is found for the given position
-                Debug.WriteLine($"No Scheda found for position: {BindingT.Posizione}");
-                BindingT = new CassaSchedaMap();
+                var schedaData = await Q.GetSchedaByPosizione(BindingT.Posizione, Token);
+                if (schedaData == null)
+                {
+                    Debug.WriteLine($"No Scheda found for position: {BindingT.Posizione}");
+                    BindingT = new CassaSchedaMap();
+                    await SetFocus(PosizioneFocus);
+                    return;
+                }
+
+                BindingT = new CassaSchedaMap(schedaData);
+                IsOpen = true;
                 await SetFocus(PosizioneFocus);
-                return ;
             }
-            BindingT = new CassaSchedaMap(schedaData);
-            IsOpen = true;
-            await SetFocus(PosizioneFocus);
-            // Logic for opening the "Scheda" view
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Errore ApriScheda: {ex.Message}");
+                // optionally reset state
+                BindingT = new CassaSchedaMap();
+            }
         }
     }
 

@@ -1,7 +1,9 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Media;
 using Avalonia.VisualTree;
+using System.Globalization;
 
 namespace ControlStyles
 {
@@ -33,8 +35,8 @@ namespace ControlStyles
                 e.Handled = true;
 
                 if (MoveToNextOnEnter) MoveFocusToNext();
-               
-                
+
+
             }
         }
 
@@ -100,6 +102,39 @@ namespace ControlStyles
         {
             this.KeyDown -= OnKeyDown;
             base.OnDetachedFromVisualTree(e);
+        }
+    }
+
+    public static class TextBoxExtensions
+    {
+        public static readonly AttachedProperty<int> MinCharWidthProperty =
+            AvaloniaProperty.RegisterAttached<UiTextBox, int>("MinCharWidth", typeof(TextBoxExtensions), 0);
+
+        public static int GetMinCharWidth(UiTextBox element) => element.GetValue(MinCharWidthProperty);
+        public static void SetMinCharWidth(UiTextBox element, int value) => element.SetValue(MinCharWidthProperty, value);
+
+        static TextBoxExtensions()
+        {
+            MinCharWidthProperty.Changed.AddClassHandler<UiTextBox>((textBox, e) =>
+            {
+                if (e.NewValue is int charCount && charCount > 0)
+                {
+                    textBox.Initialized += (s, ev) => UpdateWidth(textBox, charCount);
+                    if (textBox.IsInitialized) UpdateWidth(textBox, charCount);
+                }
+            });
+        }
+
+        private static void UpdateWidth(TextBox textBox, int charCount)
+        {
+            var text = new string('M', charCount);
+            var typeface = new Typeface(textBox.FontFamily, textBox.FontStyle, textBox.FontWeight);
+
+            var formattedText = new FormattedText(
+                text, CultureInfo.CurrentCulture, textBox.FlowDirection,
+                typeface, textBox.FontSize, Brushes.Black);
+
+            textBox.MinWidth = formattedText.Width + textBox.Padding.Left + textBox.Padding.Right;
         }
     }
 }

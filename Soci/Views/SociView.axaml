@@ -44,7 +44,8 @@
             </r:RoutedViewHost>
 
             <Viewbox Grid.Column="1">
-                <Border BorderThickness="1">
+                <Border BorderThickness="1"
+                        Margin="50,100">
                     <r:RoutedViewHost x:Name="InputRouterHost" 
                                       Router="{Binding InputRouter}">
         
@@ -52,7 +53,7 @@
                  
                         <CrossFade Duration="0:0:0.5" />
                     </r:RoutedViewHost.PageTransition>
-        
+            
                     </r:RoutedViewHost>
                 </Border>
             </Viewbox>

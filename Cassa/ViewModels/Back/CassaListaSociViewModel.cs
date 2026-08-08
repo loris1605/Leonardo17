@@ -66,6 +66,13 @@ namespace Cassa.ViewModels
             await Task.CompletedTask;
 
         }
+
+        // Chiamata dalla View in caso di doppio click su una riga: notifica l'esterno per tornare alla postazione
+        public void ReturnToPostazione(string posizione)
+        {
+            _listaSociToPostazione.OnNext((_postazioneId, posizione));
+            _listaSociToPostazione.OnCompleted();
+        }
     }
 
     public partial class CassaListaSociViewModel

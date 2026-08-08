@@ -25,5 +25,91 @@
         <Setter Property="Height" Value="30" />
     </Style>
 
+
+
+    <!-- ========================= -->
+    <!-- DataGridProf: stile professionale -->
+    <!-- ========================= -->
+
+    <!-- Applica a DataGrid con Classes="DataGridProf" -->
+    <Style Selector="DataGrid.DataGridProf">
+        <Setter Property="Background" Value="#FFFFFFFF"/>
+        <Setter Property="Foreground" Value="#1F2937"/>
+        <Setter Property="FontFamily" Value="Segoe UI, Arial, sans-serif"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+        <Setter Property="CanUserSortColumns" Value="True"/>
+        <Setter Property="IsReadOnly" Value="True"/>
+        <Setter Property="SelectionMode" Value="Single"/>
+        <Setter Property="RowHeight" Value="30"/>
+        <Setter Property="Margin" Value="8"/>
+        <Setter Property="BorderBrush" Value="#E5E7EB"/>
+        <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+
+    <!-- Header colonne con leggero gradiente e separatore -->
+    <Style Selector="DataGrid.DataGridProf DataGridColumnHeader">
+        <Setter Property="Background">
+            <Setter.Value>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStops>
+                        <GradientStop Color="#F3F4F6" Offset="0"/>
+                        <GradientStop Color="#FFFFFFFF" Offset="1"/>
+                    </GradientStops>
+                </LinearGradientBrush>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Foreground" Value="#111827"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="Padding" Value="8,6"/>
+        <Setter Property="BorderBrush" Value="#E5E7EB"/>
+        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+    </Style>
+
+    <!-- Celle: padding e contrasto leggibile -->
+    <Style Selector="DataGrid.DataGridProf DataGridCell">
+        <Setter Property="Padding" Value="8,6"/>
+        <Setter Property="Foreground" Value="#111827"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+
+    <!-- Righe alternate (usa nth-child) -->
+    <Style Selector="DataGrid.DataGridProf DataGridRow:nth-child(odd)">
+        <Setter Property="Background" Value="#FFFFFFFF"/>
+    </Style>
+
+    <Style Selector="DataGrid.DataGridProf DataGridRow:nth-child(even)">
+        <Setter Property="Background" Value="#F8FAFC"/>
+    </Style>
+
+    <!-- Hover riga -->
+    <Style Selector="DataGrid.DataGridProf DataGridRow:pointerover">
+        <Setter Property="Background" Value="#F1F5F9"/>
+    </Style>
+
+    <!-- Riga selezionata: colore accentato e testo chiaro -->
+    <Style Selector="DataGrid.DataGridProf DataGridRow:selected">
+        <Setter Property="Background" Value="#2563EB"/>
+        <Setter Property="Foreground" Value="#FFFFFFFF"/>
+    </Style>
+
+    <!-- Intestazione gruppi -->
+    <Style Selector="DataGrid.DataGridProf DataGridRowGroupHeader">
+        <Setter Property="Background" Value="#F3F4F6"/>
+        <Setter Property="Padding" Value="10,6"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+
+    <!-- Messaggio vuoto -->
+    <Style Selector="DataGrid.DataGridProf TextBlock.empty">
+        <Setter Property="Foreground" Value="#6B7280"/>
+        <Setter Property="FontStyle" Value="Italic"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="Margin" Value="12"/>
+    </Style>
+
 </Styles>
+
 
