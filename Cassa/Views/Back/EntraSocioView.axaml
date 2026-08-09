@@ -65,6 +65,18 @@
                      
             </Viewbox>
 
+            <Viewbox Grid.Column="4" MinWidth="250"
+                     x:Name="EntraIngresso"
+                     Grid.Row="1"
+                     Grid.ColumnSpan="2"
+                     Grid.RowSpan="5">
+                    
+                <vw:EntraSocioIngressoView x:Name="IngressiInput"/>
+                     
+            </Viewbox>
+
+
+
             <ui:UiButton Grid.Column="4" MinWidth="250"
                       Grid.Row="7"
                       Grid.ColumnSpan="2"
