@@ -27,12 +27,17 @@ namespace Cassa.ViewModels.Map
             this.Blocco = dto.Blocco;
             this.Note = dto.Note;
 
+            // Mappa i conti (se presenti)
+            this.Conti = dto.Conti?
+                            .Select(c => new CassaSchedaContoMap(c))
+                                    .ToList() ?? new List<CassaSchedaContoMap>();
+
         }
 
 
         public CassaSchedaDTO ToDto()
         {
-            return new CassaSchedaDTO
+            var dto = new CassaSchedaDTO
             {
                 Id = this.Id,
                 Posizione = this.Posizione,
@@ -49,8 +54,12 @@ namespace Cassa.ViewModels.Map
                 Grb4 = this.Grb4,
                 Consumazione = this.Consumazione,
                 Blocco = this.Blocco,
-                Note = this.Note
+                Note = this.Note,
+                Conti = this.Conti?
+                            .Select(c => c.ToDto()).ToList() ?? new List<CassaSchedaContoDTO>()
             };
+
+            return dto;
         }
 
         public string NatoilFormattato
@@ -68,6 +77,8 @@ namespace Cassa.ViewModels.Map
                 return Natoil.ToString(); // Ritorna il valore base se il formato non è valido
             }
         }
+
+        public List<CassaSchedaContoMap> Conti { get; set; } = new();
 
         private string _posizione = string.Empty;
         public string Posizione

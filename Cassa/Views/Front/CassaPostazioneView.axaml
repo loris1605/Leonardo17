@@ -41,35 +41,35 @@
         
         
         <Grid x:Name="CentralGrid" 
-              Grid.Row="2">
+              Grid.Row="2"
+              RowDefinitions="*,*,*,*,*,*,*"
+              ColumnDefinitions="*,*,*,*,*,*,*,*,*">
         
-            <Grid.RowDefinitions>
-            
-                <RowDefinition Height="1*" />
-                <RowDefinition Height="1*" />
-                <RowDefinition Height="1*" />
-                <RowDefinition Height="1*" />
-                <RowDefinition Height="1*" />
-                <RowDefinition Height="1*" />
-                <RowDefinition Height="1*" />
-            
-            </Grid.RowDefinitions>
+            <DataGrid Grid.Row="1"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="4"
+                      x:Name="SchedaContoDataGrid"
+                      Margin="20,10,20,10"
+                      ItemsSource="{Binding ListaSchedaConto}"
+                      SelectedItem="{Binding SchedaContoSelectedItem, Mode=TwoWay}"
+                      AutoGenerateColumns="False">
+                
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ID" 
+                                             Binding="{Binding Id}" 
+                                             Width="Auto"/>
+                    <DataGridTextColumn Header="Nome" 
+                                             Binding="{Binding Nome}" 
+                                             Width="*"/>
+                    <DataGridTextColumn Header="Cognome" 
+                                             Binding="{Binding Cognome}" 
+                                             Width="*"/>
+                    <DataGridTextColumn Header="Stato" 
+                                             Binding="{Binding Stato}" 
+                                             Width="*"/>
+                </DataGrid.Columns>
 
-            <Grid.ColumnDefinitions>
-            
-                <ColumnDefinition Width="1*" />
-                <ColumnDefinition Width="1*" />
-                <ColumnDefinition Width="1*" />
-                <ColumnDefinition Width="1*" />
-                <ColumnDefinition Width="1*" />
-                <ColumnDefinition Width="1*" />
-                <ColumnDefinition Width="1*" />
-                <ColumnDefinition Width="1*" />
-                <ColumnDefinition Width="1*" />
-            
-            </Grid.ColumnDefinitions>
-
-                    
+            </DataGrid>              
         
         </Grid>
 

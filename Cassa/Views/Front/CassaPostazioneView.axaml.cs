@@ -27,7 +27,7 @@ public partial class CassaPostazioneView : BaseUserControl<CassaPostazioneViewMo
 
             this.OneWayBind(ViewModel,
                             vm => vm.IsOpen,
-                            v => v. CognomeTextBlock.IsVisible)
+                            v => v.CognomeTextBlock.IsVisible)
                 .DisposeWith(d);
 
             this.OneWayBind(ViewModel,
