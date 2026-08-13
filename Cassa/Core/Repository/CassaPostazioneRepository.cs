@@ -3,11 +3,8 @@ using Cassa.Core.DTO;
 using Microsoft.EntityFrameworkCore;
 using Models.Repository;
 using Models.Tables;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Diagnostics;
+using ViewModelServices.Core;
 
 namespace Cassa.Core.Repository
 {
@@ -46,7 +43,9 @@ namespace Cassa.Core.Repository
             if (string.IsNullOrWhiteSpace(posizione))
                 return new CassaSchedaDTO();
 
-            var dto = await _ctx.Schede
+            try
+            {
+                var dto = await _ctx.Schede
                 .AsNoTracking()
                 .Where(x => x.Posizione == posizione)
                 .Select(x => new CassaSchedaDTO
@@ -86,7 +85,15 @@ namespace Cassa.Core.Repository
                 .FirstOrDefaultAsync(ctk)
                 .ConfigureAwait(false);
 
-            return dto ?? new CassaSchedaDTO();
+                return dto ?? new CassaSchedaDTO();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error in GetSchedaByPosizione: {ex.Message}");
+                return new CassaSchedaDTO();
+            }
+
+            
         }
 
         public async Task<List<CassaSchedaContoDTO>> GetSchedaContoBySchedaId(int schedaId, CancellationToken ctk = default)
@@ -94,10 +101,10 @@ namespace Cassa.Core.Repository
             ctk.ThrowIfCancellationRequested();
 
             // Verifica che il DbSet esista (evita eccezioni se il contesto non è stato aggiornato)
-            if (_ctx.SchedaConti == null)
+            if (_ctx.SchedeConto == null)
                 return new List<CassaSchedaContoDTO>();
 
-            var query = _ctx.SchedaConti
+            var query = _ctx.SchedeConto
                 .AsNoTracking()
                 .Where(x => x.SchedaId == schedaId)
                 .OrderBy(x => x.DataOra)

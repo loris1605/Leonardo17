@@ -8,13 +8,13 @@ namespace Cassa.Core.Context
     {
         DbSet<Postazione> Postazioni { get; set; }
         DbSet<Scheda> Schede { get; set; }
-        DbSet<SchedaConto> SchedaConti { get; set; }
+        DbSet<SchedaConto> SchedeConto { get; set; }
     }
 
     public class CassaPostazioneDbContext : BaseContext, ICassaPostazioneDbContext
     {
         public DbSet<Postazione> Postazioni { get; set; } = null;
         public DbSet<Scheda> Schede { get; set; } = null!;
-        public DbSet<SchedaConto> SchedaConti { get; set; } = null!;
+        public DbSet<SchedaConto> SchedeConto { get; set; } = null!;
     }
 }

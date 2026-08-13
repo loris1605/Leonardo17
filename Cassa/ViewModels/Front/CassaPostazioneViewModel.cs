@@ -37,8 +37,8 @@ namespace Cassa.ViewModels
         private readonly CompositeDisposable _disposables = new();
 
         protected override IObservable<bool> IsAnythingExecuting =>
-            Observable.CombineLatest(new IObservable<bool>[]
-            {
+            Observable.CombineLatest(
+            [
                 base.IsAnythingExecuting ?? Observable.Return(false),
 
                 this.WhenAnyValue(vm => vm.EntraSocioCommand)
@@ -60,7 +60,7 @@ namespace Cassa.ViewModels
                 this.WhenAnyValue(vm => vm.PosizioneEscCommand)
                     .Select(cmd => cmd?.IsExecuting ?? Observable.Return(false))
                     .Switch()
-            }, results => results.Any(x => x))
+            ], results => results.Any(x => x))
             .DistinctUntilChanged();
 
         public CassaPostazioneViewModel(ICassaPostazioneRepository repository) : base(null)
@@ -204,6 +204,13 @@ namespace Cassa.ViewModels
             get => bindingt;
             set => this.RaiseAndSetIfChanged(ref bindingt, value);
 
+        }
+
+        private CassaSchedaContoMap _schedaContoSelectedItem = new();
+        public CassaSchedaContoMap SchedaContoSelectedItem
+        {
+            get => _schedaContoSelectedItem;
+            set => this.RaiseAndSetIfChanged(ref _schedaContoSelectedItem, value);
         }
 
         public Interaction<Unit, Unit> PosizioneFocus { get; } = new();

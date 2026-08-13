@@ -42,6 +42,7 @@
         
         <Grid x:Name="CentralGrid" 
               Grid.Row="2"
+              IsVisible="{Binding IsOpen}"
               RowDefinitions="*,*,*,*,*,*,*"
               ColumnDefinitions="*,*,*,*,*,*,*,*,*">
         
@@ -50,23 +51,26 @@
                       Grid.ColumnSpan="4"
                       x:Name="SchedaContoDataGrid"
                       Margin="20,10,20,10"
-                      ItemsSource="{Binding ListaSchedaConto}"
+                      ItemsSource="{Binding BindingT.Conti}"
                       SelectedItem="{Binding SchedaContoSelectedItem, Mode=TwoWay}"
                       AutoGenerateColumns="False">
                 
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="ID" 
-                                             Binding="{Binding Id}" 
-                                             Width="Auto"/>
-                    <DataGridTextColumn Header="Nome" 
-                                             Binding="{Binding Nome}" 
-                                             Width="*"/>
-                    <DataGridTextColumn Header="Cognome" 
+                                        Binding="{Binding Id}" 
+                                        Width="Auto"/>
+                    <DataGridTextColumn Header="Settore" 
+                                        Binding="{Binding DescSettore}" 
+                                        Width="Auto"/>
+                    <DataGridTextColumn Header="Postazione" 
+                                        Binding="{Binding DescPostazione}" 
+                                        Width="Auto"/>
+                    <!--<DataGridTextColumn Header="Cognome" 
                                              Binding="{Binding Cognome}" 
                                              Width="*"/>
                     <DataGridTextColumn Header="Stato" 
                                              Binding="{Binding Stato}" 
-                                             Width="*"/>
+                                             Width="*"/>-->
                 </DataGrid.Columns>
 
             </DataGrid>              
