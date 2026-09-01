@@ -1,0 +1,82 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Cassa.ViewModels"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             KeyboardNavigation.TabNavigation="Cycle"
+             Background="#F3F3F3"
+             x:CompileBindings="False"
+             x:Class="Cassa.Views.EntraSocioIngressoView"
+             x:DataType="vm:EntraSocioViewModel"
+             x:Name="Root">
+
+    <Grid x:Name="MainGrid" >
+    
+        <HeaderedContentControl BorderBrush="Black"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                x:Name="AnagraficaBorder"
+                                BorderThickness="1"
+                                CornerRadius="5"
+                                Margin="3"
+                                Background="Transparent">
+
+            <HeaderedContentControl.Header>
+                <TextBlock Text=" INGRESSO "
+                           Foreground="Black"
+                           Margin="3"
+                           HorizontalAlignment="Center"/>
+            </HeaderedContentControl.Header>
+
+            <Grid x:Name="InputGrid"
+                      Grid.Row="1"
+                      Margin="10">
+
+            <Grid.RowDefinitions>
+                    <RowDefinition Height="5"/>
+                    <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>    
+
+            <ListBox Grid.Row="1"
+                     ItemsSource="{Binding IngressiList}"
+                     SelectedItem="{Binding SelectedIngresso}"
+                     Background="Transparent">
+                
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <!-- Grid per allineare RadioButton e Dati del Record -->
+                        <Grid ColumnDefinitions="Auto, *">
+                            
+                            <!-- Il RadioButton si attiva/disattiva in base alla selezione del ListBoxItem -->
+                            <RadioButton Grid.Column="0" 
+                                         Margin="0,0,10,0"
+                                         VerticalAlignment="Center"
+                                         IsChecked="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}, Mode=TwoWay}"/>
+                            
+                            <!-- Layout con i dati del tuo record EF -->
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding EtichettaTariffa}" />
+                                <TextBlock Text="{Binding PrezzoTariffa}" FontSize="11" Foreground="Gray"/>
+                            </StackPanel>
+                            
+                        </Grid>
+
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+
+
+            </ListBox>
+                     
+
+        </Grid>
+            
+        </HeaderedContentControl>
+
+        
+    
+    </Grid>
+  
+</UserControl>

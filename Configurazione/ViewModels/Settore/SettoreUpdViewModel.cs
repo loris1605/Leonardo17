@@ -1,0 +1,98 @@
+﻿using Configurazione.Core.Repository;
+using Configurazione.ViewModels.Map;
+using System.Diagnostics;
+
+namespace Configurazione.ViewModels
+{
+    public interface ISettoreUpdViewModel : IConfigurazioneCrudViewModel { }
+
+    public class SettoreUpdViewModel : SettoreInputBase, ISettoreUpdViewModel
+    {
+        private IConfigurazioneSettoreRepository Q;
+        
+        public SettoreUpdViewModel(IConfigurazioneSettoreRepository repository) : base()
+        {
+            Titolo = "Modifica Settore";
+            FieldsEnabled = true;
+            FieldsVisibile = true;
+            Q = repository;
+        }
+
+        protected override void OnFinalDestruction() => Q = null;
+
+        protected override async Task OnLoading()
+        {
+
+            await CaricaCombos();
+
+            var data = await Q.FirstSettore(_idDaModificare);
+            BindingT = new(data);
+
+            if (BindingT == null || BindingT.Id == 0)
+            {
+                InfoLabel = "Errore: Settore non trovato.";
+                FieldsEnabled = false;
+                await SetFocus(EscFocus);
+                return;
+            }
+
+            await SetFocus(NomeFocus);
+        }
+
+        private async Task CaricaCombos()
+        {
+            var data = await Q.LoadTipiSettore();
+            TipoSettDataSource = [.. data.Select(dto => new ConfigurazioneTipoSettoreMap(dto))];
+            
+        }
+
+        protected override async Task OnSaving()
+        {
+            InfoLabel = "";
+            _isClosing = true;
+            // 1. Validazione Dati (ora è un Task, serve await)
+            if (!await ValidaDati())
+            {
+                _isClosing = false; // Permette di riprovare dopo la validazione fallita
+                return;
+            }
+
+            try
+            {
+                // 2. Controllo duplicati (escludendo se stesso)
+                if (await Q.EsisteNomeUpd(BindingT.ToDto(), Token))
+                {
+                    _isClosing = false;
+                    InfoLabel = "Nome settore già in uso";
+                    await SetFocus(NomeFocus);
+                    return;
+                }
+
+                InfoLabel = "Aggiornamento in corso...";
+
+                // 3. Esecuzione Update
+                if (await Q.Upd(BindingT.ToDto(), Token))
+                {
+                    await OnBack(_idDaModificare);
+                }
+                else
+                {
+                    _isClosing = false;
+                    InfoLabel = "Errore Database durante la modifica";
+                    await SetFocus(NomeFocus);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                _isClosing = false;
+                Debug.WriteLine("Salvataggio annullato.");
+            }
+            catch (Exception ex)
+            {
+                _isClosing = false;
+                InfoLabel = $"Errore: {ex.Message}";
+                await SetFocus(NomeFocus);
+            }
+        }
+    }
+}

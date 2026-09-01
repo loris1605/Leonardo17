@@ -1,0 +1,56 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:ui="using:ControlStyles"
+             x:Class="Views.SplashView"
+             x:Name="Root">
+
+             <!-- Sfondo semi-trasparente scuro per bloccare visivamente l'UI sottostante -->
+    <Grid Background="#80000000">
+        
+        <!-- Pannello Centrale Splash -->
+        <Border CornerRadius="8"
+                Padding="30"
+                Width="400"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                BoxShadow="0 10 30 0 #40000000">
+            
+            <StackPanel Spacing="20">
+                <!-- Icona o Logo dell'operazione -->
+                <PathIcon Data="{StaticResource ProgressLoopIcon}" 
+                          Width="40" Height="40" 
+                          Foreground="{DynamicResource SystemAccentColor}"
+                          HorizontalAlignment="Center"/>
+                
+                <!-- Messaggio dinamico dell'operazione -->
+                <TextBlock Text="{Binding #Root.TextLine1}"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center"
+                           TextWrapping="Wrap"
+                           FontSize="15"
+                           FontWeight="Medium"/>
+
+                <!-- Messaggio dinamico dell'operazione -->
+                <TextBlock Text="{Binding #Root.TextLine2}"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center"
+                           TextWrapping="Wrap"
+                           FontSize="15"
+                           FontWeight="Medium"/>
+                
+                <!-- Barra di progresso -->
+                <ProgressBar IsIndeterminate="True"
+                             Minimum="0" 
+                             Maximum="100"
+                             Height="4"
+                             CornerRadius="2"
+                             Foreground="{DynamicResource SystemAccentColor}"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+
+
+</UserControl>

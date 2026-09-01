@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0-windows10.0.22621.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AppServices\AppServices.csproj" />
+    <ProjectReference Include="..\AppSystem\AppSystem.csproj" />
+    <ProjectReference Include="..\Contracts\Contracts.csproj" />
+    <ProjectReference Include="..\ControlStyles\ControlStyles.csproj" />
+    <ProjectReference Include="..\Models\Models.csproj" />
+    <ProjectReference Include="..\ViewModelServices\ViewModelServices.csproj" />
+    <ProjectReference Include="..\ViewServices\ViewServices.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Views\Controls\PulsantiPostazioneView.axaml.cs">
+      <DependentUpon>PulsantiPostazioneView.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Front\CassaPostazioneView.axaml.cs">
+      <DependentUpon>CassaPostazioneView.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Back\CassaListaSociView.axaml.cs">
+      <DependentUpon>CassaListaSociView.axaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+</Project>

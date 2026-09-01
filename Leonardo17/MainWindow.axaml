@@ -1,0 +1,39 @@
+<Window xmlns="https://github.com/avaloniaui"
+                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                  xmlns:r="using:ReactiveUI.Avalonia"
+                  xmlns:vm="using:ViewModels"
+                  xmlns:views="using:Views"
+                  mc:Ignorable="d"
+                  d:DesignWidth="800"
+                  d:DesignHeight="450"
+                  x:Class="Views.MainWindow"
+                  xmlns:local="using:Leonardo"
+                  x:DataType="vm:MainWindowViewModel"
+                  Title="Leonardo">
+    
+    <Grid>
+        
+        <!-- LIVELLO 0: Il Navigatore dell'applicazione -->
+
+        <r:RoutedViewHost x:Name="RouterHost" 
+                          Router="{Binding Router}"
+                          IsEnabled="{Binding !IsLoading}">
+            <r:RoutedViewHost.PageTransition>
+                <CrossFade Duration="0:0:0.5" />
+            </r:RoutedViewHost.PageTransition>
+            <r:RoutedViewHost.DefaultContent>
+                <Border/>
+            </r:RoutedViewHost.DefaultContent>
+        </r:RoutedViewHost>
+
+        <!-- LIVELLO 1: Lo SplashView posizionato SOPRA il navigatore -->
+        <!-- Visibile solo quando IsLoading del ViewModel è True -->
+        <views:SplashView TextLine1="Verifica ultima connessione in corso..."
+                          TextLine2="Attendere il completamento dell'elaborazione"
+                          IsVisible="{Binding IsLoading}"/>
+
+    </Grid>
+
+</Window>
