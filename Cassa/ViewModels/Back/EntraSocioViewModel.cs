@@ -281,11 +281,11 @@ namespace Cassa.ViewModels
 
             try
             {
-<<<<<<< HEAD
+
                 int result = await Q.AddNewScheda(BindingT.ToDto(), SelectedIngresso.ToDto(),Token);
-=======
-                int result = await Q.AddNewScheda(BindingT.ToDto(), SelectedIngresso.ToDTO(), Token);
->>>>>>> c42a9bd06f481eca069f8d12d0e299d3147dafa4
+
+                
+
                 if (result == -1)
                 {
                     Debug.WriteLine("Errore durante l'aggiunta della scheda.");

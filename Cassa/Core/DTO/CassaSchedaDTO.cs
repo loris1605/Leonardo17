@@ -21,7 +21,7 @@ namespace Cassa.Core.DTO
         public bool Blocco { get; set; }
         public string Note { get; set; } = string.Empty;
 
-        public List<CassaSchedaContoDTO> Conti { get; set; } = new();
+        
 
         public CassaSchedaDTO() { }
 

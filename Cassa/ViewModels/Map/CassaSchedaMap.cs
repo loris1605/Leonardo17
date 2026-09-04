@@ -28,11 +28,10 @@ namespace Cassa.ViewModels.Map
             this.Consumazione = dto.Consumazione;
             this.Blocco = dto.Blocco;
             this.Note = dto.Note;
-
-            // Mappa i conti (se presenti) in una ObservableCollection osservabile dalla UI
-            this.Conti = new ObservableCollection<CassaSchedaContoMap>(
-                dto.Conti?.Select(c => new CassaSchedaContoMap(c)) ?? Enumerable.Empty<CassaSchedaContoMap>()
-            );
+            //// Mappa i conti (se presenti) in una ObservableCollection osservabile dalla UI
+            //this.Conti = new ObservableCollection<CassaSchedaContoMap>(
+            //    dto.Conti?.Select(c => new CassaSchedaContoMap(c)) ?? Enumerable.Empty<CassaSchedaContoMap>()
+            //);
         }
 
 
@@ -55,8 +54,7 @@ namespace Cassa.ViewModels.Map
                 Grb4 = this.Grb4,
                 Consumazione = this.Consumazione,
                 Blocco = this.Blocco,
-                Note = this.Note,
-                Conti = this.Conti?.Select(c => c.ToDto()).ToList() ?? new List<CassaSchedaContoDTO>()
+                Note = this.Note
             };
 
             return dto;

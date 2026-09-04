@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Models.Repository;
 using Models.Tables;
 using System.Diagnostics;
-using ViewModelServices.Core;
 
 namespace Cassa.Core.Repository
 {
@@ -12,7 +11,7 @@ namespace Cassa.Core.Repository
     {
         Task<string> GetPostazioneName(int id, CancellationToken ctk = default);
         Task<CassaSchedaDTO> GetSchedaByPosizione(string posizione, CancellationToken ctk = default);
-        Task<List<CassaSchedaContoDTO>> GetSchedaContoBySchedaId(int schedaId, CancellationToken ctk = default);
+        
     }
 
     public class CassaPostazioneRepository : BaseRepository<CassaPostazioneDbContext, Postazione>, ICassaPostazioneRepository
@@ -68,22 +67,8 @@ namespace Cassa.Core.Repository
                         Grb4 = x.Grb4,
                         Consumazione = x.Consumazione,
                         Blocco = x.Blocco,
-                        Note = x.Note,
-                        Conti = x.SchedeConto
-                                .OrderBy(c => c.DataOra)
-                                .Select(c => new CassaSchedaContoDTO
-                                {
-                                    Id = c.Id,
-                                    CodiceScheda = c.SchedaId,
-                                    DescSettore = c.DescSettore,
-                                    DescPostazione = c.DescPostazione,
-                                    VoiceDesc = c.VoiceDesc,
-                                    VoicePrice = c.VoicePrice,
-                                    Pagato = c.Pagato,
-                                    Note = c.Note,
-                                    DataOra = c.DataOra
-                                })
-                                .ToList()
+                        Note = x.Note
+                       
                     })
                     .FirstOrDefaultAsync(ctk)
                     .ConfigureAwait(false);
@@ -102,34 +87,6 @@ namespace Cassa.Core.Repository
             }
         }
 
-        public async Task<List<CassaSchedaContoDTO>> GetSchedaContoBySchedaId(int schedaId, CancellationToken ctk = default)
-        {
-            ctk.ThrowIfCancellationRequested();
-
-            // Verifica che il DbSet esista (evita eccezioni se il contesto non è stato aggiornato)
-            if (_ctx.SchedeConto == null)
-                return new List<CassaSchedaContoDTO>();
-
-            var query = _ctx.SchedeConto
-                .AsNoTracking()
-                .Where(x => x.SchedaId == schedaId)
-                .OrderBy(x => x.DataOra)
-                .Select(x => new CassaSchedaContoDTO
-                {
-                    Id = x.Id,
-                    CodiceScheda = x.SchedaId,
-                    DescSettore = x.DescSettore,
-                    DescPostazione = x.DescPostazione,
-                    VoiceDesc = x.VoiceDesc,
-                    VoicePrice = x.VoicePrice,
-                    Pagato = x.Pagato,
-                    Note = x.Note,
-                    DataOra = x.DataOra
-                });
-
-            var result = await query.ToListAsync(ctk).ConfigureAwait(false);
-
-            return result ?? new List<CassaSchedaContoDTO>();
-        }
+        
     }
 }

@@ -155,14 +155,14 @@ namespace Cassa.ViewModels
                 }
 
                 // Crea la mappa e assegna i conti come ObservableCollection (se Conti in CassaSchedaMap è ObservableCollection)
-                BindingT = new CassaSchedaMap(schedaData)
-                {
-                    Conti = new System.Collections.ObjectModel.ObservableCollection<CassaSchedaContoMap>(
-                        schedaData.Conti?.Select(c => new CassaSchedaContoMap(c)) ?? Enumerable.Empty<CassaSchedaContoMap>()
-                    )
-                };
+                //BindingT = new CassaSchedaMap(schedaData)
+                //{
+                //    Conti = new System.Collections.ObjectModel.ObservableCollection<CassaSchedaContoMap>(
+                //        schedaData.Conti?.Select(c => new CassaSchedaContoMap(c)) ?? Enumerable.Empty<CassaSchedaContoMap>()
+                //    )
+                //};
 
-                Debug.WriteLine($"Conti dal repository: {schedaData.Conti?.Count ?? 0}, Conti in ViewModel: {BindingT.Conti?.Count ?? 0}");
+                //Debug.WriteLine($"Conti dal repository: {schedaData.Conti?.Count ?? 0}, Conti in ViewModel: {BindingT.Conti?.Count ?? 0}");
 
                 IsOpen = true;
                 await SetFocus(PosizioneFocus);
@@ -219,12 +219,7 @@ namespace Cassa.ViewModels
 
         }
 
-        private CassaSchedaContoMap _schedaContoSelectedItem = new();
-        public CassaSchedaContoMap SchedaContoSelectedItem
-        {
-            get => _schedaContoSelectedItem;
-            set => this.RaiseAndSetIfChanged(ref _schedaContoSelectedItem, value);
-        }
+        
 
         public Interaction<Unit, Unit> PosizioneFocus { get; } = new();
 

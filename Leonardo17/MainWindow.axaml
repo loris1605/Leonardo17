@@ -1,17 +1,16 @@
 <Window xmlns="https://github.com/avaloniaui"
-                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                  xmlns:r="using:ReactiveUI.Avalonia"
-                  xmlns:vm="using:ViewModels"
-                  xmlns:views="using:Views"
-                  mc:Ignorable="d"
-                  d:DesignWidth="800"
-                  d:DesignHeight="450"
-                  x:Class="Views.MainWindow"
-                  xmlns:local="using:Leonardo"
-                  x:DataType="vm:MainWindowViewModel"
-                  Title="Leonardo">
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:r="using:ReactiveUI.Avalonia"
+        xmlns:views="using:Views"
+        xmlns:vm="using:ViewModels"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="450"
+        x:Class="Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="Leonardo">
     
     <Grid>
         

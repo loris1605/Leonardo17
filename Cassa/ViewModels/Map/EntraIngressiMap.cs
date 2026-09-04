@@ -17,11 +17,7 @@ namespace Cassa.ViewModels.Map
             this.IsFreeDrink = dto.IsFreeDrink;
         }
 
-<<<<<<< HEAD
         public EntraIngressiDTO ToDto()
-=======
-        public EntraIngressiDTO ToDTO()
->>>>>>> c42a9bd06f481eca069f8d12d0e299d3147dafa4
         {
             return new EntraIngressiDTO
             {
@@ -31,12 +27,8 @@ namespace Cassa.ViewModels.Map
                 PrezzoTariffa = this.PrezzoTariffa,
                 IsFreeDrink = this.IsFreeDrink
             };
-<<<<<<< HEAD
         }
-=======
-        }   
 
->>>>>>> c42a9bd06f481eca069f8d12d0e299d3147dafa4
 
         private string _nometariffa = string.Empty;
         public string NomeTariffa
