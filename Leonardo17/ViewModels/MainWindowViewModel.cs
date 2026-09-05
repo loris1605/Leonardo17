@@ -22,7 +22,6 @@ namespace ViewModels
 
     public partial class MainWindowViewModel : ViewModelBase,
                                                    IScreen,
-                                                   IRoutableViewModel,
                                                    IActivatableViewModel,
                                                    IMainWindowViewModel
     {

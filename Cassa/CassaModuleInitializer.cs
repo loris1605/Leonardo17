@@ -19,6 +19,7 @@ namespace Cassa
             Locator.CurrentMutable.Register(() => new EntraSocioDbContext(), typeof(IEntraSocioDbContext));
             Locator.CurrentMutable.Register(() => new StrisciateDbContext(), typeof(IStrisciateDbContext));
 
+            #region Repository Registrations
 
             // CORRETTO: Spostiamo il GetService dentro l'ambito della Lambda () => ...
             // In questo modo, il DbContext verrà cercato solo quando verrà creato il Repository
@@ -28,7 +29,13 @@ namespace Cassa
                 return new CassaPostazioneRepository(context);
             }, typeof(ICassaPostazioneRepository));
 
-            
+            Locator.CurrentMutable.Register(() =>
+            {
+                var context = Locator.Current.GetService<ICassaPostazioneDbContext>();
+                return new CassaSchedaContoRepository(context);
+            }, typeof(ICassaSchedaContoRepository));
+
+
             Locator.CurrentMutable.Register(() =>
             {
                 var context = Locator.Current.GetService<IEntraSocioDbContext>();
@@ -47,7 +54,9 @@ namespace Cassa
                 return new CassaListaSociRepository(context);
             }, typeof(ICassaListaSociRepository));
 
+            #endregion
 
+            #region ViewModel Registrations
 
             Locator.CurrentMutable.Register(() => new CassaViewModel(), typeof(ICassaViewModel));
 
@@ -56,6 +65,12 @@ namespace Cassa
                 var repository = Locator.Current.GetService<ICassaPostazioneRepository>();
                 return new CassaPostazioneViewModel(repository);
             }, typeof(ICassaPostazioneViewModel));
+
+            Locator.CurrentMutable.Register(() =>
+            {
+                var repository = Locator.Current.GetService<ICassaSchedaContoRepository>();
+                return new SchedaContoViewModel(repository);
+            }, typeof(ISchedaContoViewModel));
 
 
             Locator.CurrentMutable.Register(() =>
@@ -72,7 +87,7 @@ namespace Cassa
             }, typeof(ICassaListaSociViewModel));
 
 
-
+            #endregion
 
 
             // 2. REGISTRAZIONE COMPONENTI UI (Modello B - Usa e Getta)
