@@ -4,7 +4,7 @@ using Avalonia.Markup.Xaml;
 using Cassa.ViewModels;
 using Views;
 
-namespace Cassa.Views;
+namespace Cassa.Views
 {
     public partial class CassaSchedaContoView : BaseUserControl<SchedaContoViewModel>
     {

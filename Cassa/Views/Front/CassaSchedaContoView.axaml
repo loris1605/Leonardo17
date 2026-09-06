@@ -6,17 +6,86 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:Cassa.ViewModels"
              xmlns:ui="using:ControlStyles"
+             xmlns:map="using:Cassa.ViewModels.Map"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
              KeyboardNavigation.TabNavigation="Cycle"
              Background="LightSteelBlue"
-             x:DataType="vm:CassaSchedaContoViewModel"
+             x:DataType="vm:SchedaContoViewModel"
              x:Class="Cassa.Views.CassaSchedaContoView">
 
-    <Grid x:Name="MainGrid">
+    <HeaderedContentControl BorderBrush="Black" 
+                            x:Name="MainGrid"
+                            Grid.Row="1" 
+                            HorizontalAlignment="Stretch" 
+                            VerticalAlignment="Stretch"
+                            Name="Group"
+                            BorderThickness="1"
+                            CornerRadius="5"
+                            Margin="3"
+                            Background="Transparent">
+
+        <HeaderedContentControl.Header>
+                <TextBlock Text=" Dettaglio Conto " 
+                           Foreground="Black" 
+                           Margin="3"
+                           HorizontalAlignment="Center"/>
+        </HeaderedContentControl.Header>  
         
+        <DataGrid ItemsSource="{Binding SchedaContoMaps}"
+                  SelectedItem="{Binding Path=SelectedSchedaContoMap}"
+                  MaxHeight="400"
+                  VerticalScrollBarVisibility="Auto"
+                  CanUserResizeColumns="True"
+                  IsReadOnly="False"
+                  Classes="Group">
+    						
+                            <DataGrid.Columns >
+                            
+                                <DataGridTextColumn Header="Cod." 
+                                            x:DataType="map:CassaSchedaContoMap"
+                                            Binding="{Binding Id}" 
+                                            IsVisible="False" />
+    
+                                <DataGridTextColumn Header="Settore" 
+                                            x:DataType="map:CassaSchedaContoMap"
+                                            Binding="{Binding DescSettore}" 
+                                            IsReadOnly="True"
+                                            Width="Auto" />
+    
+                                <DataGridTextColumn Header="Tipo" 
+                                            x:DataType="map:ConfigurazionePostazioneElencoMap"
+                                            Binding="{Binding NomeTipoPostazione}" 
+                                            IsReadOnly="True"
+                                            Width="Auto" />
+
+                                <DataGridTemplateColumn Header="Permesso" IsReadOnly="False">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <!-- Usiamo il Binding con TwoWay per aggiornare subito il ViewModel -->
+                                            <CheckBox IsChecked="{Binding HasPermesso, 
+                                                      Mode=TwoWay,
+                                                      UpdateSourceTrigger=PropertyChanged}" 
+                                                      HorizontalAlignment="Center" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+    
+                                <!--<DataGridCheckBoxColumn 
+                                            Header="Permesso"
+                                            x:DataType="vm:BindableObjects.PostazioneElencoMap"
+                                            Binding="{Binding HasPermesso, 
+                                                     Mode=TwoWay,
+                                                     UpdateSourceTrigger=PropertyChanged}" 
+                                            IsReadOnly="False"
+                                            Width="Auto" />-->
+                            
+                            </DataGrid.Columns>
+                            
+                        </DataGrid>
+
+    </HeaderedContentControl>
 
 
-    </Grid>
 </UserControl>
