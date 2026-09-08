@@ -41,7 +41,8 @@
         
         <r:RoutedViewHost x:Name="RouterSchedaConto" 
                           Router="{Binding RouterSchedaConto}"
-                          Grid.Row="2">
+                          Grid.Row="2"
+                          IsVisible="{Binding IsOpen}">
             <r:RoutedViewHost.PageTransition>
                 <CrossFade Duration="0:0:0.5" />
             </r:RoutedViewHost.PageTransition>

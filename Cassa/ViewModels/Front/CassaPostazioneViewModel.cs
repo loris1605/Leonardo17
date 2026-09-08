@@ -1,12 +1,13 @@
-﻿using Cassa.Core.Repository;
+﻿using Cassa.Core.DTO;
+using Cassa.Core.Repository;
 using Cassa.ViewModels.Map;
 using ReactiveUI;
 using Splat;
 using System.Diagnostics;
-using System.Diagnostics.Metrics;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ViewModels;
@@ -50,29 +51,26 @@ namespace Cassa.ViewModels
 
         protected override IObservable<bool> IsAnythingExecuting =>
             Observable.CombineLatest(
-            [
-                base.IsAnythingExecuting ?? Observable.Return(false),
-
-                this.WhenAnyValue(vm => vm.EntraSocioCommand)
-                    .Select(cmd => cmd?.IsExecuting ?? Observable.Return(false))
-                    .Switch(),
-
-                this.WhenAnyValue(vm => vm.EsceSocioCommand)
-                    .Select(cmd => cmd?.IsExecuting ?? Observable.Return(false))
-                    .Switch(),
-
-                this.WhenAnyValue(vm => vm.ListaSociCommand)
-                    .Select(cmd => cmd?.IsExecuting ?? Observable.Return(false))
-                    .Switch(),
-
-                this.WhenAnyValue(vm => vm.PosizioneEnterCommand)
-                    .Select(cmd => cmd?.IsExecuting ?? Observable.Return(false))
-                    .Switch(),
-
-                this.WhenAnyValue(vm => vm.PosizioneEscCommand)
-                    .Select(cmd => cmd?.IsExecuting ?? Observable.Return(false))
-                    .Switch()
-            ], results => results.Any(x => x))
+                new IObservable<bool>[]
+                {
+                    base.IsAnythingExecuting ?? Observable.Return(false),
+                    this.WhenAnyValue(vm => vm.EntraSocioCommand)
+                        .Select(cmd => cmd?.IsExecuting ?? Observable.Return(false))
+                        .Switch(),
+                    this.WhenAnyValue(vm => vm.EsceSocioCommand)
+                        .Select(cmd => cmd?.IsExecuting ?? Observable.Return(false))
+                        .Switch(),
+                    this.WhenAnyValue(vm => vm.ListaSociCommand)
+                        .Select(cmd => cmd?.IsExecuting ?? Observable.Return(false))
+                        .Switch(),
+                    this.WhenAnyValue(vm => vm.PosizioneEnterCommand)
+                        .Select(cmd => cmd?.IsExecuting ?? Observable.Return(false))
+                        .Switch(),
+                    this.WhenAnyValue(vm => vm.PosizioneEscCommand)
+                        .Select(cmd => cmd?.IsExecuting ?? Observable.Return(false))
+                        .Switch()
+                },
+                results => results.Any(x => x))
             .DistinctUntilChanged();
 
         public CassaPostazioneViewModel(ICassaPostazioneRepository repository, 
@@ -98,7 +96,15 @@ namespace Cassa.ViewModels
             _disposables.Add(_postazioneToMenu);
             _disposables.Add(_postazioneToEntraSocio);
             _disposables.Add(_postazioneToListaSoci);
-            
+
+            // Subscribe to IsOpen changes and call handler (skip initial emission if undesiderata)
+            this.WhenAnyValue(vm => vm.IsOpen)
+                .DistinctUntilChanged()
+                .Skip(1) // rimuovi se vuoi ricevere anche il valore iniziale
+                .ObserveOn(RxSchedulers.MainThreadScheduler)
+                .Subscribe(isOpen => OnIsOpenChanged(isOpen))
+                .DisposeWith(_disposables);
+
         }
 
         protected override void OnFinalDestruction()
@@ -168,7 +174,6 @@ namespace Cassa.ViewModels
                     await SetFocus(PosizioneFocus);
                     return;
                 }
-                               
 
                 var gridVM = Locator.Current.GetService<ISchedaContoViewModel>();
                 if (gridVM == null)
@@ -177,31 +182,27 @@ namespace Cassa.ViewModels
                     return;
                 }
 
-                var schedaContoData = await P.GetSchedaContoBySchedaId(schedaData.Id, Token);
+                var schedaContoData = await P.GetSchedaContoBySchedaId(schedaData.Id, Token) ?? new List<CassaSchedaContoDTO>();
 
-                var mapped = await Task.Run(() => 
-                        schedaContoData.Select(dto => new CassaSchedaContoMap(dto)).ToList(), Token);
+                var mapped = await Task.Run(() =>
+                    schedaContoData.Select(dto => new CassaSchedaContoMap(dto)).ToList(), Token);
+
                 gridVM.SchedaContoMaps = mapped;
 
-                var tcs = new TaskCompletionSource();
+                var tcs = new TaskCompletionSource<object>();
+
+                // Assicura che la navigazione avvenga sul main thread e attendi il completamento
                 RxSchedulers.MainThreadScheduler.Schedule(() =>
                 {
                     RouterSchedaConto.NavigateAndReset.Execute(gridVM)
                         .Subscribe(
-                            _ => tcs.SetResult(),
-                            ex => tcs.SetException(ex)
+                            _ => tcs.TrySetResult(null),
+                            ex => tcs.TrySetException(ex),
+                            () => tcs.TrySetResult(null)
                         );
                 });
 
-                // Crea la mappa e assegna i conti come ObservableCollection (se Conti in CassaSchedaMap è ObservableCollection)
-                //BindingT = new CassaSchedaMap(schedaData)
-                //{
-                //    Conti = new System.Collections.ObjectModel.ObservableCollection<CassaSchedaContoMap>(
-                //        schedaData.Conti?.Select(c => new CassaSchedaContoMap(c)) ?? Enumerable.Empty<CassaSchedaContoMap>()
-                //    )
-                //};
-
-                //Debug.WriteLine($"Conti dal repository: {schedaData.Conti?.Count ?? 0}, Conti in ViewModel: {BindingT.Conti?.Count ?? 0}");
+                await tcs.Task.ConfigureAwait(false);
 
                 IsOpen = true;
                 await SetFocus(PosizioneFocus);
@@ -212,9 +213,22 @@ namespace Cassa.ViewModels
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Errore ApriScheda: {ex.Message}");
+                Debug.WriteLine($"Errore ApriScheda: {ex}");
                 BindingT = new CassaSchedaMap();
             }
+        }
+
+        // Aggiungi questo metodo protetto (può essere sovrascritto in una sottoclasse o modificato qui)
+        protected virtual void OnIsOpenChanged(bool isOpen)
+        {
+            // comportamento predefinito: se la scheda viene chiusa, resetta la binding map
+            if (!isOpen)
+            {
+                BindingT = new CassaSchedaMap();
+            }
+
+            // Se vuoi chiamare un metodo asincrono, avvialo senza bloccare:
+            // _ = SomeAsyncHandler(isOpen);
         }
     }
 

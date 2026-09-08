@@ -4,7 +4,6 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Models.Context;
 using ReactiveUI;
-using Splat;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Diagnostics;
@@ -178,6 +177,7 @@ namespace ViewModels
                 if (connection.State == ConnectionState.Open)
                 {
                     await connection.CloseAsync().ConfigureAwait(false);
+                    Debug.WriteLine("Connessione master OK");
                     isSqlInstanceOk = true;
                 }
                 else
@@ -185,6 +185,7 @@ namespace ViewModels
                     RxSchedulers.MainThreadScheduler.Schedule(() =>
                     {
                         isSqlInstanceOk = false;
+                        Debug.WriteLine("Connessione master KO");
                         ErrorText = "Connessione fallita.";
                         return;
                     });
@@ -209,12 +210,16 @@ namespace ViewModels
                 if (conn2.State == ConnectionState.Open)
                 {
                     await conn2.CloseAsync().ConfigureAwait(false);
-                    //isSqlInstanceOk = true;
+                    Debug.WriteLine("Connessione ulisse OK");
+                    AppServices.Connection.SetConnectionString(dbConnectionString);
+                    await CheckMigrations();
+                    await GoToLogin();
                 }
                 else
                 {
                     RxSchedulers.MainThreadScheduler.Schedule(() =>
                     {
+                        Debug.WriteLine("Connessione ulisse KO");
                         ErrorText = "DataBase inesistente - F5 Crea";
                         isDbDaCreare = true;
                         return;
@@ -226,6 +231,7 @@ namespace ViewModels
                 RxSchedulers.MainThreadScheduler.Schedule(() =>
                 {
                     isSqlInstanceOk = true;
+                    Debug.WriteLine("Connessione ulisse KO sul catch");
                     ErrorText = "DataBase inesistente - F5 Crea";
                     
                 });
@@ -354,6 +360,45 @@ namespace ViewModels
         protected override Task OnSaving() => Task.CompletedTask;
 
         protected override Task OnEsc() => Task.CompletedTask;
+
+        private async Task CheckMigrations()
+        {
+            try
+            {
+                using var db = new AppDbContext();
+                var pendingMigrations = await db.Database.GetPendingMigrationsAsync(Token);
+                if (pendingMigrations.Any())
+                {
+                    Debug.WriteLine("Ci sono migrazioni in sospeso. Applicazione in corso...");
+                    try
+                    {
+                        await db.Database.MigrateAsync(Token);
+                        Debug.WriteLine("Migrazioni applicate correttamente.");
+                        RxSchedulers.MainThreadScheduler.Schedule(() =>
+                        {
+                            AvviaVisibile = true;
+                            ErrorText = string.Empty;
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Errore durante l'applicazione delle migrazioni: {ex.Message}");
+                        RxSchedulers.MainThreadScheduler.Schedule(() =>
+                        {
+                            ErrorText = "Errore applicando le migrazioni: " + ex.Message;
+                        });
+                    }
+                }
+                else
+                {
+                    Debug.WriteLine("Nessuna migrazione in sospeso.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Errore durante il controllo delle migrazioni: {ex.Message}");
+            }
+        }
     }
 
     public partial class ConnectionViewModel

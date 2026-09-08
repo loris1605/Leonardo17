@@ -15,97 +15,106 @@
              x:DataType="vm:SchedaContoViewModel"
              x:Class="Cassa.Views.CassaSchedaContoView">
 
-    <HeaderedContentControl BorderBrush="Black" 
-                            x:Name="MainGrid"
-                            Grid.Row="1" 
-                            HorizontalAlignment="Stretch" 
-                            VerticalAlignment="Stretch"
-                            Name="Group"
-                            BorderThickness="1"
-                            CornerRadius="5"
-                            Margin="3"
-                            Background="Transparent">
+    <Grid x:Name="MainGrid">
 
-        <HeaderedContentControl.Header>
-                <TextBlock Text=" Dettaglio Conto " 
-                           Foreground="Black" 
-                           Margin="3"
-                           HorizontalAlignment="Center"/>
-        </HeaderedContentControl.Header>  
-        
-        <DataGrid ItemsSource="{Binding SchedaContoMaps}"
-                  SelectedItem="{Binding Path=SelectedSchedaContoMap}"
-                  MaxHeight="400"
-                  VerticalScrollBarVisibility="Auto"
-                  CanUserResizeColumns="True"
-                  IsReadOnly="False"
-                  Classes="Group">
-    						
-            <DataGrid.Columns >
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+
+        <HeaderedContentControl BorderBrush="Black" 
+                                Grid.Column="1"
+                                HorizontalAlignment="Stretch" 
+                                VerticalAlignment="Top"
+                                Name="Conti"
+                                BorderThickness="1"
+                                CornerRadius="5"
+                                Margin="3"
+                                Background="Transparent">
+
+            <HeaderedContentControl.Header>
+                    <TextBlock Text=" Dettaglio Conto " 
+                               Foreground="Black" 
+                               Margin="3"
+                               HorizontalAlignment="Center"/>
+            </HeaderedContentControl.Header>  
             
-                <DataGridTextColumn Header="Cod." 
-                            x:DataType="map:CassaSchedaContoMap"
-                            Binding="{Binding Id}" 
-                            IsVisible="False" />
+            <DataGrid ItemsSource="{Binding SchedaContoMaps}"
+                      SelectedItem="{Binding Path=SelectedSchedaContoMap}"
+                      MaxHeight="400"
+                      VerticalScrollBarVisibility="Auto"
+                      CanUserResizeColumns="True"
+                      IsReadOnly="False"
+                      Classes="Group">
+        						
+                <DataGrid.Columns >
+                
+                    <DataGridTextColumn Header="Cod." 
+                                x:DataType="map:CassaSchedaContoMap"
+                                Binding="{Binding Id}" 
+                                IsVisible="False" />
 
-                <DataGridTextColumn Header="Postazione" 
-                            x:DataType="map:CassaSchedaContoMap"
-                            Binding="{Binding DescPostazione}" 
-                            IsReadOnly="True"
-                            Width="Auto" />
+                    <DataGridTextColumn Header="Postazione" 
+                                x:DataType="map:CassaSchedaContoMap"
+                                Binding="{Binding DescPostazione}" 
+                                IsReadOnly="True"
+                                Width="Auto" />
 
-                <DataGridTextColumn Header="Data e Ora" 
-                            x:DataType="map:CassaSchedaContoMap"
-                            Binding="{Binding DataOra}" 
-                            IsReadOnly="True"
-                            Width="Auto" />
+                    <DataGridTextColumn Header="Data e Ora" 
+                                x:DataType="map:CassaSchedaContoMap"
+                                Binding="{Binding DataOra}" 
+                                IsReadOnly="True"
+                                Width="Auto" />
 
-                <DataGridTextColumn Header="Settore" 
-                            x:DataType="map:CassaSchedaContoMap"
-                            Binding="{Binding DescSettore}" 
-                            IsReadOnly="True"
-                            Width="Auto" />
+                    <DataGridTextColumn Header="Settore" 
+                                x:DataType="map:CassaSchedaContoMap"
+                                Binding="{Binding DescSettore}" 
+                                IsReadOnly="True"
+                                Width="Auto" />
 
-                <DataGridTextColumn Header="Dettaglio" 
-                            x:DataType="map:CassaSchedaContoMap"
-                            Binding="{Binding VoiceDesc}" 
-                            IsReadOnly="True"
-                            Width="Auto" />
+                    <DataGridTextColumn Header="Dettaglio" 
+                                x:DataType="map:CassaSchedaContoMap"
+                                Binding="{Binding VoiceDesc}" 
+                                IsReadOnly="True"
+                                Width="Auto" />
 
-                <DataGridTextColumn Header="Prezzo" 
-                            x:DataType="map:CassaSchedaContoMap"
-                            Binding="{Binding VoicePrice}" 
-                            IsReadOnly="True"
-                            Width="Auto" />
+                    <DataGridTextColumn Header="Prezzo" 
+                                x:DataType="map:CassaSchedaContoMap"
+                                Binding="{Binding VoicePrice}" 
+                                IsReadOnly="True"
+                                Width="Auto" />
 
-                <DataGridTemplateColumn Header="Pagato" IsReadOnly="False"
-                                        x:DataType="map:CassaSchedaContoMap">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <!-- Usiamo il Binding con TwoWay per aggiornare subito il ViewModel -->
-                            <CheckBox IsChecked="{Binding Pagato, 
-                                      Mode=TwoWay,
-                                      UpdateSourceTrigger=PropertyChanged}" 
-                                      HorizontalAlignment="Center" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn Header="Pagato" IsReadOnly="False"
+                                            x:DataType="map:CassaSchedaContoMap">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <!-- Usiamo il Binding con TwoWay per aggiornare subito il ViewModel -->
+                                <CheckBox IsChecked="{Binding Pagato, 
+                                          Mode=TwoWay,
+                                          UpdateSourceTrigger=PropertyChanged}" 
+                                          HorizontalAlignment="Center" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
 
-                </DataGridTemplateColumn>
+                    </DataGridTemplateColumn>
 
-                <!--<DataGridCheckBoxColumn 
-                            Header="Permesso"
-                            x:DataType="vm:BindableObjects.PostazioneElencoMap"
-                            Binding="{Binding HasPermesso, 
-                                     Mode=TwoWay,
-                                     UpdateSourceTrigger=PropertyChanged}" 
-                            IsReadOnly="False"
-                            Width="Auto" />-->
-            
-            </DataGrid.Columns>
-                            
-        </DataGrid>
+                    <!--<DataGridCheckBoxColumn 
+                                Header="Permesso"
+                                x:DataType="vm:BindableObjects.PostazioneElencoMap"
+                                Binding="{Binding HasPermesso, 
+                                         Mode=TwoWay,
+                                         UpdateSourceTrigger=PropertyChanged}" 
+                                IsReadOnly="False"
+                                Width="Auto" />-->
+                
+                </DataGrid.Columns>
+                                
+            </DataGrid>
 
-    </HeaderedContentControl>
+        </HeaderedContentControl>
+
+    </Grid>
 
 
 </UserControl>
