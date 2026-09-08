@@ -7,7 +7,7 @@ using System.Diagnostics;
 
 namespace Cassa.Core.Repository
 {
-    public interface ICassaPostazioneRepository
+    public interface ICassaPostazioneRepository : IBaseRepository<Postazione>
     {
         Task<string> GetPostazioneName(int id, CancellationToken ctk = default);
         Task<CassaSchedaDTO> GetSchedaByPosizione(string posizione, CancellationToken ctk = default);

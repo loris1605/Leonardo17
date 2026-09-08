@@ -6,7 +6,7 @@ using Models.Tables;
 
 namespace Cassa.Core.Repository
 {
-    public interface ICassaSchedaContoRepository
+    public interface ICassaSchedaContoRepository : IBaseRepository<SchedaConto>
     {
         Task<List<CassaSchedaContoDTO>> GetSchedaContoBySchedaId(int schedaId, CancellationToken ctk = default);
     }

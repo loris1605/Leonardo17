@@ -1,8 +1,11 @@
 ﻿using Cassa.Core.Repository;
 using Cassa.ViewModels.Map;
 using ReactiveUI;
+using Splat;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -21,7 +24,13 @@ namespace Cassa.ViewModels
         Task ApriScheda();
     }
 
-    public partial class CassaPostazioneViewModel : ViewModelBase, ICassaPostazioneViewModel
+    public interface ICassaPostazioneScreen : IScreen
+    {
+        RoutingState RouterSchedaConto { get; }
+    }
+
+    public partial class CassaPostazioneViewModel : ViewModelBase, 
+                                                    ICassaPostazioneViewModel
     {
         // Commands
         public ReactiveCommand<Unit, Unit> EntraSocioCommand { get; }
@@ -31,10 +40,13 @@ namespace Cassa.ViewModels
         public ReactiveCommand<Unit, Unit> PosizioneEscCommand { get; }
 
         private readonly ICassaPostazioneRepository Q;
+        private readonly ICassaSchedaContoRepository P;
         private int _postazioneId;
 
         // disposables and subjects
         private readonly CompositeDisposable _disposables = new();
+
+        public RoutingState RouterSchedaConto { get; } = new RoutingState();
 
         protected override IObservable<bool> IsAnythingExecuting =>
             Observable.CombineLatest(
@@ -63,9 +75,11 @@ namespace Cassa.ViewModels
             ], results => results.Any(x => x))
             .DistinctUntilChanged();
 
-        public CassaPostazioneViewModel(ICassaPostazioneRepository repository) : base(null)
+        public CassaPostazioneViewModel(ICassaPostazioneRepository repository, 
+                                        ICassaSchedaContoRepository contoRepository) : base(null)
         {
             Q = repository ?? throw new ArgumentNullException(nameof(repository));
+            P = contoRepository ?? throw new ArgumentNullException(nameof(contoRepository));
 
             EntraSocioCommand = ReactiveCommand.CreateFromTask(GoToEntraSocio);
             EsceSocioCommand = ReactiveCommand.CreateFromTask(() => Task.CompletedTask);
@@ -84,6 +98,7 @@ namespace Cassa.ViewModels
             _disposables.Add(_postazioneToMenu);
             _disposables.Add(_postazioneToEntraSocio);
             _disposables.Add(_postazioneToListaSoci);
+            
         }
 
         protected override void OnFinalDestruction()
@@ -153,6 +168,30 @@ namespace Cassa.ViewModels
                     await SetFocus(PosizioneFocus);
                     return;
                 }
+                               
+
+                var gridVM = Locator.Current.GetService<ISchedaContoViewModel>();
+                if (gridVM == null)
+                {
+                    Debug.WriteLine($">>> [ERROR] Impossibile risolvere SchedaContoViewModel.");
+                    return;
+                }
+
+                var schedaContoData = await P.GetSchedaContoBySchedaId(schedaData.Id, Token);
+
+                var mapped = await Task.Run(() => 
+                        schedaContoData.Select(dto => new CassaSchedaContoMap(dto)).ToList(), Token);
+                gridVM.SchedaContoMaps = mapped;
+
+                var tcs = new TaskCompletionSource();
+                RxSchedulers.MainThreadScheduler.Schedule(() =>
+                {
+                    RouterSchedaConto.NavigateAndReset.Execute(gridVM)
+                        .Subscribe(
+                            _ => tcs.SetResult(),
+                            ex => tcs.SetException(ex)
+                        );
+                });
 
                 // Crea la mappa e assegna i conti come ObservableCollection (se Conti in CassaSchedaMap è ObservableCollection)
                 //BindingT = new CassaSchedaMap(schedaData)

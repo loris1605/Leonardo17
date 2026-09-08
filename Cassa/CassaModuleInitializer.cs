@@ -63,7 +63,8 @@ namespace Cassa
             Locator.CurrentMutable.Register(() =>
             {
                 var repository = Locator.Current.GetService<ICassaPostazioneRepository>();
-                return new CassaPostazioneViewModel(repository);
+                var contoRepository = Locator.Current.GetService<ICassaSchedaContoRepository>();
+                return new CassaPostazioneViewModel(repository, contoRepository);
             }, typeof(ICassaPostazioneViewModel));
 
             Locator.CurrentMutable.Register(() =>
@@ -89,6 +90,7 @@ namespace Cassa
 
             #endregion
 
+            #region View Registrations
 
             // 2. REGISTRAZIONE COMPONENTI UI (Modello B - Usa e Getta)
             // CORRETTO: Spostiamo i resolver dentro la Lambda. 
@@ -96,10 +98,14 @@ namespace Cassa
             Locator.CurrentMutable.Register(() => new CassaView(), typeof(IViewFor<CassaViewModel>));
 
             Locator.CurrentMutable.Register(() => new CassaPostazioneView(), typeof(IViewFor<CassaPostazioneViewModel>));
+            Locator.CurrentMutable.Register(() => new CassaSchedaContoView(), 
+                                                typeof(IViewFor<SchedaContoViewModel>));
 
             Locator.CurrentMutable.Register(() => new EntraSocioView(), typeof(IViewFor<EntraSocioViewModel>));
 
             Locator.CurrentMutable.Register(() => new CassaListaSociView(), typeof(IViewFor<CassaListaSociViewModel>));
+
+            #endregion
         }
     }
 }

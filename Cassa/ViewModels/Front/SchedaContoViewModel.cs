@@ -10,6 +10,7 @@ namespace Cassa.ViewModels
     public interface ISchedaContoViewModel : IRoutableViewModel
     {
         // Define any properties or methods that the SchedaContoViewModel should implement
+        List<CassaSchedaContoMap> SchedaContoMaps { get; set; }
     }
 
     public class SchedaContoViewModel : ViewModelBase, ISchedaContoViewModel
@@ -17,7 +18,7 @@ namespace Cassa.ViewModels
         private readonly CompositeDisposable _disposables = new();
 
         private readonly ICassaSchedaContoRepository _cassaSchedaContoRepository;
-        private int _schedaId;
+        public int CodiceScheda { get; set; }
 
         public SchedaContoViewModel(ICassaSchedaContoRepository cassaSchedaContoRepository)
         {

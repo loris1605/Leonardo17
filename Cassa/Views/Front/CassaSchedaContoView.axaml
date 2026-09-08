@@ -41,49 +41,69 @@
                   IsReadOnly="False"
                   Classes="Group">
     						
-                            <DataGrid.Columns >
-                            
-                                <DataGridTextColumn Header="Cod." 
-                                            x:DataType="map:CassaSchedaContoMap"
-                                            Binding="{Binding Id}" 
-                                            IsVisible="False" />
-    
-                                <DataGridTextColumn Header="Settore" 
-                                            x:DataType="map:CassaSchedaContoMap"
-                                            Binding="{Binding DescSettore}" 
-                                            IsReadOnly="True"
-                                            Width="Auto" />
-    
-                                <DataGridTextColumn Header="Tipo" 
-                                            x:DataType="map:ConfigurazionePostazioneElencoMap"
-                                            Binding="{Binding NomeTipoPostazione}" 
-                                            IsReadOnly="True"
-                                            Width="Auto" />
+            <DataGrid.Columns >
+            
+                <DataGridTextColumn Header="Cod." 
+                            x:DataType="map:CassaSchedaContoMap"
+                            Binding="{Binding Id}" 
+                            IsVisible="False" />
 
-                                <DataGridTemplateColumn Header="Permesso" IsReadOnly="False">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <!-- Usiamo il Binding con TwoWay per aggiornare subito il ViewModel -->
-                                            <CheckBox IsChecked="{Binding HasPermesso, 
-                                                      Mode=TwoWay,
-                                                      UpdateSourceTrigger=PropertyChanged}" 
-                                                      HorizontalAlignment="Center" />
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-    
-                                <!--<DataGridCheckBoxColumn 
-                                            Header="Permesso"
-                                            x:DataType="vm:BindableObjects.PostazioneElencoMap"
-                                            Binding="{Binding HasPermesso, 
-                                                     Mode=TwoWay,
-                                                     UpdateSourceTrigger=PropertyChanged}" 
-                                            IsReadOnly="False"
-                                            Width="Auto" />-->
+                <DataGridTextColumn Header="Postazione" 
+                            x:DataType="map:CassaSchedaContoMap"
+                            Binding="{Binding DescPostazione}" 
+                            IsReadOnly="True"
+                            Width="Auto" />
+
+                <DataGridTextColumn Header="Data e Ora" 
+                            x:DataType="map:CassaSchedaContoMap"
+                            Binding="{Binding DataOra}" 
+                            IsReadOnly="True"
+                            Width="Auto" />
+
+                <DataGridTextColumn Header="Settore" 
+                            x:DataType="map:CassaSchedaContoMap"
+                            Binding="{Binding DescSettore}" 
+                            IsReadOnly="True"
+                            Width="Auto" />
+
+                <DataGridTextColumn Header="Dettaglio" 
+                            x:DataType="map:CassaSchedaContoMap"
+                            Binding="{Binding VoiceDesc}" 
+                            IsReadOnly="True"
+                            Width="Auto" />
+
+                <DataGridTextColumn Header="Prezzo" 
+                            x:DataType="map:CassaSchedaContoMap"
+                            Binding="{Binding VoicePrice}" 
+                            IsReadOnly="True"
+                            Width="Auto" />
+
+                <DataGridTemplateColumn Header="Pagato" IsReadOnly="False"
+                                        x:DataType="map:CassaSchedaContoMap">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <!-- Usiamo il Binding con TwoWay per aggiornare subito il ViewModel -->
+                            <CheckBox IsChecked="{Binding Pagato, 
+                                      Mode=TwoWay,
+                                      UpdateSourceTrigger=PropertyChanged}" 
+                                      HorizontalAlignment="Center" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+
+                </DataGridTemplateColumn>
+
+                <!--<DataGridCheckBoxColumn 
+                            Header="Permesso"
+                            x:DataType="vm:BindableObjects.PostazioneElencoMap"
+                            Binding="{Binding HasPermesso, 
+                                     Mode=TwoWay,
+                                     UpdateSourceTrigger=PropertyChanged}" 
+                            IsReadOnly="False"
+                            Width="Auto" />-->
+            
+            </DataGrid.Columns>
                             
-                            </DataGrid.Columns>
-                            
-                        </DataGrid>
+        </DataGrid>
 
     </HeaderedContentControl>
 
