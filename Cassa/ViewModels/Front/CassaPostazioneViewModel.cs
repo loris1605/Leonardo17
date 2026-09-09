@@ -105,6 +105,13 @@ namespace Cassa.ViewModels
                 .Subscribe(isOpen => OnIsOpenChanged(isOpen))
                 .DisposeWith(_disposables);
 
+            // Subscribe to ErrorText changes and call handler (skip initial emission if undesiderata)
+            this.WhenAnyValue(vm => vm.ErrorText)
+                .DistinctUntilChanged()
+                .ObserveOn(RxSchedulers.MainThreadScheduler)
+                .Subscribe(errorText => OnErrorTextChanged(errorText))
+                .DisposeWith(_disposables);
+
         }
 
         protected override void OnFinalDestruction()
@@ -160,8 +167,14 @@ namespace Cassa.ViewModels
 
         public async Task ApriScheda()
         {
+            ErrorText = string.Empty; // Clear any previous error messages
+
             if (string.IsNullOrWhiteSpace(BindingT?.Posizione))
+            {
+                ErrorText = "Posizione non valida.";
                 return;
+            }
+               
 
             try
             {
@@ -171,14 +184,18 @@ namespace Cassa.ViewModels
                 {
                     Debug.WriteLine($"No Scheda found for position: {BindingT.Posizione}");
                     BindingT = new CassaSchedaMap();
+                    ErrorText = "Nessuna scheda trovata per la posizione specificata.";
                     await SetFocus(PosizioneFocus);
                     return;
                 }
+
+                ErrorText = string.Empty; // Clear any previous error messages
 
                 var gridVM = Locator.Current.GetService<ISchedaContoViewModel>();
                 if (gridVM == null)
                 {
                     Debug.WriteLine($">>> [ERROR] Impossibile risolvere SchedaContoViewModel.");
+                    ErrorText = "Impossibile risolvere SchedaContoViewModel.";
                     return;
                 }
 
@@ -214,6 +231,7 @@ namespace Cassa.ViewModels
             catch (Exception ex)
             {
                 Debug.WriteLine($"Errore ApriScheda: {ex}");
+                ErrorText = $"Errore durante l'apertura della scheda: {ex.Message}";
                 BindingT = new CassaSchedaMap();
             }
         }
@@ -225,10 +243,26 @@ namespace Cassa.ViewModels
             if (!isOpen)
             {
                 BindingT = new CassaSchedaMap();
+                RxSchedulers.MainThreadScheduler.Schedule(() =>
+                {
+                    RouterSchedaConto.NavigateBack.Execute();
+                    
+                });
             }
 
             // Se vuoi chiamare un metodo asincrono, avvialo senza bloccare:
             // _ = SomeAsyncHandler(isOpen);
+        }
+
+        protected virtual void OnErrorTextChanged(string errorText)
+        {
+            // comportamento predefinito: log dell'errore
+            if (!string.IsNullOrWhiteSpace(errorText))
+            {
+                Debug.WriteLine($"Errore cambiato: {errorText}");
+            }
+
+            ErrorText = errorText; // Aggiorna la proprietà ErrorText se necessario
         }
     }
 
@@ -272,7 +306,13 @@ namespace Cassa.ViewModels
 
         }
 
-        
+        private string _errorText = string.Empty;
+        public string ErrorText
+        {
+            get => _errorText;
+            set => this.RaiseAndSetIfChanged(ref _errorText, value);
+
+        }
 
         public Interaction<Unit, Unit> PosizioneFocus { get; } = new();
 

@@ -4,6 +4,8 @@ using Cassa.ViewModels.Map;
 using ReactiveUI;
 using System.Diagnostics;
 using System.Reactive;
+using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ViewModels;
@@ -30,6 +32,8 @@ namespace Cassa.ViewModels
 
         private HashSet<string> posizioniEsistentiHash;
 
+        private readonly CompositeDisposable _disposables = new();
+
         public ReactiveCommand<Unit, Unit> TesseraCommand { get; private set; }
         public ReactiveCommand<Unit, Unit> F5Command { get; private set; }
         public ReactiveCommand<Unit, Unit> PosizioneEscCommand { get; private set; }
@@ -50,6 +54,8 @@ namespace Cassa.ViewModels
             x => x.CanEntraLabel,
             (canEntraLabel) => string.IsNullOrEmpty(canEntraLabel)
         );
+
+
 
 
         public EntraSocioViewModel(IStrisciataRepository strisciataRepository, IEntraSocioRepository Repository) : base()
@@ -95,6 +101,13 @@ namespace Cassa.ViewModels
                 .ObserveOn(RxSchedulers.MainThreadScheduler)
                 .ToProperty(this, x => x.IsPosizioneEsistente, initialValue: false);
 
+            // Subscribe to ErrorText changes and call handler (skip initial emission if undesiderata)
+            this.WhenAnyValue(vm => vm.ErrorText)
+                .DistinctUntilChanged()
+                .ObserveOn(RxSchedulers.MainThreadScheduler)
+                .Subscribe(errorText => OnErrorTextChanged(errorText))
+                .DisposeWith(_disposables);
+
             _canEntraLabel = this.WhenAnyValue(
                     x => x.IsSocioFound,
                     x => x.IsSocioInside,
@@ -131,10 +144,10 @@ namespace Cassa.ViewModels
             PosizioneEscCommand = ReactiveCommand.CreateFromTask(async vm => await OnPosizioneEsc());
             EntraCommand = ReactiveCommand.CreateFromTask(async vm => await OnEntra(), CanEntra);
 
-            TesseraCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Tessera: {ex.Message}"));
-            F5Command.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione F5: {ex.Message}"));
-            PosizioneEscCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Posizione Esc: {ex.Message}"));
-            EntraCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Entra: {ex.Message}"));
+            _disposables.Add(TesseraCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Tessera: {ex.Message}")));
+            _disposables.Add(F5Command.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione F5: {ex.Message}")));
+            _disposables.Add(PosizioneEscCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Posizione Esc: {ex.Message}")));
+            _disposables.Add(EntraCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Entra: {ex.Message}")));
         }
 
         protected override void OnFinalDestruction()
@@ -143,6 +156,7 @@ namespace Cassa.ViewModels
             TesseraCommand = null;
             PosizioneEscCommand = null;
             F5Command = null;
+            _disposables.Dispose(); // Dispose di tutte le sottoscrizioni
             //AddTesseraCommand = DelTesseraCommand = UpdTesseraCommand = PersonSearchCommand = null;
 
             _strisciataRepository = null;
@@ -232,6 +246,17 @@ namespace Cassa.ViewModels
                 // Sposta il focus alla fine del ciclo di rendering
                 await SetFocus(TesseraFocus);
             }
+        }
+
+        private void OnErrorTextChanged(string errorText)
+        {
+            // comportamento predefinito: log dell'errore
+            if (!string.IsNullOrWhiteSpace(errorText))
+            {
+                Debug.WriteLine($"Errore cambiato: {errorText}");
+            }
+
+            ErrorText = errorText; // Aggiorna la proprietà ErrorText se necessario
         }
 
 
@@ -332,6 +357,14 @@ namespace Cassa.ViewModels
         {
             get => this._bindingt;
             set => this.RaiseAndSetIfChanged(ref _bindingt, value);
+        }
+
+        private string _errorText = string.Empty;
+        public string ErrorText
+        {
+            get => _errorText;
+            set => this.RaiseAndSetIfChanged(ref _errorText, value);
+
         }
 
         private string _eta;

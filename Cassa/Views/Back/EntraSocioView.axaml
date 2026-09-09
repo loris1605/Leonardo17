@@ -17,8 +17,9 @@
     <Grid x:Name="MainGrid">
     
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/> 
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/> <!-- TITOLO -->
+            <RowDefinition Height="*"/> <!-- GRID CENTRALE -->
+            <RowDefinition Height="50"/> <!-- BARRA DI ERROR -->
         </Grid.RowDefinitions>      
     
         <lc:TitleView TitoloPagina="ACCESSO NUOVO SOCIO"

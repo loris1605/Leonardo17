@@ -21,9 +21,10 @@
     
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/> <!-- TITOLO -->
-            <RowDefinition Height="100"/>
+            <RowDefinition Height="100"/> <!-- PULSANTI -->
             <RowDefinition Height="*"/> <!-- GRID CENTRALE -->
             <RowDefinition Height="Auto"/> <!-- BARRA INFERIORE -->
+            <RowDefinition Height="50"/> <!-- BARRA DI ERROR -->
         </Grid.RowDefinitions>  
 
         <lc:TitleView Grid.Row="0"
@@ -39,17 +40,7 @@
                 x:Name="PulsantiPostazione"
                 Margin="0,10,0,10"/>
         
-        <r:RoutedViewHost x:Name="RouterSchedaConto" 
-                          Router="{Binding RouterSchedaConto}"
-                          Grid.Row="2"
-                          IsVisible="{Binding IsOpen}">
-            <r:RoutedViewHost.PageTransition>
-                <CrossFade Duration="0:0:0.5" />
-            </r:RoutedViewHost.PageTransition>
-            <r:RoutedViewHost.DefaultContent>
-                <Border/>
-            </r:RoutedViewHost.DefaultContent>
-        </r:RoutedViewHost>
+        
         
         
         <Grid x:Name="CentralGrid" 
@@ -69,6 +60,18 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
+            <r:RoutedViewHost x:Name="RouterSchedaConto" 
+                          Router="{Binding RouterSchedaConto}"
+                          Grid.Column="1"
+                          Grid.ColumnSpan="2"
+                          IsVisible="{Binding IsOpen}">
+                <r:RoutedViewHost.PageTransition>
+                    <CrossFade Duration="0:0:0.5" />
+                </r:RoutedViewHost.PageTransition>
+                <r:RoutedViewHost.DefaultContent>
+                    <Border/>
+                </r:RoutedViewHost.DefaultContent>
+            </r:RoutedViewHost>
             
         </Grid>
 
@@ -101,7 +104,34 @@
            </ui:UiInfoBorder>
 
        </Grid>
-      
+
+        <TextBlock x:Name="ErrorLabel"
+                    Grid.Row="4"
+                    Grid.ColumnSpan="5"
+                    FontSize="20"
+                    Foreground="Red"
+                    HorizontalAlignment="Center"
+                    Margin="20,10"
+                    Text="{Binding ErrorText}">
+
+             <TextBlock.Styles>
+                 <Style Selector="TextBlock">
+                     <Style.Animations>
+                         <Animation Duration="0:0:1"
+                                    IterationCount="Infinite"
+                                    PlaybackDirection="Alternate">
+                             <KeyFrame KeyTime="0:0:0">
+                                 <Setter Property="Opacity" Value="1.0"/>
+                             </KeyFrame>
+                             <KeyFrame KeyTime="0:0:1">
+                                 <Setter Property="Opacity" Value="0.3"/>
+                             </KeyFrame>
+                         </Animation>
+                     </Style.Animations>
+                 </Style>
+             </TextBlock.Styles>
+
+        </TextBlock>      
     
     </Grid>
 
