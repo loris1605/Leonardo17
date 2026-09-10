@@ -62,7 +62,8 @@
                      Grid.ColumnSpan="2"
                      Grid.RowSpan="5">
                     
-                <vw:EntraSocioAnagraficaView x:Name="AnagraficaInput"/>
+                <vw:EntraSocioAnagraficaView x:Name="AnagraficaInput"
+                />
                      
             </Viewbox>
 
@@ -72,7 +73,8 @@
                      Grid.ColumnSpan="2"
                      Grid.RowSpan="5">
                     
-                <vw:EntraSocioIngressoView x:Name="IngressiInput"/>
+                <vw:EntraSocioIngressoView x:Name="IngressiInput"
+                    IsEnabled="{Binding !IsEntryFormBlocked}"/>
                      
             </Viewbox>
 
@@ -85,7 +87,7 @@
                       Command="{Binding EntraCommand}"
                       Content="ENTRA SOCIO"/>
 
-            <TextBlock x:Name="CanEntraLabel"
+            <!--<TextBlock x:Name="CanEntraLabel"
                             Grid.Row="9"
                             Grid.Column="2"
                             Grid.ColumnSpan="6"
@@ -111,7 +113,7 @@
                          </Style>
                      </TextBlock.Styles>
 
-                </TextBlock>
+            </TextBlock>-->
 
 
             <!--<vw:EntraSocioIngressoView x:Name="EntraIngresso"
@@ -125,6 +127,34 @@
            
 
         </Grid>
+
+        <TextBlock x:Name="ErrorLabel"
+                    Grid.Row="2"
+                    Grid.ColumnSpan="5"
+                    FontSize="20"
+                    Foreground="Red"
+                    HorizontalAlignment="Center"
+                    Margin="20,10"
+                    Text="{Binding ErrorText}">
+
+             <TextBlock.Styles>
+                 <Style Selector="TextBlock">
+                     <Style.Animations>
+                         <Animation Duration="0:0:1"
+                                    IterationCount="Infinite"
+                                    PlaybackDirection="Alternate">
+                             <KeyFrame KeyTime="0:0:0">
+                                 <Setter Property="Opacity" Value="1.0"/>
+                             </KeyFrame>
+                             <KeyFrame KeyTime="0:0:1">
+                                 <Setter Property="Opacity" Value="0.3"/>
+                             </KeyFrame>
+                         </Animation>
+                     </Style.Animations>
+                 </Style>
+             </TextBlock.Styles>
+
+        </TextBlock>  
     
     </Grid>
   

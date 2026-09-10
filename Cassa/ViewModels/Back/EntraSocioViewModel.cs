@@ -132,6 +132,7 @@ namespace Cassa.ViewModels
                 .ObserveOn(RxSchedulers.MainThreadScheduler)
                 .ToProperty(this, x => x.CanEntraLabel, initialValue: "");
 
+            
 
             EntraCommand = ReactiveCommand.CreateFromTask(async vm => await OnEntra(), CanEntra);
 
@@ -153,11 +154,21 @@ namespace Cassa.ViewModels
         {
             await _strisciataRepository.DevelopStrisciate(Token);
             var data  = await Q.GetIngressiByPostazione(_postazioneId, Token);
+            
+            if (data.Count == 0)
+            {
+                
+                ErrorText = "Nessun ingresso disponibile per questa postazione.";
+                IsEntryFormBlocked = true; // Blocca l'inserimento dei dati
+                return;
+            }
+
             IngressiList = [.. data.Select(data => new EntraIngressiMap(data))];
             if (IngressiList.Count > 0)
             {
                 SelectedIngresso = IngressiList[0];
             }
+
             await SetFocus(TesseraFocus);
         }
 
@@ -391,6 +402,17 @@ namespace Cassa.ViewModels
         private readonly ObservableAsPropertyHelper<string> _infoLabel;
         public string InfoLabel => _infoLabel.Value;
 
+
+        private bool _isEntryFormBlocked;
+        // Proprietà di sola lettura alimentata dal flusso reattivo
+        public bool IsEntryFormBlocked
+        {
+            get => _isEntryFormBlocked;
+            set => this.RaiseAndSetIfChanged(ref _isEntryFormBlocked, value);
+        }
+
+
+
         private readonly ObservableAsPropertyHelper<string> _canEntraLabel;
         public string CanEntraLabel => _canEntraLabel.Value;
 
@@ -409,11 +431,6 @@ namespace Cassa.ViewModels
 
         }
 
-        //private string infolabel = string.Empty;
-        //public string InfoLabel
-        //{
-        //    get => infolabel;
-        //    set => this.RaiseAndSetIfChanged(ref infolabel, value);
-        //}
+        
     }
 }

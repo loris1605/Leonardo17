@@ -32,10 +32,10 @@ public partial class EntraSocioView : BaseUserControl<EntraSocioViewModel>
                 view => view.AnagraficaInput.TesseraFocus)
             .DisposeWith(d);
 
-            this.OneWayBind(ViewModel,
-                    vm => vm.CanEntraLabel,
-                    v => v.CanEntraLabel.Text)
-            .DisposeWith(d);
+            //this.OneWayBind(ViewModel,
+            //        vm => vm.CanEntraLabel,
+            //        v => v.CanEntraLabel.Text)
+            //.DisposeWith(d);
         });
     }
 }

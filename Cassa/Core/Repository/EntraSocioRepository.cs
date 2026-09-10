@@ -46,24 +46,24 @@ namespace Cassa.Core.Repository
 
         public async Task<List<EntraIngressiDTO>> GetIngressiByPostazione(int postazioneId, CancellationToken ctk = default)
         {
-            var data = await _ctx.Tariffe
-                .AsNoTracking() // Ottimizza le performance se devi solo mostrare i dati
+            var result = await _ctx.Tariffe
+                .AsNoTracking()
                 .Where(t => t.Listini.Any(l =>
                     l.Settore != null &&
                     l.Settore.TipoSettoreId == -1 &&
                     l.Settore.Reparti.Any(r => r.PostazioneId == postazioneId)
                 ))
+                .Select(t => new EntraIngressiDTO
+                {
+                    Id = t.Id,
+                    NomeTariffa = t.Nome,
+                    EtichettaTariffa = t.Label,
+                    PrezzoTariffa = t.Prezzo,
+                    IsFreeDrink = t.IsFreeDrink
+                })
                 .ToListAsync(ctk);
 
-            return [.. data.Select(t => new EntraIngressiDTO
-            {
-                Id = t.Id, //id tariffa
-                NomeTariffa = t.Nome,
-                EtichettaTariffa = t.Label,
-                PrezzoTariffa = t.Prezzo,
-                IsFreeDrink = t.IsFreeDrink
-            })];
-
+            return result;
         }
 
 
