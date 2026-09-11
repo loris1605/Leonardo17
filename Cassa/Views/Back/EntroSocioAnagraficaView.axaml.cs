@@ -1,19 +1,15 @@
 using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Data;
 using Avalonia.Input;
 using Cassa.ViewModels;
 using ReactiveUI;
-using ReactiveUI.Avalonia;
 using System.Reactive;
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
-using ViewModels;
 using Views;
 
 namespace Cassa.Views;
 
-public partial class EntraSocioAnagraficaView : BaseUserControl<EntraSocioViewModel>
+public partial class EntraSocioAnagraficaView : BaseUserControl<EntraSocioAnagraficaViewModel>
 {
     protected override string RootControlName => "MainGrid";
 
@@ -130,16 +126,7 @@ public partial class EntraSocioAnagraficaView : BaseUserControl<EntraSocioViewMo
 
             #region OneWay
 
-            this.OneWayBind(ViewModel,
-                    vm => vm.InfoLabel,
-                    v => v.InfoLabel.Text)
-            .DisposeWith(d);
-
-            this.OneWayBind(ViewModel,
-                    vm => vm.TesseraLabel,
-                    v => v.TesseraLabel.Text)
-            .DisposeWith(d);
-
+            
             this.OneWayBind(ViewModel,
                     vm => vm.BindingT.Cognome,
                     v => v.CognomeBlock.Text)
@@ -150,10 +137,10 @@ public partial class EntraSocioAnagraficaView : BaseUserControl<EntraSocioViewMo
                     v => v.NomeBlock.Text)
             .DisposeWith(d);
 
-            this.OneWayBind(ViewModel,
-                    vm => vm.Eta,
-                    v => v.EtaBlock.Text)
-            .DisposeWith(d);
+            //this.OneWayBind(ViewModel,
+            //        vm => vm.Eta,
+            //        v => v.EtaBlock.Text)
+            //.DisposeWith(d);
 
             this.OneWayBind(ViewModel,
                     vm => vm.BindingT.NumeroSocio,
@@ -173,16 +160,16 @@ public partial class EntraSocioAnagraficaView : BaseUserControl<EntraSocioViewMo
 
 
 
-            this.OneWayBind(ViewModel,
-                vm => vm.IsSocioFound,
-                v => v.TesseraBox.IsEnabled,
-                isFound => !isFound) // <--- Inverte il valore
-            .DisposeWith(d);
+            //this.OneWayBind(ViewModel,
+            //    vm => vm.IsSocioFound,
+            //    v => v.TesseraBox.IsEnabled,
+            //    isFound => !isFound) // <--- Inverte il valore
+            //.DisposeWith(d);
 
-            this.OneWayBind(ViewModel,
-                    vm => vm.IsSocioFound,
-                    v => v.PosizioneBox.IsEnabled)
-                .DisposeWith(d);
+            //this.OneWayBind(ViewModel,
+            //        vm => vm.IsSocioFound,
+            //        v => v.PosizioneBox.IsEnabled)
+            //    .DisposeWith(d);
 
             #endregion
 

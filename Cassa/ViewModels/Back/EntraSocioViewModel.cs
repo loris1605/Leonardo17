@@ -34,19 +34,13 @@ namespace Cassa.ViewModels
 
         private readonly CompositeDisposable _disposables = new();
 
-        public ReactiveCommand<Unit, Unit> TesseraCommand { get; private set; }
-        public ReactiveCommand<Unit, Unit> F5Command { get; private set; }
-        public ReactiveCommand<Unit, Unit> PosizioneEscCommand { get; private set; }
         public ReactiveCommand<Unit, Unit> EntraCommand { get; private set; }
 
         protected override IObservable<bool> IsAnythingExecuting =>
             new[]
             {
                 base.IsAnythingExecuting,
-                TesseraCommand?.IsExecuting ?? Observable.Return(false),
-                PosizioneEscCommand?.IsExecuting ?? Observable.Return(false),
-                EntraCommand?.IsExecuting ?? Observable.Return(false),
-                F5Command?.IsExecuting ?? Observable.Return(false)
+                EntraCommand?.IsExecuting ?? Observable.Return(false)
 
             }.CombineLatest(values => values.Any(x => x));
 
@@ -139,23 +133,14 @@ namespace Cassa.ViewModels
                 .ToProperty(this, x => x.CanEntraLabel, initialValue: "");
 
 
-            TesseraCommand = ReactiveCommand.CreateFromTask(async vm => await OnTesseraEnter());
-            F5Command = ReactiveCommand.CreateFromTask(async vm => await OnF5Pressed());
-            PosizioneEscCommand = ReactiveCommand.CreateFromTask(async vm => await OnPosizioneEsc());
             EntraCommand = ReactiveCommand.CreateFromTask(async vm => await OnEntra(), CanEntra);
 
-            _disposables.Add(TesseraCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Tessera: {ex.Message}")));
-            _disposables.Add(F5Command.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione F5: {ex.Message}")));
-            _disposables.Add(PosizioneEscCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Posizione Esc: {ex.Message}")));
             _disposables.Add(EntraCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Entra: {ex.Message}")));
         }
 
         protected override void OnFinalDestruction()
         {
             // Assicuriamoci che la collezione sia nulla per il GC
-            TesseraCommand = null;
-            PosizioneEscCommand = null;
-            F5Command = null;
             _disposables.Dispose(); // Dispose di tutte le sottoscrizioni
             //AddTesseraCommand = DelTesseraCommand = UpdTesseraCommand = PersonSearchCommand = null;
 

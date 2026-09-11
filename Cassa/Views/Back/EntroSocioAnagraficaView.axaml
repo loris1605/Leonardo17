@@ -9,7 +9,7 @@
              d:DesignHeight="450"
              KeyboardNavigation.TabNavigation="Cycle"
              Background="LightSteelBlue"
-             x:DataType="vm:EntraSocioViewModel"
+             x:DataType="vm:EntraSocioAnagraficaViewModel"
              x:Class="Cassa.Views.EntraSocioAnagraficaView">
 
     <Grid x:Name="MainGrid" >
