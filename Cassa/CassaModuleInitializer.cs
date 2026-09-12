@@ -83,6 +83,13 @@ namespace Cassa
 
             Locator.CurrentMutable.Register(() =>
             {
+                var repository = Locator.Current.GetService<IEntraSocioRepository>();
+                return new EntraSocioAnagraficaViewModel(repository);
+            }, typeof(IEntraSocioAnagraficaViewModel));
+
+
+            Locator.CurrentMutable.Register(() =>
+            {
                 var repository1 = Locator.Current.GetService<ICassaListaSociRepository>();
                 return new CassaListaSociViewModel(repository1);
             }, typeof(ICassaListaSociViewModel));

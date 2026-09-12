@@ -58,7 +58,6 @@ namespace Cassa.ViewModels
             _disposables.Add(F5Command);
             _disposables.Add(PosizioneEscCommand);
 
-
         }
 
         protected override void OnFinalDestruction()
@@ -66,6 +65,11 @@ namespace Cassa.ViewModels
             // Dispose of all subscriptions and subjects
             _disposables.Dispose();
             base.OnFinalDestruction();
+        }
+
+        protected override async Task OnLoading()
+        {
+            await SetFocus(TesseraFocus);
         }
 
         private async Task TesseraAsync()
@@ -96,5 +100,7 @@ namespace Cassa.ViewModels
             get => this._bindingt;
             set => this.RaiseAndSetIfChanged(ref _bindingt, value);
         }
+
+        public Interaction<Unit, Unit> TesseraFocus { get; } = new();
     }
 }

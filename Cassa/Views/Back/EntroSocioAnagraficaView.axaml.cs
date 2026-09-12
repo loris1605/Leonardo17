@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Input;
 using Cassa.ViewModels;
+using Avalonia.Threading;
 using ReactiveUI;
 using System.Reactive;
 using System.Reactive.Disposables.Fluent;
@@ -19,30 +20,24 @@ public partial class EntraSocioAnagraficaView : BaseUserControl<EntraSocioAnagra
 
         this.WhenActivated(d =>
         {
-            var tesseraHandlerDisposable = new System.Reactive.Disposables.SerialDisposable().DisposeWith(d);
-            this.GetObservable(TesseraFocusProperty)
-            .Where(x => x != null)
-            .Subscribe(interaction =>
-            {
-                // Rimuove l'handler precedente prima di registrarne uno nuovo
-                tesseraHandlerDisposable.Disposable = null;
 
-                tesseraHandlerDisposable.Disposable = interaction!.RegisterHandler(async context =>
+            this.WhenAnyValue(x => x.ViewModel)
+                .Where(vm => vm is not null)
+                .Subscribe(vmObj =>
                 {
-                    // Piccolo delay per permettere alla UI di stabilizzarsi
-                    await Task.Delay(100);
-
-                    // Sposta l'esecuzione sul thread della UI di Avalonia
-                    await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
-                    {
-                        TesseraBox.Focus();
-                        TesseraBox.SelectAll();
-                    }, Avalonia.Threading.DispatcherPriority.Background);
-
-                    context.SetOutput(Unit.Default);
+                    // 1. Gestione Focus Interaction
+                    vmObj.TesseraFocus
+                        .RegisterHandler(async interaction =>
+                        {
+                            await Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                TesseraBox.Focus();
+                                TesseraBox.SelectAll();
+                            });
+                            interaction.SetOutput(Unit.Default);
+                        })
+                        .DisposeWith(d);
                 });
-            }).DisposeWith(d);
-
 
             PosizioneBox.GetObservable(Avalonia.Controls.Control.IsEnabledProperty)
                 .Where(enabled => enabled == true) // Agisci solo quando passa da False a True
@@ -55,6 +50,8 @@ public partial class EntraSocioAnagraficaView : BaseUserControl<EntraSocioAnagra
                     // 2. Esegui il focus e la selezione sul thread principale
                     await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
                     {
+
+                        
                         // Verifica di sicurezza: il controllo potrebbe essere stato disabilitato nel frattempo
                         if (PosizioneBox.IsEnabled)
                         {

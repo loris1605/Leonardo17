@@ -27,10 +27,10 @@ public partial class EntraSocioView : BaseUserControl<EntraSocioViewModel>
                 .InvokeCommand(vm.EscPressedCommand)
                 .DisposeWith(d);
 
-            this.OneWayBind(ViewModel,
-                vm => vm.TesseraFocus,
-                view => view.AnagraficaInput.TesseraFocus)
-            .DisposeWith(d);
+            //this.OneWayBind(ViewModel,
+            //    vm => vm.TesseraFocus,
+            //    view => view.AnagraficaInput.TesseraFocus)
+            //.DisposeWith(d);
 
             //this.OneWayBind(ViewModel,
             //        vm => vm.CanEntraLabel,

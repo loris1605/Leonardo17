@@ -62,8 +62,9 @@
                      Grid.ColumnSpan="2"
                      Grid.RowSpan="5">
                     
-                <vw:EntraSocioAnagraficaView x:Name="AnagraficaInput"
-                />
+                <vw:EntraSocioAnagraficaView 
+                        x:Name="AnagraficaInput"
+                        DataContext="{Binding AnagraficaViewModel}"/>
                      
             </Viewbox>
 

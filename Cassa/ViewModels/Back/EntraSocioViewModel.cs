@@ -2,6 +2,7 @@
 using Cassa.Core.Repository;
 using Cassa.ViewModels.Map;
 using ReactiveUI;
+using Splat;
 using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Disposables;
@@ -169,7 +170,7 @@ namespace Cassa.ViewModels
                 SelectedIngresso = IngressiList[0];
             }
 
-            await SetFocus(TesseraFocus);
+            //await SetFocus(TesseraFocus);
         }
 
         public void SetHost(ICassaScreen host) => _host = host;
@@ -240,7 +241,7 @@ namespace Cassa.ViewModels
             finally
             {
                 // Sposta il focus alla fine del ciclo di rendering
-                await SetFocus(TesseraFocus);
+                //await SetFocus(TesseraFocus);
             }
         }
 
@@ -273,7 +274,7 @@ namespace Cassa.ViewModels
             Eta = string.Empty;
             IsSocioFound = false;
             IsRicercaEffettuata = false;
-            await SetFocus(TesseraFocus);
+            //await SetFocus(TesseraFocus);
         }
 
         private void BuildVirtualSocio()
@@ -311,7 +312,7 @@ namespace Cassa.ViewModels
                 {
                     Debug.WriteLine("Errore durante l'aggiunta della scheda.");
                     _isClosing = false; // Reset del flag perché non stiamo chiudendo la pagina
-                    await SetFocus(TesseraFocus);
+                    //await SetFocus(TesseraFocus);
                     return;
                 }
 
@@ -330,7 +331,7 @@ namespace Cassa.ViewModels
             {
                 _isClosing = false;
                 Debug.WriteLine($"Errore: {ex.Message}");
-                await SetFocus(TesseraFocus);
+                //await SetFocus(TesseraFocus);
                 return;
             }
 
@@ -341,7 +342,7 @@ namespace Cassa.ViewModels
 
     public partial class EntraSocioViewModel
     {
-        public Interaction<Unit, Unit> TesseraFocus { get; } = new();
+        //public Interaction<Unit, Unit> TesseraFocus { get; } = new();
         public Interaction<Unit, Unit> PosizioneFocus { get; } = new();
 
         private readonly Subject<(int postazioneId, string posizione)> _entraSocioToPostazione = new();
@@ -353,6 +354,13 @@ namespace Cassa.ViewModels
         {
             get => this._bindingt;
             set => this.RaiseAndSetIfChanged(ref _bindingt, value);
+        }
+
+        private IEntraSocioAnagraficaViewModel _anagraficaViewModel = Locator.Current.GetService<IEntraSocioAnagraficaViewModel>();
+        public IEntraSocioAnagraficaViewModel AnagraficaViewModel
+        {
+            get => _anagraficaViewModel;
+            set => this.RaiseAndSetIfChanged(ref _anagraficaViewModel, value);
         }
 
         private string _errorText = string.Empty;
