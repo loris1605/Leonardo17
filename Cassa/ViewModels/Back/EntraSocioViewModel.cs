@@ -160,7 +160,7 @@ namespace Cassa.ViewModels
             {
                 
                 ErrorText = "Nessun ingresso disponibile per questa postazione.";
-                IsEntryFormBlocked = true; // Blocca l'inserimento dei dati
+                IsAnagraficaEnabled = false; // Blocca l'inserimento dei dati
                 return;
             }
 
@@ -361,6 +361,13 @@ namespace Cassa.ViewModels
         {
             get => _anagraficaViewModel;
             set => this.RaiseAndSetIfChanged(ref _anagraficaViewModel, value);
+        }
+
+        private bool isAnagraficaEnabled = true;
+        public bool IsAnagraficaEnabled
+        {
+            get => isAnagraficaEnabled;
+            set => this.RaiseAndSetIfChanged(ref isAnagraficaEnabled, value);
         }
 
         private string _errorText = string.Empty;

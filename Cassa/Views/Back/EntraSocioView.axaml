@@ -58,13 +58,14 @@
 
             <Viewbox Grid.Column="1" MinWidth="250"
                      x:Name="ContenitoreAnagrafica"
+                     IsEnabled="{Binding IsAnagraficaEnabled}"
                      Grid.Row="1"
                      Grid.ColumnSpan="2"
                      Grid.RowSpan="5">
                     
                 <vw:EntraSocioAnagraficaView 
-                        x:Name="AnagraficaInput"
-                        DataContext="{Binding AnagraficaViewModel}"/>
+                    x:Name="AnagraficaInput"
+                    DataContext="{Binding AnagraficaViewModel}"/>
                      
             </Viewbox>
 

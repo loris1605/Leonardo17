@@ -39,28 +39,28 @@ public partial class EntraSocioAnagraficaView : BaseUserControl<EntraSocioAnagra
                         .DisposeWith(d);
                 });
 
-            PosizioneBox.GetObservable(Avalonia.Controls.Control.IsEnabledProperty)
-                .Where(enabled => enabled == true) // Agisci solo quando passa da False a True
-                .ObserveOn(RxSchedulers.MainThreadScheduler)
-                .Subscribe(async _ =>
-                {
-                    // 1. Attendi un istante (1-2 frame) per permettere alla UI di sbloccare il controllo
-                    await Task.Delay(50);
+            //PosizioneBox.GetObservable(Avalonia.Controls.Control.IsEnabledProperty)
+            //    .Where(enabled => enabled == true) // Agisci solo quando passa da False a True
+            //    .ObserveOn(RxSchedulers.MainThreadScheduler)
+            //    .Subscribe(async _ =>
+            //    {
+            //        // 1. Attendi un istante (1-2 frame) per permettere alla UI di sbloccare il controllo
+            //        await Task.Delay(50);
 
-                    // 2. Esegui il focus e la selezione sul thread principale
-                    await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
-                    {
+            //        // 2. Esegui il focus e la selezione sul thread principale
+            //        await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+            //        {
 
                         
-                        // Verifica di sicurezza: il controllo potrebbe essere stato disabilitato nel frattempo
-                        if (PosizioneBox.IsEnabled)
-                        {
-                            PosizioneBox.Focus();
-                            PosizioneBox.SelectAll();
-                        }
-                    }, Avalonia.Threading.DispatcherPriority.Background);
-                })
-                .DisposeWith(d);
+            //            // Verifica di sicurezza: il controllo potrebbe essere stato disabilitato nel frattempo
+            //            if (PosizioneBox.IsEnabled)
+            //            {
+            //                PosizioneBox.Focus();
+            //                PosizioneBox.SelectAll();
+            //            }
+            //        }, Avalonia.Threading.DispatcherPriority.Background);
+            //    })
+            //    .DisposeWith(d);
 
 
             // 1. Definisci il flusso sorgente centralizzato e rendilo condiviso (.Publish().RefCount())
