@@ -4,6 +4,7 @@ using ReactiveUI;
 using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using ViewModels;
 
@@ -58,6 +59,37 @@ namespace Cassa.ViewModels
             _disposables.Add(F5Command);
             _disposables.Add(PosizioneEscCommand);
 
+
+             // Inizializza prima _isSocioFound per evitare NullReference quando si osserva IsSocioFound
+            _isSocioFound = this.WhenAnyValue(x => x.BindingT.NumeroTessera)
+                .Throttle(TimeSpan.FromMilliseconds(300))
+                .DistinctUntilChanged()
+                .SelectMany(numero =>
+                {
+                    if (string.IsNullOrWhiteSpace(numero))
+                        return Observable.Return(false);
+
+                    // Cattura snapshot del DTO per la chiamata asincrona
+                    var dto = BindingT.ToDto();
+                    return Observable.FromAsync(ct => Q.EsisteSocioInside(dto, ct))
+                                     .Catch<bool, Exception>(ex =>
+                                     {
+                                         Debug.WriteLine($"Errore verifica socio inside: {ex.Message}");
+                                         return Observable.Return(false);
+                                     });
+                })
+                .ObserveOn(RxSchedulers.MainThreadScheduler)
+                .ToProperty(this, x => x.IsSocioFound, initialValue: true);
+
+
+
+
+            // 1. Aggiungi .Skip(1) così ignora lo stato iniziale di default (false)
+            var socioFoundStream = this.WhenAnyValue(x => x.IsSocioFound)
+                                       .ObserveOn(RxSchedulers.MainThreadScheduler);
+
+                        
+
         }
 
         protected override void OnFinalDestruction()
@@ -100,6 +132,20 @@ namespace Cassa.ViewModels
             get => this._bindingt;
             set => this.RaiseAndSetIfChanged(ref _bindingt, value);
         }
+
+        private string _tesseraLabel = "TESSERA :";
+        public string TesseraLabel
+        {
+            get => _tesseraLabel;
+            private set => this.RaiseAndSetIfChanged(ref _tesseraLabel, value);
+        }
+
+
+
+        private readonly ObservableAsPropertyHelper<bool> _isSocioFound;
+        public bool IsSocioFound => _isSocioFound.Value;
+
+
 
         public Interaction<Unit, Unit> TesseraFocus { get; } = new();
     }

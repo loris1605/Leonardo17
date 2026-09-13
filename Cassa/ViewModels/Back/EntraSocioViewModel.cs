@@ -62,10 +62,7 @@ namespace Cassa.ViewModels
             var socioFoundStream = this.WhenAnyValue(x => x.IsSocioFound)
                                        .ObserveOn(RxSchedulers.MainThreadScheduler);
 
-            // 2. Imposta l'initialValue desiderato all'apertura della pagina
-            _tesseraLabel = socioFoundStream
-                                .Select(found => found ? "TESSERA :" : "TESSERA (F5) :")
-                                .ToProperty(this, x => x.TesseraLabel, initialValue: "TESSERA :");
+            
 
             // 3. Allinea l'initialValue vuoto per l'avvio
             _infoLabel = this.WhenAnyValue(
@@ -410,9 +407,7 @@ namespace Cassa.ViewModels
         // Proprietà di sola lettura alimentata dal flusso reattivo
         public bool IsPosizioneEsistente => _isPosizioneEsistente.Value;
 
-        // 2. Proprietà calcolata (OAPH) per la Label
-        private readonly ObservableAsPropertyHelper<string> _tesseraLabel;
-        public string TesseraLabel => _tesseraLabel.Value;
+        
 
         private readonly ObservableAsPropertyHelper<string> _infoLabel;
         public string InfoLabel => _infoLabel.Value;

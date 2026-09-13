@@ -153,9 +153,6 @@ public partial class EntraSocioAnagraficaView : BaseUserControl<EntraSocioAnagra
                     v => v.TesseraBox.Text)
                 .DisposeWith(d);
 
-            
-
-
 
             //this.OneWayBind(ViewModel,
             //    vm => vm.IsSocioFound,
