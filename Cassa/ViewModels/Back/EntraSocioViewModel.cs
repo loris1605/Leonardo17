@@ -185,62 +185,7 @@ namespace Cassa.ViewModels
 
         }
 
-        private async Task OnTesseraEnter()
-        {
-            // Stato iniziale: reset della ricerca prima di iniziare
-            IsRicercaEffettuata = false;
-            IsSocioFound = false;
-
-            if (string.IsNullOrWhiteSpace(BindingT.NumeroTessera)) return;
-
-            try
-            {
-                var personData = await Q.GetPersonByTessera(BindingT.NumeroTessera, Token);
-                var data = new EntraSocioMap(personData);
-
-                if (data.NumeroSocio is null)
-                {
-                    // NOTA: Rimane false per attivare la InfoLabel "Socio non Trovato" 
-                    // grazie alla logica (effettuata && !found) se decidi di metterla a true qui.
-                    // Per coerenza con la tua InfoLabel, la ricerca DEVE essere considerata effettuata.
-                    IsSocioFound = false;
-                    IsRicercaEffettuata = true;
-
-                    string tesseraCorrente = BindingT.NumeroTessera;
-
-                    // Al fine di evitare che _canEntraLabel mostri "Posizione Mancante" 
-                    // sovrascrivendo "Socio non Trovato", azzeriamo la posizione o gestiamo l'oggetto.
-                    BindingT = new EntraSocioMap
-                    {
-                        NumeroTessera = tesseraCorrente,
-                        Posizione = null // Verrà intercettato da !IsSocioFound dando la precedenza a "Warning Identificazione"
-                    };
-                    Eta = string.Empty;
-                }
-                else
-                {
-                    IsSocioFound = true;
-                    IsRicercaEffettuata = true;
-                    IsSocioInside = await Q.EsisteSocioInside(data.ToDto(), Token);
-                    posizioniEsistentiHash = new HashSet<string>(
-                                        await Q.GetPosizioniAsync(),
-                                        StringComparer.OrdinalIgnoreCase );
-                    BindingT = data;
-                    Eta = BindingT.Natoil.DateIntToEta().ToString();
-                }
-            }
-            catch (Exception ex)
-            {
-                IsSocioFound = false;
-                IsRicercaEffettuata = false; // La ricerca è fallita tecnicamente, non è "Socio non trovato"
-                Debug.WriteLine($"Errore durante la ricerca del socio: {ex.Message}");
-            }
-            finally
-            {
-                // Sposta il focus alla fine del ciclo di rendering
-                //await SetFocus(TesseraFocus);
-            }
-        }
+        
 
         private void OnErrorTextChanged(string errorText)
         {
@@ -259,31 +204,15 @@ namespace Cassa.ViewModels
 
             if (BindingT.NumeroTessera== string.Empty) return;
             IsSocioFound = true;
-            BuildVirtualSocio();
+            //BuildVirtualSocio();
 
             await Task.CompletedTask;
 
         }
 
-        private async Task OnPosizioneEsc()
-        {
-            BindingT = new(); // Resetta i dati
-            Eta = string.Empty;
-            IsSocioFound = false;
-            IsRicercaEffettuata = false;
-            //await SetFocus(TesseraFocus);
-        }
+        
 
-        private void BuildVirtualSocio()
-        {
-            BindingT.Cognome = "Socio";
-            BindingT.Nome = "Virtuale";
-            BindingT.NumeroSocio = "-" + BindingT.NumeroTessera;
-            Eta = string.Empty;
-            BindingT.CodiceSocio = -1; // Indica che è un socio virtuale
-
-            // Qui puoi fare ulteriori operazioni con virtualSocio, come salvarlo o passarlo ad altri componenti
-        }
+        
 
         private async Task OnEntra()
         {
@@ -375,12 +304,7 @@ namespace Cassa.ViewModels
 
         }
 
-        private string _eta;
-        public string Eta
-        {
-            get => _eta;
-            set => this.RaiseAndSetIfChanged(ref _eta, value);
-        }
+        
 
         private bool _isSocioFound = false;
         public bool IsSocioFound

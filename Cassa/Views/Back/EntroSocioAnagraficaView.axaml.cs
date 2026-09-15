@@ -39,28 +39,24 @@ public partial class EntraSocioAnagraficaView : BaseUserControl<EntraSocioAnagra
                         .DisposeWith(d);
                 });
 
-            //PosizioneBox.GetObservable(Avalonia.Controls.Control.IsEnabledProperty)
-            //    .Where(enabled => enabled == true) // Agisci solo quando passa da False a True
-            //    .ObserveOn(RxSchedulers.MainThreadScheduler)
-            //    .Subscribe(async _ =>
-            //    {
-            //        // 1. Attendi un istante (1-2 frame) per permettere alla UI di sbloccare il controllo
-            //        await Task.Delay(50);
+            this.WhenAnyValue(x => x.ViewModel)
+                .Where(vm => vm is not null)
+                .Subscribe(vmObj =>
+                {
+                    // 1. Gestione Focus Interaction
+                    vmObj.PosizioneFocus
+                        .RegisterHandler(async interaction =>
+                        {
+                            await Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                PosizioneBox.Focus();
+                                PosizioneBox.SelectAll();
+                            });
+                            interaction.SetOutput(Unit.Default);
+                        })
+                        .DisposeWith(d);
+                });
 
-            //        // 2. Esegui il focus e la selezione sul thread principale
-            //        await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
-            //        {
-
-                        
-            //            // Verifica di sicurezza: il controllo potrebbe essere stato disabilitato nel frattempo
-            //            if (PosizioneBox.IsEnabled)
-            //            {
-            //                PosizioneBox.Focus();
-            //                PosizioneBox.SelectAll();
-            //            }
-            //        }, Avalonia.Threading.DispatcherPriority.Background);
-            //    })
-            //    .DisposeWith(d);
 
 
             // 1. Definisci il flusso sorgente centralizzato e rendilo condiviso (.Publish().RefCount())
@@ -120,73 +116,26 @@ public partial class EntraSocioAnagraficaView : BaseUserControl<EntraSocioAnagra
                 .InvokeCommand(ViewModel!, x => x.PosizioneEscCommand)
                 .DisposeWith(d);
 
-
-            #region OneWay
-
-            
-            this.OneWayBind(ViewModel,
-                    vm => vm.BindingT.Cognome,
-                    v => v.CognomeBlock.Text)
-            .DisposeWith(d);
-
-            this.OneWayBind(ViewModel,
-                    vm => vm.BindingT.Nome,
-                    v => v.NomeBlock.Text)
-            .DisposeWith(d);
-
-            //this.OneWayBind(ViewModel,
-            //        vm => vm.Eta,
-            //        v => v.EtaBlock.Text)
-            //.DisposeWith(d);
-
-            this.OneWayBind(ViewModel,
-                    vm => vm.BindingT.NumeroSocio,
-                    v => v.NumeroSocioBlock.Text)
-            .DisposeWith(d);
-
-            #endregion
-
-            #region TwoWays Ottimizzato con Throttle
-
-            this.Bind(ViewModel,
-                    vm => vm.BindingT.NumeroTessera,
-                    v => v.TesseraBox.Text)
-                .DisposeWith(d);
-
-
-            //this.OneWayBind(ViewModel,
-            //    vm => vm.IsSocioFound,
-            //    v => v.TesseraBox.IsEnabled,
-            //    isFound => !isFound) // <--- Inverte il valore
-            //.DisposeWith(d);
-
-            //this.OneWayBind(ViewModel,
-            //        vm => vm.IsSocioFound,
-            //        v => v.PosizioneBox.IsEnabled)
-            //    .DisposeWith(d);
-
-            #endregion
-
         });
     }
 
 
 
-    public static readonly StyledProperty<Interaction<Unit, Unit>> TesseraFocusProperty =
-        AvaloniaProperty.Register<EntraSocioAnagraficaView, Interaction<Unit, Unit>>(nameof(TesseraFocus));
+    //public static readonly StyledProperty<Interaction<Unit, Unit>> TesseraFocusProperty =
+    //    AvaloniaProperty.Register<EntraSocioAnagraficaView, Interaction<Unit, Unit>>(nameof(TesseraFocus));
 
-    public Interaction<Unit, Unit> TesseraFocus
-    {
-        get => GetValue(TesseraFocusProperty);
-        set => SetValue(TesseraFocusProperty, value);
-    }
+    //public Interaction<Unit, Unit> TesseraFocus
+    //{
+    //    get => GetValue(TesseraFocusProperty);
+    //    set => SetValue(TesseraFocusProperty, value);
+    //}
 
-    public static readonly StyledProperty<Interaction<Unit, Unit>> PosizioneFocusProperty =
-        AvaloniaProperty.Register<EntraSocioAnagraficaView, Interaction<Unit, Unit>>(nameof(PosizioneFocus));
+    //public static readonly StyledProperty<Interaction<Unit, Unit>> PosizioneFocusProperty =
+    //    AvaloniaProperty.Register<EntraSocioAnagraficaView, Interaction<Unit, Unit>>(nameof(PosizioneFocus));
 
-    public Interaction<Unit, Unit> PosizioneFocus
-    {
-        get => GetValue(PosizioneFocusProperty);
-        set => SetValue(PosizioneFocusProperty, value);
-    }
+    //public Interaction<Unit, Unit> PosizioneFocus
+    //{
+    //    get => GetValue(PosizioneFocusProperty);
+    //    set => SetValue(PosizioneFocusProperty, value);
+    //}
 }

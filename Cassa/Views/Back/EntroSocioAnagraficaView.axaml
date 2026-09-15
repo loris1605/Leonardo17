@@ -60,7 +60,8 @@
                                     Grid.Column="1"
                                     Margin="5,2,5,2"
                                     MoveToNextOnEnter="False"
-                                    VerticalAlignment="Center"/>
+                                    VerticalAlignment="Center"
+                                    Text="{Binding BindingT.NumeroTessera}"/>
 
                 <ui:UiLabelForGrid Text="COGNOME :"
                                    Margin="5,10,5,10"
@@ -70,7 +71,8 @@
                                    Foreground="Blue"
                                    Margin="5,10,5,10"
                                    Grid.Row="2"
-                                   Grid.Column="1"/>
+                                   Grid.Column="1"
+                                   Text="{Binding BindingT.Cognome}"/>
 
                 <ui:UiLabelForGrid Text="NOME :"
                                    Margin="5,10,5,10"
@@ -80,7 +82,8 @@
                                    Foreground="Blue"
                                    Margin="5,10,5,10"
                                    Grid.Row="3"
-                                   Grid.Column="1"/>
+                                   Grid.Column="1"
+                                   Text="{Binding BindingT.Nome}"/>
 
                 <ui:UiLabelForGrid Text="ETA' :"
                                    Margin="5,10,5,10"
@@ -90,7 +93,8 @@
                                    Foreground="Blue"
                                    Margin="5,10,5,10"
                                    Grid.Row="4"
-                                   Grid.Column="1"/>
+                                   Grid.Column="1"
+                                   Text="{Binding Eta}"/>
 
                 <ui:UiLabelForGrid Text="CODICE SOCIO :"
                                    Margin="5,10,5,10"
@@ -100,7 +104,8 @@
                                    Foreground="Blue"
                                    Margin="5,10,5,10"
                                    Grid.Row="5"
-                                   Grid.Column="1"/>
+                                   Grid.Column="1"
+                                   Text="{Binding BindingT.NumeroSocio}"/>
 
                 <ui:UiLabelForGrid Text="POSIZIONE :"
                                    Margin="5,10,5,10"

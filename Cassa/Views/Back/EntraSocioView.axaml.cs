@@ -20,22 +20,7 @@ public partial class EntraSocioView : BaseUserControl<EntraSocioViewModel>
         {
             var vm = this.ViewModel;
 
-            // 2. Gestione Tasto ESCAPE
-            Observable.FromEventPattern<KeyEventArgs>(this, nameof(this.KeyDown))
-                .Where(e => e.EventArgs.Key == Key.Escape)
-                .Select(_ => Unit.Default)
-                .InvokeCommand(vm.EscPressedCommand)
-                .DisposeWith(d);
-
-            //this.OneWayBind(ViewModel,
-            //    vm => vm.TesseraFocus,
-            //    view => view.AnagraficaInput.TesseraFocus)
-            //.DisposeWith(d);
-
-            //this.OneWayBind(ViewModel,
-            //        vm => vm.CanEntraLabel,
-            //        v => v.CanEntraLabel.Text)
-            //.DisposeWith(d);
+            
         });
     }
 }
