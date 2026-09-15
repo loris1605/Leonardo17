@@ -124,7 +124,8 @@
                             Grid.ColumnSpan="2"
                             Foreground="Red"
                             HorizontalAlignment="Center"
-                            Margin="20,10">
+                            Margin="20,10"
+                            Text="{Binding InfoLabel, Mode=OneWay}">
 
                      <TextBlock.Styles>
                          <Style Selector="TextBlock">

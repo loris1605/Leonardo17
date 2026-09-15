@@ -121,6 +121,7 @@ namespace Cassa.ViewModels
                     IsRicercaEffettuata = true;
 
                     string tesseraCorrente = BindingT.NumeroTessera;
+                    InfoLabel = "Socio non Trovato - F5 x Virtuale";
 
                     // Al fine di evitare che _canEntraLabel mostri "Posizione Mancante" 
                     // sovrascrivendo "Socio non Trovato", azzeriamo la posizione o gestiamo l'oggetto.
@@ -135,7 +136,18 @@ namespace Cassa.ViewModels
                 {
                     IsSocioFound = true;
                     IsRicercaEffettuata = true;
+                    
                     IsSocioInside = await Q.EsisteSocioInside(data.ToDto(), Token);
+
+                    if (IsSocioInside)
+                    {   
+                        InfoLabel = "Socio già all'interno";
+                    }
+                    else
+                    {
+                        InfoLabel = string.Empty;
+                    }
+
                     //posizioniEsistentiHash = new HashSet<string>(
                     //                    await Q.GetPosizioniAsync(),
                     //                    StringComparer.OrdinalIgnoreCase);
@@ -174,6 +186,7 @@ namespace Cassa.ViewModels
             Eta = string.Empty;
             IsSocioFound = false;
             IsRicercaEffettuata = false;
+            InfoLabel= string.Empty;
             await SetFocus(TesseraFocus);
         }
 
