@@ -79,6 +79,17 @@ public partial class EntraSocioAnagraficaView : BaseUserControl<EntraSocioAnagra
                 .BindTo(this, v => v.TesseraBox.IsEnabled)
                 .DisposeWith(d);
 
+            // 1. Definisci il flusso sorgente centralizzato e rendilo condiviso (.Publish().RefCount())
+            var isApriSchedaVisible = this.WhenAnyValue(x => x.ViewModel.IsSocioInside)
+                .ObserveOn(RxSchedulers.MainThreadScheduler)
+                .Publish()
+                .RefCount();
+
+            // 2. Lega il flusso direttamente a ApriSchedaButton
+            isApriSchedaVisible
+                .BindTo(this, v => v.ApriSchedaButton.IsVisible)
+                .DisposeWith(d);
+
             // --- STREAM EVENTI TASTIERA ---
             var keyUpTesseraStream = Observable.FromEventPattern<EventHandler<KeyEventArgs>, KeyEventArgs>(
                         h => this.TesseraBox.KeyUp += h,

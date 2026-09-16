@@ -29,6 +29,7 @@ namespace Cassa.ViewModels
         public ReactiveCommand<Unit, Unit> TesseraCommand { get; }
         public ReactiveCommand<Unit, Unit> F5Command { get; }
         public ReactiveCommand<Unit, Unit> PosizioneEscCommand { get; }
+        public ReactiveCommand<Unit, Unit> ApriSchedaCommand { get; }
 
         // Freeze after the first execution to prevent multiple simultaneous executions
         protected override IObservable<bool> IsAnythingExecuting =>
@@ -37,7 +38,8 @@ namespace Cassa.ViewModels
                 base.IsAnythingExecuting,
                 TesseraCommand?.IsExecuting ?? Observable.Return(false),
                 PosizioneEscCommand?.IsExecuting ?? Observable.Return(false),
-                F5Command?.IsExecuting ?? Observable.Return(false)
+                F5Command?.IsExecuting ?? Observable.Return(false),
+                ApriSchedaCommand?.IsExecuting ?? Observable.Return(false)
 
             }.CombineLatest(values => values.Any(x => x));
 
@@ -49,15 +51,25 @@ namespace Cassa.ViewModels
             TesseraCommand = ReactiveCommand.CreateFromTask(TesseraAsync);
             F5Command = ReactiveCommand.CreateFromTask(F5Async);
             PosizioneEscCommand = ReactiveCommand.CreateFromTask(PosizioneEscAsync);
+            ApriSchedaCommand = ReactiveCommand.CreateFromTask(async () =>
+            {
+                if (IsSocioFound)
+                {
+                    // Logica per aprire la scheda del socio trovato
+                    await Task.CompletedTask; // Sostituire con la logica reale
+                }
+            });
 
             _disposables.Add(TesseraCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Tessera: {ex.Message}")));
             _disposables.Add(F5Command.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione F5: {ex.Message}")));
             _disposables.Add(PosizioneEscCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Posizione Esc: {ex.Message}")));
+            _disposables.Add(ApriSchedaCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Apri Scheda: {ex.Message}")));
 
             // Gestione delle disposizioni
             _disposables.Add(TesseraCommand);
             _disposables.Add(F5Command);
             _disposables.Add(PosizioneEscCommand);
+            _disposables.Add(ApriSchedaCommand);
 
             var socioFoundStream = this.WhenAnyValue(x => x.IsSocioFound, x => x.IsRicercaEffettuata)
                                .ObserveOn(RxSchedulers.MainThreadScheduler)

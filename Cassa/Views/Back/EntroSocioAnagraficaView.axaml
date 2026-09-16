@@ -149,12 +149,13 @@
 
                 <ui:UiButton 
                      Grid.Row="8"
-                     Grid.ColumnSpan="2"
-                     x:Name="ConfermaButton"
+                     Grid.Column="1"
+                     x:Name="ApriSchedaButton"
                      Margin="5,10,5,10"
                      HorizontalAlignment="Center"
                      Width="150"
                      Height="30"
+                     Content="APRI SCHEDA"
                      Command="{Binding ApriSchedaCommand}"/>
 
 
