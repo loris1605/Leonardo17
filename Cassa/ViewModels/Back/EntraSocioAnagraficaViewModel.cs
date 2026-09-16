@@ -131,6 +131,8 @@ namespace Cassa.ViewModels
                         Posizione = null // Verrà intercettato da !IsSocioFound dando la precedenza a "Warning Identificazione"
                     };
                     Eta = string.Empty;
+                    
+                    await SetFocus(TesseraFocus);
                 }
                 else
                 {
@@ -139,9 +141,15 @@ namespace Cassa.ViewModels
                     
                     IsSocioInside = await Q.EsisteSocioInside(data.ToDto(), Token);
 
+                    BindingT = data;
+
+
                     if (IsSocioInside)
-                    {   
+                    {
+                        // Se il socio è già dentro, mostrare la posizione
+                        BindingT.Posizione = await Q.GetPosizioneByCodicePerson(BindingT.CodicePerson, Token); 
                         InfoLabel = "Socio già all'interno";
+                        await SetFocus(TesseraFocus);
                     }
                     else
                     {
@@ -151,7 +159,7 @@ namespace Cassa.ViewModels
                     //posizioniEsistentiHash = new HashSet<string>(
                     //                    await Q.GetPosizioniAsync(),
                     //                    StringComparer.OrdinalIgnoreCase);
-                    BindingT = data;
+                    
                     Eta = BindingT.Natoil.DateIntToEta().ToString();
 
                     if (!IsSocioInside) await SetFocus(PosizioneFocus);

@@ -42,6 +42,7 @@
                     <RowDefinition Height="Auto" MinHeight="35"/>
                     <RowDefinition Height="Auto" MinHeight="35"/>
                     <RowDefinition Height="Auto" MinHeight="35"/>
+                    <RowDefinition Height="Auto" MinHeight="35"/>
                     <RowDefinition Height="50" />
                  </Grid.RowDefinitions>    
                  
@@ -145,6 +146,16 @@
                      </TextBlock.Styles>
 
                 </TextBlock>
+
+                <ui:UiButton 
+                     Grid.Row="8"
+                     Grid.ColumnSpan="2"
+                     x:Name="ConfermaButton"
+                     Margin="5,10,5,10"
+                     HorizontalAlignment="Center"
+                     Width="150"
+                     Height="30"
+                     Command="{Binding ApriSchedaCommand}"/>
 
 
             </Grid>

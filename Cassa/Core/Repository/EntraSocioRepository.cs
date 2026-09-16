@@ -14,6 +14,8 @@ namespace Cassa.Core.Repository
         Task<int> AddNewScheda(EntraSocioDTO dto, EntraIngressiDTO edto, CancellationToken ctk = default);
         Task<bool> EsisteSocioInside(EntraSocioDTO dto, CancellationToken ctk = default);
         Task<IEnumerable<string>> GetPosizioniAsync();
+
+        Task<string> GetPosizioneByCodicePerson(int personId, CancellationToken ctk = default);
     }
 
     public class EntraSocioRepository(IEntraSocioDbContext ctx) : BaseRepository<EntraSocioDbContext, Scheda>, IEntraSocioRepository
@@ -129,6 +131,14 @@ namespace Cassa.Core.Repository
         public async Task<bool> EsisteSocioInside(EntraSocioDTO dto, CancellationToken ctk = default)
         {
             return await _ctx.Schede.Where(x => x.PersonId == dto.CodicePerson).AnyAsync(ctk);
+        }
+
+        public async Task<string> GetPosizioneByCodicePerson(int personId, CancellationToken ctk = default)
+        {
+            var scheda = await _ctx.Schede
+                .Where(s => s.PersonId == personId)
+                .FirstOrDefaultAsync(ctk);
+            return scheda?.Posizione ?? string.Empty;
         }
 
         public async Task<IEnumerable<string>> GetPosizioniAsync()

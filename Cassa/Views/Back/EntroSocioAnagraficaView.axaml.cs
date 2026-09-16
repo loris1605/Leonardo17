@@ -62,7 +62,8 @@ public partial class EntraSocioAnagraficaView : BaseUserControl<EntraSocioAnagra
             // 1. Definisci il flusso sorgente centralizzato e rendilo condiviso (.Publish().RefCount())
             var isPosizioneEnabled = this.WhenAnyValue(
                     x => x.ViewModel.BindingT.NumeroSocio,
-                    codice => !string.IsNullOrWhiteSpace(codice)) // Esprime la tua condizione (0 = disabilitato, -1 o altri = abilitato)
+                    x => x.ViewModel.IsSocioInside,
+                    (numeroSocio, isInside) => !string.IsNullOrWhiteSpace(numeroSocio) && !isInside)
                 .ObserveOn(RxSchedulers.MainThreadScheduler)
                 .Publish()
                 .RefCount();
