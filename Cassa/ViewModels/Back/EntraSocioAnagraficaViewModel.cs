@@ -6,13 +6,14 @@ using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using ViewModels;
 
 namespace Cassa.ViewModels
 {
     public interface IEntraSocioAnagraficaViewModel : IRoutableViewModel
     {
-        
+        IObservable<string> EntraSocioAnagraficaToPostazione { get; }
     }
 
 
@@ -51,14 +52,7 @@ namespace Cassa.ViewModels
             TesseraCommand = ReactiveCommand.CreateFromTask(TesseraAsync);
             F5Command = ReactiveCommand.CreateFromTask(F5Async);
             PosizioneEscCommand = ReactiveCommand.CreateFromTask(PosizioneEscAsync);
-            ApriSchedaCommand = ReactiveCommand.CreateFromTask(async () =>
-            {
-                if (IsSocioFound)
-                {
-                    // Logica per aprire la scheda del socio trovato
-                    await Task.CompletedTask; // Sostituire con la logica reale
-                }
-            });
+            ApriSchedaCommand = ReactiveCommand.CreateFromTask(ApriSchedaAsync);
 
             _disposables.Add(TesseraCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Tessera: {ex.Message}")));
             _disposables.Add(F5Command.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione F5: {ex.Message}")));
@@ -192,7 +186,12 @@ namespace Cassa.ViewModels
             }
         }
 
-        
+        private async Task ApriSchedaAsync()
+        {
+            _entraSocioAnagraficaToPostazione.OnNext(BindingT.Posizione);
+            _entraSocioAnagraficaToPostazione.OnCompleted();
+            await Task.CompletedTask;
+        }
 
         private async Task F5Async()
         {
@@ -280,5 +279,9 @@ namespace Cassa.ViewModels
 
         public Interaction<Unit, Unit> TesseraFocus { get; } = new();
         public Interaction<Unit, Unit> PosizioneFocus { get; } = new();
+
+
+        private readonly Subject<string> _entraSocioAnagraficaToPostazione = new();
+        public IObservable<string> EntraSocioAnagraficaToPostazione => _entraSocioAnagraficaToPostazione.AsObservable();
     }
 }

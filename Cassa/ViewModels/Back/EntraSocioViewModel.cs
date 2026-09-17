@@ -135,6 +135,8 @@ namespace Cassa.ViewModels
             EntraCommand = ReactiveCommand.CreateFromTask(async vm => await OnEntra(), CanEntra);
 
             _disposables.Add(EntraCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Selezione Entra: {ex.Message}")));
+
+            _disposables.Add(EntraCommand);
         }
 
         protected override void OnFinalDestruction()
@@ -150,6 +152,16 @@ namespace Cassa.ViewModels
 
         protected override async Task OnLoading()
         {
+
+            AnagraficaViewModel.EntraSocioAnagraficaToPostazione
+                .Subscribe(posizione =>
+                {
+                    _posizione = posizione ?? string.Empty;
+                    _entraSocioToPostazione.OnNext((_postazioneId, _posizione)); // Notifica l'esterno con postazioneId + posizione
+                    _entraSocioToPostazione.OnCompleted(); // Completa l'osservabile per evitare memory leak
+                })
+            .DisposeWith(_disposables);
+
             await _strisciataRepository.DevelopStrisciate(Token);
             var data  = await Q.GetIngressiByPostazione(_postazioneId, Token);
             

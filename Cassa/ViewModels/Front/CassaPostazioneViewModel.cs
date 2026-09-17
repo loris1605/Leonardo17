@@ -96,6 +96,7 @@ namespace Cassa.ViewModels
             _disposables.Add(_postazioneToMenu);
             _disposables.Add(_postazioneToEntraSocio);
             _disposables.Add(_postazioneToListaSoci);
+            
 
             // Subscribe to IsOpen changes and call handler (skip initial emission if undesiderata)
             this.WhenAnyValue(vm => vm.IsOpen)
@@ -136,6 +137,7 @@ namespace Cassa.ViewModels
 
         protected override async Task OnLoading()
         {
+             
             try
             {
                 Titolo = "POSTAZIONE " + await Q.GetPostazioneName(_postazioneId, Token);

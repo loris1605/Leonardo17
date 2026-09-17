@@ -35,6 +35,7 @@ namespace Models.Context
         public DbSet<TipoFidelity> TipiFidelity { get; set; } = null!;
         public DbSet<Fidelity> Fidelities { get; set; } = null!;
         public DbSet<FidelityConto> FidelityEntries { get; set; } = null!;
+        public DbSet<TipoAbbonamento> TipiAbbonamento { get; set; } = null!;
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -62,6 +63,7 @@ namespace Models.Context
             TipoFidelityConfig(modelBuilder);
             FidelityConfig(modelBuilder);
             FidelityContoConfig(modelBuilder);
+            TipoAbbonamentoConfig(modelBuilder);
         }
 
         private void SettingsConfig(ModelBuilder modelBuilder)
@@ -552,7 +554,7 @@ namespace Models.Context
                         .WithMany(p => p.TipiFidelity)    // Una TipoFidelityInput ha molte TipoFidelity
                         .HasForeignKey(s => s.TipoFidelityInputId) // La chiave è TipoFidelityInputId
                         .OnDelete(DeleteBehavior.Cascade);
-           
+
             modelBuilder.Entity<TipoFidelity>()
                         .HasOne(s => s.TipoFidelityOutput)          // Una TipoFidelity ha una TipoFidelityOutput
                         .WithMany(p => p.TipiFidelity)    // Una TipoFidelityOutput ha molte TipoFidelity
@@ -583,14 +585,21 @@ namespace Models.Context
 
         private static void FidelityContoConfig(ModelBuilder modelBuilder)
         {
-           
+
             modelBuilder.Entity<FidelityConto>()
                         .HasOne(s => s.Fidelity)          // Una FidelityEntry ha una Fidelity
                         .WithMany(p => p.FidelityConti)    // Una Fidelity ha molte FidelityEntries
                         .HasForeignKey(s => s.FidelityId) // La chiave è FidelityId
                         .OnDelete(DeleteBehavior.Cascade);
-            
-        }
-    }
 
+        }
+
+        private static void TipoAbbonamentoConfig(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<TipoAbbonamento>()
+                .Property(s => s.Nome).HasMaxLength(25);
+
+        }
+
+    }
 }
