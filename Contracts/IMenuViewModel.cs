@@ -9,6 +9,7 @@ namespace Contracts
         IObservable<Unit> MenuToSoci { get; }
         IObservable<Unit> MenuToConnection { get; }
         IObservable<Unit> MenuToConfigurazione { get; }
+        IObservable<Unit> MenuToServizi { get; }
         IObservable<int> MenuToCassa { get; }
     }
 }

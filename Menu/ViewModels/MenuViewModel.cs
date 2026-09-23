@@ -10,7 +10,6 @@ using System.Reactive.Disposables;
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Threading.Tasks;
 using ViewModels;
 
 namespace Menu.ViewModels
@@ -39,6 +38,7 @@ namespace Menu.ViewModels
         public ReactiveCommand<Unit, Unit> SociCommand { get; }
         public ReactiveCommand<Unit, Unit> ApriGiornataCommand { get; }
         public ReactiveCommand<Unit, Unit> ChiudiGiornataCommand { get; }
+        public ReactiveCommand<Unit, Unit> ServiziCommand { get; }
 
 
         // ---------------------------------------------------------------------
@@ -68,6 +68,10 @@ namespace Menu.ViewModels
             .Select(cmd => cmd != null ? cmd.IsExecuting : Observable.Return(false))
             .Switch()
             .StartWith(false),
+        this.WhenAnyValue(x => x.ServiziCommand)
+            .Select(cmd => cmd != null ? cmd.IsExecuting : Observable.Return(false))
+            .Switch()
+            .StartWith(false),
         this.WhenAnyValue(x => x.SociCommand)
             .Select(cmd => cmd != null ? cmd.IsExecuting : Observable.Return(false))
             .Switch()
@@ -81,8 +85,8 @@ namespace Menu.ViewModels
             .Switch()
             .StartWith(false),
         // combinazione finale: true se uno qualsiasi è in esecuzione
-        (baseLoad, baseSave, baseEsc, ca, lo, co, cf, so, ap, ch) =>
-            baseLoad || baseSave || baseEsc || ca || lo || co || cf || so || ap || ch)
+        (baseLoad, baseSave, baseEsc, ca, lo, co, cf, sv, so, ap, ch) =>
+            baseLoad || baseSave || baseEsc || ca || lo || co || cf || sv || so || ap || ch)
         .DistinctUntilChanged();
 
 
@@ -216,6 +220,9 @@ namespace Menu.ViewModels
 
         private readonly Subject<int> _menuToCassa = new();
         public IObservable<int> MenuToCassa => _menuToCassa.AsObservable();
+
+        private readonly Subject<int> _menuToServizi = new();
+        public IObservable<int> MenuToServizi => _menuToServizi.AsObservable();
 
         private void AttivaPermessi()
         {

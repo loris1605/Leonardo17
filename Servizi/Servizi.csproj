@@ -7,12 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Core\Context\" />
-    <Folder Include="Core\Repository\" />
-    <Folder Include="Views\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\AppServices\AppServices.csproj" />
     <ProjectReference Include="..\AppSystem\AppSystem.csproj" />
     <ProjectReference Include="..\Contracts\Contracts.csproj" />
