@@ -20,7 +20,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <lc:TitleView TitoloPagina="CONFIGURAZIONE"
+        <lc:TitleView TitoloPagina="SERVIZI"
                       x:Name="Title"
                       ButtonText="Esci"
                       ToolTipText="TORNA A MENU PRINCIPALE"

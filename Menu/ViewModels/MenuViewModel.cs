@@ -130,6 +130,7 @@ namespace Menu.ViewModels
             SociCommand = ReactiveCommand.CreateFromTask(() => GoTo(_menuToSoci), canNavigate);
             ApriGiornataCommand = ReactiveCommand.CreateFromTask(ExecuteOpenGiornata, canApriFinal);
             ChiudiGiornataCommand = ReactiveCommand.CreateFromTask(ExecuteChiudiGiornata, canChiudiFinal);
+            ServiziCommand = ReactiveCommand.CreateFromTask(() => GoTo(_menuToServizi), canNavigate);
             //CassaCommand = ReactiveCommand.CreateFromTask(() => GoToCassa(SelectedPostazione?.IDPOSTAZIONE ?? 0), canNavigate);
 
             //4.Gestione centralizzata delle Eccezioni(Ciclo di vita del ViewModel)
@@ -140,6 +141,7 @@ namespace Menu.ViewModels
             SociCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Soci: {ex.Message}"));
             ApriGiornataCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Apertura Giornata: {ex.Message}"));
             ChiudiGiornataCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Chiusura Giornata: {ex.Message}"));
+            ServiziCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Servizi: {ex.Message}"));
             //CassaCommand.ThrownExceptions.Subscribe(ex => Debug.WriteLine($"Errore Cassa: {ex.Message}"));
 
 
@@ -221,8 +223,8 @@ namespace Menu.ViewModels
         private readonly Subject<int> _menuToCassa = new();
         public IObservable<int> MenuToCassa => _menuToCassa.AsObservable();
 
-        private readonly Subject<int> _menuToServizi = new();
-        public IObservable<int> MenuToServizi => _menuToServizi.AsObservable();
+        private readonly Subject<Unit> _menuToServizi = new();
+        public IObservable<Unit> MenuToServizi => _menuToServizi.AsObservable();
 
         private void AttivaPermessi()
         {

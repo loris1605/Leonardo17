@@ -1,11 +1,10 @@
-﻿using Servizi.Core.Context;
+﻿using Contracts;
+using ReactiveUI;
+using Servizi.Core.Context;
 using Servizi.Core.Repository;
+using Servizi.ViewModels;
+using Servizi.Views;
 using Splat;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Servizi
 {
@@ -27,8 +26,21 @@ namespace Servizi
                 return new ServiziAbbonamentoRepository(context);
             }, typeof(IServiziAbbonamentoRepository));
 
+
+
+            Locator.CurrentMutable.Register(() => new ServiziViewModel(), typeof(IServiziViewModel));
+
+
+
+            Locator.CurrentMutable.Register(() => new ServiziView(), typeof(IViewFor<ServiziViewModel>));
+
+
             // Initialization code for the Servizi module
             Console.WriteLine("Servizi module initialized.");
+
+
+
+
         }
     }
 }

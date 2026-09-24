@@ -59,6 +59,14 @@
                          HorizontalAlignment="Stretch"
                          IsVisible="{Binding AmministratoreVisible}"/>
 
+            <ui:UiButton x:Name="ServiziItem" 
+                         Content="Servizi" 
+                         Foreground="Black"
+                         Command="{Binding ServiziCommand}"
+                         Height="50" 
+                         Margin="20,5"
+                         HorizontalAlignment="Stretch"
+                         IsVisible="{Binding AmministratoreVisible}"/>
 
             <!--<Button x:Name="AmministratoreItem" Content="Cassa" Command="{Binding ConfigurazioneCommand, Mode=OneWay}" IsVisible="{Binding CassaVisible}" />
             <Button x:Name="CassaItem" Content="Configurazione" Command="{Binding ConfigurazioneCommand}" IsVisible="{Binding ConfigurazioneCommand, Converter={StaticResource CmdToVisibleConverter}}"/>

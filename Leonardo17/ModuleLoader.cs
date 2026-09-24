@@ -12,6 +12,7 @@ namespace Leonardo17
         private static bool _isMenuLoaded = false;
         private static bool _isSociLoaded = false;
         private static bool _isConfigurazioneLoaded = false;
+        private static bool _isServiziLoaded = false;
         private static bool _isCassaLoaded = false; 
 
         public static void EnsureLoginModuleLoaded()
@@ -182,6 +183,41 @@ namespace Leonardo17
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($">>> [ERROR] Errore critico nel caricamento del modulo Configurazione: {ex.Message}");
+                throw;
+            }
+        }
+
+        public static void EnsureServiziModuleLoaded()
+        {
+            if (_isServiziLoaded) return;
+
+            try
+            {
+                // 1. Determina il percorso della DLL nella cartella dell'applicazione
+                string assemblyPath = Path.Combine(AppContext.BaseDirectory, "Servizi.dll");
+
+                if (!File.Exists(assemblyPath))
+                {
+                    throw new FileNotFoundException($"Impossibile trovare il modulo di menu: {assemblyPath}");
+                }
+
+                // 2. Carica l'Assembly in memoria dinamicamente
+                Assembly menuAssembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
+                // 3. Cerca la classe di configurazione del modulo (es. MenuModuleInitializer)
+                Type initializerType = menuAssembly.GetType("Servizi.ServiziModuleInitializer");
+                if (initializerType != null)
+                {
+                    // Invocazione del metodo di registrazione delle dipendenze (Splat)
+                    MethodInfo initMethod = initializerType.GetMethod("Initialize", BindingFlags.Public | BindingFlags.Static);
+                    initMethod?.Invoke(null, null);
+                }
+
+                _isConfigurazioneLoaded = true;
+                System.Diagnostics.Debug.WriteLine("***** [MODULE] Modulo Servizi caricato in memoria con successo *****");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($">>> [ERROR] Errore critico nel caricamento del modulo Servizi: {ex.Message}");
                 throw;
             }
         }

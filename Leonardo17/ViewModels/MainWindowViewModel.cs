@@ -268,6 +268,13 @@ namespace ViewModels
                         .Subscribe()
                         .DisposeWith(_currentNavigationDisposables);
 
+                    menuVM.MenuToServizi
+                        .Take(1)
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .SelectMany(_ => Observable.FromAsync(GoToServizi))
+                        .Subscribe()
+                        .DisposeWith(_currentNavigationDisposables);
+
                     Router.NavigateAndReset.Execute(menuVM)
                         .Select(_ => Unit.Default)
                         .Subscribe(
@@ -364,6 +371,52 @@ namespace ViewModels
                     else
                     {
                         Debug.WriteLine(">>> [ERROR] Impossibile risolvere IConfigurazioneViewModel.");
+                        tcs.TrySetResult(Unit.Default);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    tcs.TrySetException(ex);
+                }
+            });
+
+            await tcs.Task;
+        }
+
+        private async Task GoToServizi()
+        {
+            _currentNavigationDisposables.Clear();
+
+            await Task.Run(() => ModuleLoader.EnsureServiziModuleLoaded());
+
+            var tcs = new TaskCompletionSource<Unit>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            RxSchedulers.MainThreadScheduler.Schedule(() =>
+            {
+                try
+                {
+                    var serviziVM = Locator.Current.GetService<IServiziViewModel>();
+
+                    if (serviziVM != null)
+                    {
+                        serviziVM.ServiziToMenu
+                            .Take(1)
+                            .ObserveOn(RxSchedulers.MainThreadScheduler)
+                            .SelectMany(_ => Observable.FromAsync(GoToMenu))
+                            .Subscribe()
+                            .DisposeWith(_currentNavigationDisposables);
+
+                        Router.NavigateAndReset.Execute(serviziVM)
+                            .Select(_ => Unit.Default)
+                            .Subscribe(
+                                _ => { },
+                                ex => tcs.TrySetException(ex),
+                                () => tcs.TrySetResult(Unit.Default)
+                            );
+                    }
+                    else
+                    {
+                        Debug.WriteLine(">>> [ERROR] Impossibile risolvere IServiziViewModel.");
                         tcs.TrySetResult(Unit.Default);
                     }
                 }
