@@ -153,13 +153,13 @@ namespace Configurazione.ViewModels
                     registerSubscriptions(groupVM);
 
                     // 3. NAVIGAZIONE SUL MAIN THREAD
-                    var tcs = new TaskCompletionSource();
+                    var tcs = new TaskCompletionSource<object>();
 
                     RxSchedulers.MainThreadScheduler.Schedule(() =>
                     {
                         Router.NavigateAndReset.Execute(groupVM)
                             .Subscribe(
-                                _ => tcs.SetResult(),
+                                _ => tcs.SetResult(null),
                                 ex => tcs.SetException(ex)
                             );
                     });
@@ -184,46 +184,82 @@ namespace Configurazione.ViewModels
             {
                 groupVM.OperatoreToPostazioni
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async _ => { GroupEnabled = false; await GoToPostazioneGroup(); })
+                    .SelectMany(_ => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToSettoreGroup();
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 groupVM.OperatoreToSettori
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async _ => { GroupEnabled = false; await GoToSettoreGroup(); })
+                    .SelectMany(_ => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToSettoreGroup();
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 groupVM.OperatoreToTariffe
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async _ => { GroupEnabled = false; await GoToTariffaGroup(); })
+                    .SelectMany(_ => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToTariffaGroup();
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 groupVM.OperatoreToRientri
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async _ => { GroupEnabled = false; await GoToRientroGroup(); })
+                    .SelectMany(_ => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToRientroGroup();
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 groupVM.GroupToOperatoreAdd
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async _ => { GroupEnabled = false; 
-                                            await GoToInput(Locator.Current.GetService<IOperatoreAddViewModel>()); })
+                    .SelectMany(_ => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToInput(Locator.Current.GetService<IOperatoreAddViewModel>());
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 groupVM.GroupToOperatoreDel
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async id => { GroupEnabled = false; 
-                                             await GoToInput(Locator.Current.GetService<IOperatoreDelViewModel>(), id); })
+                    .SelectMany(id => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToInput(Locator.Current.GetService<IOperatoreDelViewModel>(), id);
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 groupVM.GroupToOperatoreUpd
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async id => { GroupEnabled = false; 
-                                             await GoToInput(Locator.Current.GetService<IOperatoreUpdViewModel>(), id); })
+                    .SelectMany(id => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToInput(Locator.Current.GetService<IOperatoreUpdViewModel>(), id);
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 groupVM.GroupToPermessi
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async id => { GroupEnabled = false; 
-                                             await GoToInput(Locator.Current.GetService<IPermessoViewModel>(), id); })
+                    .SelectMany(id => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToInput(Locator.Current.GetService<IPermessoViewModel>(), id);
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
             });
         }
@@ -234,42 +270,82 @@ namespace Configurazione.ViewModels
             {
                 groupVM.PostazioniToOperatori
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async _ => { GroupEnabled = false; await GoToOperatoreGroup(); })
+                    .SelectMany(_ => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToOperatoreGroup();
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 groupVM.PostazioniToSettori
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async _ => { GroupEnabled = false; await GoToSettoreGroup(); })
+                    .SelectMany(_ => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToSettoreGroup();
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 groupVM.PostazioniToRientri
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async _ => { GroupEnabled = false; await GoToRientroGroup(); })
+                    .SelectMany(_ => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToRientroGroup();
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 groupVM.PostazioniToTariffe
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async _ => { GroupEnabled = false; await GoToTariffaGroup(); })
+                    .SelectMany(_ => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToTariffaGroup();
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 groupVM.GroupToPostazioneAdd
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async _ => { GroupEnabled = false; await GoToInput(Locator.Current.GetService<IPostazioneAddViewModel>()); })
+                    .SelectMany(_ => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToInput(Locator.Current.GetService<IPostazioneAddViewModel>());
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 groupVM.GroupToPostazioneDel
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async id => { GroupEnabled = false; await GoToInput(Locator.Current.GetService<IPostazioneDelViewModel>(), id); })
+                    .SelectMany(id => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToInput(Locator.Current.GetService<IPostazioneDelViewModel>(), id);
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 groupVM.GroupToPostazioneUpd
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async id => { GroupEnabled = false; await GoToInput(Locator.Current.GetService<IPostazioneUpdViewModel>(), id); })
+                    .SelectMany(id => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToInput(Locator.Current.GetService<IPostazioneUpdViewModel>(), id);
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 groupVM.GroupToReparti
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async id => { GroupEnabled = false; await GoToInput(Locator.Current.GetService<IRepartoViewModel>(), id); })
+                    .SelectMany(id => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToInput(Locator.Current.GetService<IRepartoViewModel>(), id);
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
             });
         }
@@ -281,44 +357,84 @@ namespace Configurazione.ViewModels
                 // 1. Transizioni verso gli altri macro-gruppi
                 groupVM.SettoriToOperatori
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async _ => { GroupEnabled = false; await GoToOperatoreGroup(); })
+                    .SelectMany(_ => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToOperatoreGroup();
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 groupVM.SettoriToPostazioni
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async _ => { GroupEnabled = false; await GoToPostazioneGroup(); })
+                    .SelectMany(_ => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToPostazioneGroup();
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 groupVM.SettoriToTariffe
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async _ => { GroupEnabled = false; await GoToTariffaGroup(); })
+                    .SelectMany(_ => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToTariffaGroup();
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 groupVM.SettoriToRientri
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async _ => { GroupEnabled = false; await GoToRientroGroup(); })
+                    .SelectMany(_ => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToRientroGroup();
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 // 2. Transizioni verso le maschere di input (Aggiunta)
                 groupVM.GroupToSettoreAdd
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async _ => { GroupEnabled = false; await GoToInput(Locator.Current.GetService<ISettoreAddViewModel>()); })
+                    .SelectMany(_ => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToInput(Locator.Current.GetService<ISettoreAddViewModel>());
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 // 3. Transizioni verso le maschere di input con ID (Cancellazione, Modifica, Listino)
                 groupVM.GroupToSettoreDel
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async id => { GroupEnabled = false; await GoToInput(Locator.Current.GetService<ISettoreDelViewModel>(), id); })
+                    .SelectMany(id => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToInput(Locator.Current.GetService<ISettoreDelViewModel>(), id);
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 groupVM.GroupToSettoreUpd
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async id => { GroupEnabled = false; await GoToInput(Locator.Current.GetService<ISettoreUpdViewModel>(), id); })
+                    .SelectMany(id => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToInput(Locator.Current.GetService<ISettoreUpdViewModel>(), id);
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 groupVM.GroupToListino
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async id => { GroupEnabled = false; await GoToInput(Locator.Current.GetService<IListinoViewModel>(), id); })
+                    .SelectMany(id => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToInput(Locator.Current.GetService<IListinoViewModel>(), id);
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
             });
         }
@@ -330,39 +446,74 @@ namespace Configurazione.ViewModels
                 // 1. Transizioni verso gli altri macro-gruppi
                 groupVM.TariffaToOperatori
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async _ => { GroupEnabled = false; await GoToOperatoreGroup(); })
+                    .SelectMany(_ => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToOperatoreGroup();
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 groupVM.TariffaToPostazioni
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async _ => { GroupEnabled = false; await GoToPostazioneGroup(); })
+                    .SelectMany(_ => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToPostazioneGroup();
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 groupVM.TariffaToSettori
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async _ => { GroupEnabled = false; await GoToSettoreGroup(); })
+                    .SelectMany(_ => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToSettoreGroup();
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 groupVM.TariffaToRientri
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async _ => { GroupEnabled = false; await GoToRientroGroup(); })
+                    .SelectMany(_ => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToRientroGroup();
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 // 2. Transizioni verso le maschere di input (Aggiunta)
                 groupVM.GroupToTariffaAdd
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async _ => { GroupEnabled = false; await GoToInput(Locator.Current.GetService<ITariffaAddViewModel>()); })
+                    .SelectMany(_ => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToInput(Locator.Current.GetService<ITariffaAddViewModel>());
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 // 3. Transizioni verso le maschere di input con ID (Cancellazione e Modifica)
                 groupVM.GroupToTariffaDel
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async id => { GroupEnabled = false; await GoToInput(Locator.Current.GetService<ITariffaDelViewModel>(), id); })
+                    .SelectMany(id => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToInput(Locator.Current.GetService<ITariffaDelViewModel>(), id);
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 groupVM.GroupToTariffaUpd
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async id => { GroupEnabled = false; await GoToInput(Locator.Current.GetService<ITariffaUpdViewModel>(), id); })
+                    .SelectMany(id => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToInput(Locator.Current.GetService<ITariffaUpdViewModel>(), id);
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
             });
         }
@@ -374,39 +525,74 @@ namespace Configurazione.ViewModels
                 // 1. Transizioni verso gli altri macro-gruppi
                 groupVM.TipoRientroToOperatori
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async _ => { GroupEnabled = false; await GoToOperatoreGroup(); })
+                    .SelectMany(_ => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToOperatoreGroup();
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 groupVM.TipoRientroToPostazioni
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async _ => { GroupEnabled = false; await GoToPostazioneGroup(); })
+                    .SelectMany(_ => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToPostazioneGroup();
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 groupVM.TipoRientroToSettori
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async _ => { GroupEnabled = false; await GoToSettoreGroup(); })
+                    .SelectMany(_ => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToSettoreGroup();
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 groupVM.TipoRientroToTariffe
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async _ => { GroupEnabled = false; await GoToTariffaGroup(); })
+                    .SelectMany(_ => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToTariffaGroup();
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 // 2. Transizioni verso le maschere di input (Aggiunta)
                 groupVM.GroupToTipoRientroAdd
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async _ => { GroupEnabled = false; await GoToInput(Locator.Current.GetService<ITipoRientroAddViewModel>()); })
+                    .SelectMany(_ => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToInput(Locator.Current.GetService<ITipoRientroAddViewModel>());
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 // 3. Transizioni verso le maschere di input con ID (Cancellazione e Modifica)
                 groupVM.GroupToTipoRientroDel
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async id => { GroupEnabled = false; await GoToInput(Locator.Current.GetService<ITipoRientroDelViewModel>(), id); })
+                    .SelectMany(id => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToInput(Locator.Current.GetService<ITipoRientroDelViewModel>(), id);
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
 
                 groupVM.GroupToTipoRientroUpd
                     .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(async id => { GroupEnabled = false; await GoToInput(Locator.Current.GetService<ITipoRientroUpdViewModel>(), id); })
+                    .SelectMany(id => Observable.FromAsync(async () =>
+                    {
+                        GroupEnabled = false;
+                        await GoToInput(Locator.Current.GetService<ITipoRientroUpdViewModel>(), id);
+                    }))
+                    .Subscribe()
                     .DisposeWith(_navigationDisposables);
             });
         }

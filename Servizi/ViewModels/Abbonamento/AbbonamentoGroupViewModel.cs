@@ -3,6 +3,7 @@ using Servizi.Core.DTO;
 using Servizi.Core.Repository;
 using Servizi.ViewModels.Map;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ViewModels;
 
@@ -24,14 +25,17 @@ namespace Servizi.ViewModels
 
         public IObservable<bool> CanAction { get; }
 
-        protected override IObservable<bool> CanDel => this.WhenAnyValue(x => x.GroupBindingT != null);
-
-
+        protected override IObservable<bool> CanDel =>
+            this.WhenAnyValue(x => x.GroupBindingT)
+                .Select(g => g != null)
+                .DistinctUntilChanged();
 
         public AbbonamentoGroupViewModel(IServiziAbbonamentoRepository repository) : base(null)
         {
             Q = repository ?? throw new ArgumentNullException(nameof(repository));
-            CanAction = this.WhenAnyValue(x => x.GroupBindingT != null);
+            CanAction = this.WhenAnyValue(x => x.GroupBindingT)
+                .Select(g => g != null)
+                .DistinctUntilChanged();
 
         }
 

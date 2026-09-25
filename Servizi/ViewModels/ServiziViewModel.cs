@@ -166,64 +166,71 @@ namespace Servizi.ViewModels
             }
         }
 
-        private async Task GoToAbbonamentoGroup()
+        private Task GoToAbbonamentoGroup()
         {
-            //return GoToGroupGeneric<IOperatoreGroupViewModel>(groupVM =>
+
+            return GoToGroupGeneric<IAbbonamentoGroupViewModel>(groupVM => { });
             //{
-            //    groupVM.OperatoreToPostazioni
-            //        .ObserveOn(RxSchedulers.MainThreadScheduler)
-            //        .Subscribe(async _ => { GroupEnabled = false; await GoToPostazioneGroup(); })
-            //        .DisposeWith(_navigationDisposables);
 
-            //    groupVM.OperatoreToSettori
-            //        .ObserveOn(RxSchedulers.MainThreadScheduler)
-            //        .Subscribe(async _ => { GroupEnabled = false; await GoToSettoreGroup(); })
-            //        .DisposeWith(_navigationDisposables);
 
-            //    groupVM.OperatoreToTariffe
-            //        .ObserveOn(RxSchedulers.MainThreadScheduler)
-            //        .Subscribe(async _ => { GroupEnabled = false; await GoToTariffaGroup(); })
-            //        .DisposeWith(_navigationDisposables);
+            //groupVM.OperatoreToPostazioni
+            //    .ObserveOn(RxSchedulers.MainThreadScheduler)
+            //    .Subscribe(async _ => { GroupEnabled = false; await GoToPostazioneGroup(); })
+            //    .DisposeWith(_navigationDisposables);
 
-            //    groupVM.OperatoreToRientri
-            //        .ObserveOn(RxSchedulers.MainThreadScheduler)
-            //        .Subscribe(async _ => { GroupEnabled = false; await GoToRientroGroup(); })
-            //        .DisposeWith(_navigationDisposables);
+            //groupVM.OperatoreToSettori
+            //    .ObserveOn(RxSchedulers.MainThreadScheduler)
+            //    .Subscribe(async _ => { GroupEnabled = false; await GoToSettoreGroup(); })
+            //    .DisposeWith(_navigationDisposables);
 
-            //    groupVM.GroupToOperatoreAdd
-            //        .ObserveOn(RxSchedulers.MainThreadScheduler)
-            //        .Subscribe(async _ => {
-            //            GroupEnabled = false;
-            //            await GoToInput(Locator.Current.GetService<IOperatoreAddViewModel>());
-            //        })
-            //        .DisposeWith(_navigationDisposables);
+            //groupVM.OperatoreToTariffe
+            //    .ObserveOn(RxSchedulers.MainThreadScheduler)
+            //    .Subscribe(async _ => { GroupEnabled = false; await GoToTariffaGroup(); })
+            //    .DisposeWith(_navigationDisposables);
 
-            //    groupVM.GroupToOperatoreDel
-            //        .ObserveOn(RxSchedulers.MainThreadScheduler)
-            //        .Subscribe(async id => {
-            //            GroupEnabled = false;
-            //            await GoToInput(Locator.Current.GetService<IOperatoreDelViewModel>(), id);
-            //        })
-            //        .DisposeWith(_navigationDisposables);
+            //groupVM.OperatoreToRientri
+            //    .ObserveOn(RxSchedulers.MainThreadScheduler)
+            //    .Subscribe(async _ => { GroupEnabled = false; await GoToRientroGroup(); })
+            //    .DisposeWith(_navigationDisposables);
 
-            //    groupVM.GroupToOperatoreUpd
-            //        .ObserveOn(RxSchedulers.MainThreadScheduler)
-            //        .Subscribe(async id => {
-            //            GroupEnabled = false;
-            //            await GoToInput(Locator.Current.GetService<IOperatoreUpdViewModel>(), id);
-            //        })
-            //        .DisposeWith(_navigationDisposables);
+            //groupVM.GroupToOperatoreAdd
+            //    .ObserveOn(RxSchedulers.MainThreadScheduler)
+            //    .Subscribe(async _ =>
+            //    {
+            //        GroupEnabled = false;
+            //        await GoToInput(Locator.Current.GetService<IOperatoreAddViewModel>());
+            //    })
+            //    .DisposeWith(_navigationDisposables);
 
-            //    groupVM.GroupToPermessi
-            //        .ObserveOn(RxSchedulers.MainThreadScheduler)
-            //        .Subscribe(async id => {
-            //            GroupEnabled = false;
-            //            await GoToInput(Locator.Current.GetService<IPermessoViewModel>(), id);
-            //        })
-            //        .DisposeWith(_navigationDisposables);
+            //groupVM.GroupToOperatoreDel
+            //    .ObserveOn(RxSchedulers.MainThreadScheduler)
+            //    .Subscribe(async id =>
+            //    {
+            //        GroupEnabled = false;
+            //        await GoToInput(Locator.Current.GetService<IOperatoreDelViewModel>(), id);
+            //    })
+            //    .DisposeWith(_navigationDisposables);
+
+            //groupVM.GroupToOperatoreUpd
+            //    .ObserveOn(RxSchedulers.MainThreadScheduler)
+            //    .Subscribe(async id =>
+            //    {
+            //        GroupEnabled = false;
+            //        await GoToInput(Locator.Current.GetService<IOperatoreUpdViewModel>(), id);
+            //    })
+            //    .DisposeWith(_navigationDisposables);
+
+            //groupVM.GroupToPermessi
+            //    .ObserveOn(RxSchedulers.MainThreadScheduler)
+            //    .Subscribe(async id =>
+            //    {
+            //        GroupEnabled = false;
+            //        await GoToInput(Locator.Current.GetService<IPermessoViewModel>(), id);
+            //    })
+            //    .DisposeWith(_navigationDisposables);
             //});
 
-            await Task.CompletedTask;
+            
         }
     }
 }

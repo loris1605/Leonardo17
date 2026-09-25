@@ -30,9 +30,16 @@ namespace Servizi
 
             Locator.CurrentMutable.Register(() => new ServiziViewModel(), typeof(IServiziViewModel));
 
+            Locator.CurrentMutable.Register(() =>
+            {
+                var context = Locator.Current.GetService<IServiziAbbonamentoRepository>();
+                return new AbbonamentoGroupViewModel(context);
+            }, typeof(IAbbonamentoGroupViewModel));
 
 
             Locator.CurrentMutable.Register(() => new ServiziView(), typeof(IViewFor<ServiziViewModel>));
+
+            Locator.CurrentMutable.Register(() => new AbbonamentoGroupView(), typeof(IViewFor<AbbonamentoGroupViewModel>));
 
 
             // Initialization code for the Servizi module
