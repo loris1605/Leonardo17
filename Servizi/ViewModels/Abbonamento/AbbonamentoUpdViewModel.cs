@@ -1,17 +1,22 @@
-﻿using Configurazione.Core.Repository;
+﻿using Servizi.Core.Repository;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Configurazione.ViewModels
+namespace Servizi.ViewModels
 {
-    public interface ITariffaUpdViewModel : IConfigurazioneCrudViewModel { }
+    public interface IAbbonamentoUpdViewModel : IServiziCrudViewModel { }
 
-    public class TariffaUpdViewModel : TariffaInputBase, ITariffaUpdViewModel
+    public partial class AbbonamentoUpdViewModel : AbbonamentoInputBase, IAbbonamentoDelViewModel
     {
-        private IConfigurazioneTariffaRepository Q;
-       
-        public TariffaUpdViewModel(IConfigurazioneTariffaRepository Repository) : base()
+        private IServiziAbbonamentoRepository Q;
+
+        public AbbonamentoUpdViewModel(IServiziAbbonamentoRepository Repository) : base()
         {
-            Titolo = "Modifica Tariffa";
+            Titolo = "Modifica Tipo Abbonamento";
             FieldsVisibile = true; // Impostato come richiesto
             FieldsEnabled = true;
 
@@ -28,16 +33,16 @@ namespace Configurazione.ViewModels
         {
             try
             {
-                var data = await Q.FirstTariffa(_idDaModificare);
+                var data = await Q.FirstAbbonamento(_idDaModificare);
 
                 if (data == null)
                 {
-                    InfoLabel = "Errore: Tariffa non trovata.";
+                    InfoLabel = "Errore: Tipo Abbonamento non trovato.";
                     FieldsEnabled = false;
                     return;
                 }
 
-                BindingT = new (data);
+                BindingT = new(data);
 
                 // In modifica, portiamo il focus sul nome all'avvio
                 await SetFocus(NomeFocus);
@@ -71,7 +76,7 @@ namespace Configurazione.ViewModels
                 if (await Q.EsisteNomeUpd(input))
                 {
                     _isClosing = false;
-                    InfoLabel = "Tariffa già registrata";
+                    InfoLabel = "Tipo Abbonamento già registrato";
                     FieldsEnabled = true;
                     await SetFocus(NomeFocus);
                     return;
@@ -83,7 +88,7 @@ namespace Configurazione.ViewModels
                 if (!await Q.Upd(input))
                 {
                     _isClosing = false;
-                    InfoLabel = "Errore Db modifica Tariffa";
+                    InfoLabel = "Errore Db modifica Tipo Abbonamento";
                     FieldsEnabled = true;
                     await SetFocus(NomeFocus);
                     return;

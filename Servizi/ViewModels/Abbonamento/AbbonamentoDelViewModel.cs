@@ -1,21 +1,19 @@
-﻿using Configurazione.Core.Repository;
+﻿using Servizi.Core.Repository;
 using System.Diagnostics;
 
-namespace Configurazione.ViewModels
+namespace Servizi.ViewModels
 {
-    public interface ITariffaDelViewModel : IConfigurazioneCrudViewModel { }
+    public interface IAbbonamentoDelViewModel : IServiziCrudViewModel { }
 
-    public class TariffaDelViewModel : TariffaInputBase, ITariffaDelViewModel
+    public partial class AbbonamentoDelViewModel : AbbonamentoInputBase, IAbbonamentoDelViewModel
     {
-        private IConfigurazioneTariffaRepository Q;
-
-        public TariffaDelViewModel(IConfigurazioneTariffaRepository Repository) : base()
+        private IServiziAbbonamentoRepository Q;
+        public AbbonamentoDelViewModel(IServiziAbbonamentoRepository Repository) : base()
         {
-            Titolo = "Cancella Tariffa";
+            Titolo = "Cancella Tipo Abbonamento";
             Q = Repository ?? throw new ArgumentNullException(nameof(Repository));
             FieldsEnabled = false;
         }
-
         protected override void OnFinalDestruction()
         {
             Q = null;
@@ -24,13 +22,13 @@ namespace Configurazione.ViewModels
 
         protected override async Task OnLoading()
         {
-            var data = await Q.FirstTariffa(_idDaModificare);
+            var data = await Q.FirstAbbonamento(_idDaModificare);
 
-            BindingT = new (data);
+            BindingT = new(data);
 
-            if (GetCodiceTariffa == 0)
+            if (GetCodiceAbbonamento == 0)
             {
-                InfoLabel = "Errore: Tariffa non trovata nel database.";
+                InfoLabel = "Errore: Tipo Abbonamento non trovato nel database.";
                 FieldsEnabled = false;
             }
             await SetFocus(EscFocus);
@@ -43,7 +41,7 @@ namespace Configurazione.ViewModels
             if (BindingT == null || BindingT.Id == 0)
             {
                 _isClosing = false;
-                InfoLabel = "Errore: Tariffa non valida.";
+                InfoLabel = "Errore: Tipo Abbonamento non valido.";
                 await SetFocus(EscFocus);
                 return;
             }
@@ -56,7 +54,7 @@ namespace Configurazione.ViewModels
                 if (!await Q.Del(BindingT.ToDto(), Token))
                 {
                     _isClosing = false;
-                    InfoLabel = "Errore Database: impossibile eliminare la tariffa";
+                    InfoLabel = "Errore Database: impossibile eliminare il Tipo Abbonamento";
                     await SetFocus(EscFocus);
                     return;
                 }
@@ -76,5 +74,6 @@ namespace Configurazione.ViewModels
                 await SetFocus(EscFocus);
             }
         }
+
     }
 }

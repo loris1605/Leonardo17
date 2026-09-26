@@ -1,17 +1,17 @@
-﻿using Configurazione.Core.Repository;
+﻿using Servizi.Core.Repository;
 using System.Diagnostics;
 
-namespace Configurazione.ViewModels
+namespace Servizi.ViewModels
 {
-    public interface ITariffaAddViewModel : IConfigurazioneCrudViewModel { }
+    public interface IAbbonamentoAddViewModel : IServiziCrudViewModel { }
 
-    public class TariffaAddViewModel : TariffaInputBase, ITariffaAddViewModel
+    public partial class AbbonamentoAddViewModel : AbbonamentoInputBase, IAbbonamentoAddViewModel
     {
-        private IConfigurazioneTariffaRepository Q;
+        private IServiziAbbonamentoRepository Q;
 
-        public TariffaAddViewModel(IConfigurazioneTariffaRepository Repository) : base()
+        public AbbonamentoAddViewModel(IServiziAbbonamentoRepository Repository) : base()
         {
-            Titolo = "Aggiungi Nuova Tariffa";
+            Titolo = "Aggiungi Nuovo Abbonamento";
             FieldsVisibile = true;
             FieldsEnabled = true;
             Q = Repository ?? throw new ArgumentNullException(nameof(Repository));
@@ -21,11 +21,6 @@ namespace Configurazione.ViewModels
         {
             Q = null;
             base.OnFinalDestruction();
-        }
-
-        protected override async Task OnLoading()
-        {
-            await SetFocus(NomeFocus);
         }
 
         protected async override Task OnSaving()
@@ -44,7 +39,7 @@ namespace Configurazione.ViewModels
                 if (await Q.EsisteNome(BindingT.ToDto(), Token))
                 {
                     _isClosing = false;
-                    InfoLabel = "Tariffa già registrata";
+                    InfoLabel = "Tipo Abbonamento già registrato";
                     await SetFocus(NomeFocus);
                     return;
                 }
@@ -52,9 +47,9 @@ namespace Configurazione.ViewModels
                 InfoLabel = "Salvataggio in corso...";
 
                 // 3. Inserimento a Database
-                int newTariffaId = await Q.Add(BindingT.ToDto(), Token);
+                int newTipoAbbonamentoId = await Q.Add(BindingT.ToDto(), Token);
 
-                if (newTariffaId == -1)
+                if (newTipoAbbonamentoId == -1)
                 {
                     _isClosing = false;
                     InfoLabel = "Errore Database: inserimento fallito";
@@ -63,7 +58,7 @@ namespace Configurazione.ViewModels
                 }
 
                 // 4. Successo: Ritorno protetto
-                await OnBack(newTariffaId);
+                await OnBack(newTipoAbbonamentoId);
             }
             catch (OperationCanceledException) { Debug.WriteLine("Salvataggio annullato."); _isClosing = false; }
             catch (Exception ex)

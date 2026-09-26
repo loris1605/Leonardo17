@@ -36,6 +36,24 @@ namespace Servizi
                 return new AbbonamentoGroupViewModel(context);
             }, typeof(IAbbonamentoGroupViewModel));
 
+            Locator.CurrentMutable.Register(() =>
+            {
+                var context = Locator.Current.GetService<IServiziAbbonamentoRepository>();
+                return new AbbonamentoAddViewModel(context);
+            }, typeof(IAbbonamentoAddViewModel));
+
+            Locator.CurrentMutable.Register(() =>
+            {
+                var context = Locator.Current.GetService<IServiziAbbonamentoRepository>();
+                return new AbbonamentoDelViewModel(context);
+            }, typeof(IAbbonamentoDelViewModel));
+
+            Locator.CurrentMutable.Register(() =>
+            {
+                var context = Locator.Current.GetService<IServiziAbbonamentoRepository>();
+                return new AbbonamentoUpdViewModel(context);
+            }, typeof(IAbbonamentoUpdViewModel));
+
 
             Locator.CurrentMutable.Register(() => new ServiziView(), typeof(IViewFor<ServiziViewModel>));
 

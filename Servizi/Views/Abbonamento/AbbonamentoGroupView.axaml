@@ -68,7 +68,7 @@
                                         Binding="{Binding Nome}" 
                                         Width="Auto" />
                                                
-                    <DataGridTextColumn Header="N° Ingr" 
+                    <DataGridTextColumn Header="Nr.Ingr" 
                                         Binding="{Binding NumeroIngressi}" 
                                         Width="Auto" />
 
