@@ -118,8 +118,10 @@ namespace Servizi.ViewModels
     {
         private Subject<Unit> _groupToAbbonamentoAdd = new();
         public IObservable<Unit> GroupToAbbonamentoAdd => _groupToAbbonamentoAdd;
+
         private Subject<int> _groupToAbbonamentoDel = new();
         public IObservable<int> GroupToAbbonamentoDel => _groupToAbbonamentoDel;
+
         private Subject<int> _groupToAbbonamentoUpd = new();
         public IObservable<int> GroupToAbbonamentoUpd => _groupToAbbonamentoUpd;
     }

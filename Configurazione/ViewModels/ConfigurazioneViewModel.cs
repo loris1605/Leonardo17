@@ -75,7 +75,6 @@ namespace Configurazione.ViewModels
             _navigationDisposables.Dispose();
             GroupRouter?.NavigationStack.Clear();
             InputRouter?.NavigationStack.Clear();
-            
 
             base.OnFinalDestruction();
         }

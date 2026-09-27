@@ -1,10 +1,5 @@
 ﻿using ReactiveUI;
 using Servizi.Core.DTO;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ViewModelServices.Core.Map;
 
 namespace Servizi.ViewModels.Map
@@ -15,7 +10,7 @@ namespace Servizi.ViewModels.Map
         public ServiziTipoAbbonamentoMap(ServiziTipoAbbonamentoDTO dto)
         {
             this.Id = dto.Id;
-            this.Nome = dto.Nome;
+            this.NomeAbbonamento = dto.Nome;
             this.NumeroIngressi = dto.NumeroIngressi;
             this.DurataGiorni = dto.DurataGiorni;
             this.Prezzo = dto.Prezzo;
@@ -26,7 +21,7 @@ namespace Servizi.ViewModels.Map
             return new ServiziTipoAbbonamentoDTO
             {
                 Id = this.Id,
-                Nome = this.Nome,
+                Nome = this.NomeAbbonamento,
                 NumeroIngressi = this.NumeroIngressi,
                 DurataGiorni = this.DurataGiorni,
                 Prezzo = this.Prezzo,

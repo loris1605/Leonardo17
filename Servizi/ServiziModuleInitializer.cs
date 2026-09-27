@@ -59,6 +59,11 @@ namespace Servizi
 
             Locator.CurrentMutable.Register(() => new AbbonamentoGroupView(), typeof(IViewFor<AbbonamentoGroupViewModel>));
 
+            Locator.CurrentMutable.Register(() => new AbbonamentoInputView(), typeof(IViewFor<AbbonamentoAddViewModel>));
+            Locator.CurrentMutable.Register(() => new AbbonamentoInputView(), typeof(IViewFor<AbbonamentoDelViewModel>));
+            Locator.CurrentMutable.Register(() => new AbbonamentoInputView(), typeof(IViewFor<AbbonamentoUpdViewModel>));
+
+
 
             // Initialization code for the Servizi module
             Console.WriteLine("Servizi module initialized.");

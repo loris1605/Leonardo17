@@ -23,6 +23,11 @@ namespace Servizi.ViewModels
             base.OnFinalDestruction();
         }
 
+        protected override async Task OnLoading()
+        {
+            await SetFocus(NomeFocus);
+        }
+
         protected async override Task OnSaving()
         {
             _isClosing = true;

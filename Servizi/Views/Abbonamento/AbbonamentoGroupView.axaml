@@ -65,7 +65,7 @@
                                         IsVisible="False" />
 
                     <DataGridTextColumn Header="Nome" 
-                                        Binding="{Binding Nome}" 
+                                        Binding="{Binding NomeAbbonamento}" 
                                         Width="Auto" />
                                                
                     <DataGridTextColumn Header="Nr.Ingr" 

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Text;
@@ -166,11 +167,117 @@ namespace Servizi.ViewModels
             }
         }
 
+        private async Task GoToInput<TViewModel>(TViewModel vm, int id = 0, int idRitorno = 0)
+                        where TViewModel : class, IServiziCrudViewModel
+        {
+            if (vm == null)
+            {
+                Debug.WriteLine($">>> [ERROR] Il ViewModel {typeof(TViewModel).Name} passato a GoToInput è nullo.");
+                return;
+            }
+
+            // Configurazione dei parametri sul ViewModel prima di entrare nel Thread UI
+            if (id != 0) vm.SetIdDaModificare(id);
+            if (idRitorno != 0) vm.SetIdRitorno(idRitorno);
+
+            var tcs = new TaskCompletionSource();
+
+            // Creiamo il contenitore per i disposable di QUESTA specifica sessione di input
+            var localDisposables = new CompositeDisposable();
+
+            RxSchedulers.MainThreadScheduler.Schedule(() =>
+            {
+                try
+                {
+                    // Gestione ESC
+                    vm.InputEsc
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(_ =>
+                        {
+                            InputRouter?.NavigationStack.Clear();
+                            GroupEnabled = true;
+                            localDisposables.Dispose(); // Libera la memoria alla chiusura
+                        })
+                        .DisposeWith(localDisposables);
+
+                    // Gestione BACK
+                    vm.InputBack
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Take(1)
+                        .Subscribe(value =>
+                        {
+                            try
+                            {
+                                InputRouter?.NavigateBack.Execute();
+                                AggiornaGridByInt(value);
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine($"Errore navigazione back: {ex.Message}");
+                                _isClosing = false;
+                            }
+
+                            InputRouter?.NavigationStack.Clear();
+                            GroupEnabled = true;
+                            localDisposables.Dispose(); // Libera la memoria alla chiusura
+                        })
+                        .DisposeWith(localDisposables);
+
+                    // Esecuzione Navigazione
+                    InputRouter.NavigateAndReset.Execute(vm)
+                        .Subscribe(
+                            _ => tcs.SetResult(),
+                            ex =>
+                            {
+                                localDisposables.Dispose(); // Libera in caso di errore immediato
+                                tcs.SetException(ex);
+                            }
+                        )
+                        .DisposeWith(localDisposables);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Errore durante la configurazione UI di GoToInput: {ex.Message}");
+                    localDisposables.Dispose();
+                    tcs.SetException(ex);
+                }
+            });
+
+            await tcs.Task;
+        }
+
         private Task GoToAbbonamentoGroup()
         {
 
-            return GoToGroupGeneric<IAbbonamentoGroupViewModel>(groupVM => { });
-            //{
+            return GoToGroupGeneric<IAbbonamentoGroupViewModel>(groupVM =>
+            { 
+                groupVM.GroupToAbbonamentoAdd
+                    .ObserveOn(RxSchedulers.MainThreadScheduler)
+                    .Subscribe(async _ =>
+                    {
+                        GroupEnabled = false;
+                        await GoToInput(Locator.Current.GetService<IAbbonamentoAddViewModel>());
+                    })
+                    .DisposeWith(_navigationDisposables);
+
+                    groupVM.GroupToAbbonamentoDel
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async id =>
+                        {
+                            GroupEnabled = false;
+                            await GoToInput(Locator.Current.GetService<IAbbonamentoDelViewModel>(), id);
+                        })
+                        .DisposeWith(_navigationDisposables);
+
+                    groupVM.GroupToAbbonamentoUpd
+                        .ObserveOn(RxSchedulers.MainThreadScheduler)
+                        .Subscribe(async id =>
+                        {
+                            GroupEnabled = false;
+                            await GoToInput(Locator.Current.GetService<IAbbonamentoUpdViewModel>(), id);
+                        })
+                        .DisposeWith(_navigationDisposables);
+            });
 
 
             //groupVM.OperatoreToPostazioni
@@ -193,31 +300,7 @@ namespace Servizi.ViewModels
             //    .Subscribe(async _ => { GroupEnabled = false; await GoToRientroGroup(); })
             //    .DisposeWith(_navigationDisposables);
 
-            //groupVM.GroupToOperatoreAdd
-            //    .ObserveOn(RxSchedulers.MainThreadScheduler)
-            //    .Subscribe(async _ =>
-            //    {
-            //        GroupEnabled = false;
-            //        await GoToInput(Locator.Current.GetService<IOperatoreAddViewModel>());
-            //    })
-            //    .DisposeWith(_navigationDisposables);
 
-            //groupVM.GroupToOperatoreDel
-            //    .ObserveOn(RxSchedulers.MainThreadScheduler)
-            //    .Subscribe(async id =>
-            //    {
-            //        GroupEnabled = false;
-            //        await GoToInput(Locator.Current.GetService<IOperatoreDelViewModel>(), id);
-            //    })
-            //    .DisposeWith(_navigationDisposables);
-
-            //groupVM.GroupToOperatoreUpd
-            //    .ObserveOn(RxSchedulers.MainThreadScheduler)
-            //    .Subscribe(async id =>
-            //    {
-            //        GroupEnabled = false;
-            //        await GoToInput(Locator.Current.GetService<IOperatoreUpdViewModel>(), id);
-            //    })
             //    .DisposeWith(_navigationDisposables);
 
             //groupVM.GroupToPermessi
@@ -230,7 +313,7 @@ namespace Servizi.ViewModels
             //    .DisposeWith(_navigationDisposables);
             //});
 
-            
+
         }
     }
 }

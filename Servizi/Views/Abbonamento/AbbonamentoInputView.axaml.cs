@@ -48,15 +48,7 @@ namespace Servizi.Views
                         })
                         .DisposeWith(d);
 
-                ViewModel?.LabelFocus
-                        .RegisterHandler(interaction =>
-                        {
-                            EtichettaBox.Focus();
-                            EtichettaBox.SelectAll();
-                            interaction.SetOutput(Unit.Default);
-                        })
-                        .DisposeWith(d);
-
+                
                 this.OneWayBind(ViewModel,
                         vm => vm.EscFocus,
                         view => view.InputSaveBox.EscFocus)
@@ -74,19 +66,29 @@ namespace Servizi.Views
 
                 //Bind Nome to TextBox
                 this.Bind(ViewModel,
-                          vm => vm.BindingT.NomeTariffa,
+                          vm => vm.BindingT.NomeAbbonamento,
                           v => v.NomeBox.Text)
                     .DisposeWith(d);
 
                 //Bind Label to TextBox
                 this.Bind(ViewModel,
-                          vm => vm.BindingT.EtichettaTariffa,
-                          v => v.EtichettaBox.Text)
+                          vm => vm.BindingT.NumeroIngressi,
+                          v => v.IngressiBox.Text)
                     .DisposeWith(d);
 
                 this.Bind(ViewModel,
-                          vm => vm.BindingT.PrezzoTariffa,
+                          vm => vm.BindingT.DurataGiorni,
+                          v => v.DurataBox.Text)
+                    .DisposeWith(d);
+
+                this.Bind(ViewModel,
+                          vm => vm.BindingT.Prezzo,
                           v => v.PrezzoBox.Value)
+                    .DisposeWith(d);
+
+                this.Bind(ViewModel,
+                          vm => vm.BindingT.Attivo,
+                          v => v.AbilitatoCheckBox.IsChecked)
                     .DisposeWith(d);
 
                 #region OneWay

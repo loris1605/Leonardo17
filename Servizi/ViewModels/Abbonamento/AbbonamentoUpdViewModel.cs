@@ -1,16 +1,11 @@
 ﻿using Servizi.Core.Repository;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Servizi.ViewModels
 {
     public interface IAbbonamentoUpdViewModel : IServiziCrudViewModel { }
 
-    public partial class AbbonamentoUpdViewModel : AbbonamentoInputBase, IAbbonamentoDelViewModel
+    public partial class AbbonamentoUpdViewModel : AbbonamentoInputBase, IAbbonamentoUpdViewModel
     {
         private IServiziAbbonamentoRepository Q;
 
