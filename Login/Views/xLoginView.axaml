@@ -1,0 +1,83 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:vm="using:Login.ViewModels"
+             xmlns:ui="using:ControlStyles"
+             KeyboardNavigation.TabNavigation="Cycle"
+             Background="LightSteelBlue"
+             x:DataType="vm:LoginViewModel"
+             x:Class="Login.Views.XLoginView">
+
+    <Grid x:Name="RootGrid" Margin="16">
+    
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="280"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+    
+        <!-- Left -->
+    <Border Grid.Column="0" CornerRadius="6" Padding="12" Background="#FFFAFAFA" BorderBrush="#FFE0E0E0" BorderThickness="1">
+      <StackPanel Spacing="8">
+        <TextBlock Text="Seleziona Operatore" FontWeight="SemiBold" FontSize="14"/>
+        <ComboBox x:Name="OperatoreCombo"
+                  HorizontalAlignment="Stretch"
+                  ItemsSource="{Binding DataSource}"
+                  SelectedItem="{Binding BindingT, Mode=TwoWay}">
+          <ComboBox.ItemTemplate>
+            <DataTemplate>
+              <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <Ellipse Width="36" Height="36" Fill="#FFD8D8D8"/>
+                <StackPanel>
+                  <TextBlock Text="{Binding NomeOperatore}" FontSize="12" Foreground="#FF666666"/>
+                </StackPanel>
+              </StackPanel>
+            </DataTemplate>
+          </ComboBox.ItemTemplate>
+        </ComboBox>
+
+        <TextBlock Text="Ultimo accesso:" 
+                   FontSize="12" 
+                   Foreground="#FF777777" 
+                   Margin="0,8,0,0"/>
+
+        <TextBlock x:Name="LastLoginLabel" Text="-" FontSize="12"/>
+
+        <StackPanel Orientation="Horizontal" 
+                    Spacing="8" 
+                    Margin="0,10,0,0"
+                    Height="50">
+          <ui:UiButton x:Name="LoginButton" 
+                        Content="Accedi" 
+                        Width="120"
+                        Command="{Binding SaveCommand}"/>
+          <ui:UiButton x:Name="CancelButton" 
+                        Content="Esci" 
+                        Width="120" />
+          
+          
+        </StackPanel>
+      </StackPanel>
+    </Border>
+
+    <!-- Right -->
+    <Border Grid.Column="1" CornerRadius="6" Padding="20" Background="#FFFFFFFF" BorderBrush="#FFECECEC" BorderThickness="1" Margin="12,0,0,0">
+      <StackPanel VerticalAlignment="Center" Spacing="12">
+        <TextBox x:Name="PasswordBox" 
+                Width="360" 
+                Text="{Binding PasswordText, Mode=TwoWay}"
+                PlaceholderText="Inserisci la password"/>
+        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <TextBlock Text="Opzioni:" VerticalAlignment="Center" Foreground="#FF666666"/>
+          <CheckBox Content="Ricorda operatore" IsChecked="False" />
+        </StackPanel>
+        <TextBlock x:Name="InfoText" Text="" Foreground="#FFAA0000" />
+      </StackPanel>
+    </Border>
+    
+    
+    
+    </Grid>
+  
+</UserControl>
