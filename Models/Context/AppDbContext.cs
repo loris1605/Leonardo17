@@ -36,7 +36,8 @@ namespace Models.Context
         public DbSet<Fidelity> Fidelities { get; set; } = null!;
         public DbSet<FidelityConto> FidelityEntries { get; set; } = null!;
         public DbSet<TipoAbbonamento> TipiAbbonamento { get; set; } = null!;
-
+        public DbSet<Abbonamento> Abbonamenti { get; set; } = null!;
+        public DbSet<AbbonamentoConto> AbbonamentoConti { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -64,6 +65,8 @@ namespace Models.Context
             FidelityConfig(modelBuilder);
             FidelityContoConfig(modelBuilder);
             TipoAbbonamentoConfig(modelBuilder);
+            AbbonamentoConfig(modelBuilder);
+            AbbonamentoContoConfig(modelBuilder);
         }
 
         private void SettingsConfig(ModelBuilder modelBuilder)
@@ -448,8 +451,8 @@ namespace Models.Context
             // EF Core capisce da solo la relazione, ma puoi essere esplicito:
             modelBuilder.Entity<Scheda>()
                         .HasOne(s => s.Person)          // Una Scheda ha una Person
-                        .WithMany(p => p.Schede)    // Una Person ha una Scheda
-                        .HasForeignKey(s => s.PersonId) // La chiave è PersonId
+                        .WithOne(p => p.Scheda)    // Una Person ha una Scheda
+                        .HasForeignKey<Scheda>(s => s.PersonId) // La chiave è PersonId
                         .OnDelete(DeleteBehavior.NoAction);
 
 
@@ -598,6 +601,56 @@ namespace Models.Context
         {
             modelBuilder.Entity<TipoAbbonamento>()
                 .Property(s => s.Nome).HasMaxLength(25);
+
+        }
+
+        private static void AbbonamentoConfig(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Abbonamento>()
+                .Property(s => s.Nome).HasMaxLength(50);
+
+            modelBuilder.Entity<Abbonamento>()
+                .HasIndex(p => p.TipoAbbonamentoId);
+
+            modelBuilder.Entity<Abbonamento>()
+                .HasIndex(p => p.PersonId1);
+
+            modelBuilder.Entity<Abbonamento>()
+                .HasIndex(p => p.PersonId2);
+
+            modelBuilder.Entity<Abbonamento>()
+                        .HasOne(s => s.TipoAbbonamento)          // Una Abbonamento ha una TipoAbbonamento
+                        .WithMany(p => p.Abbonamenti)    // Una TipoAbbonamento ha molte Abbonamenti
+                        .HasForeignKey(s => s.TipoAbbonamentoId) // La chiave è TipoAbbonamentoId
+                        .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Abbonamento>()
+                        .HasOne(s => s.Person1)          // Una Abbonamento ha una Person1
+                        .WithMany(p => p.Abbonamenti1)    // Una Person ha molte Abbonamenti
+                        .HasForeignKey(s => s.PersonId1) // La chiave è PersonId1
+                        .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Abbonamento>()
+                        .HasOne(s => s.Person2)          // Una Abbonamento ha una Person2
+                        .WithMany(p => p.Abbonamenti2)    // Una Person ha molte Abbonamenti
+                        .HasForeignKey(s => s.PersonId2) // La chiave è PersonId2
+                        .OnDelete(DeleteBehavior.NoAction);
+        }
+
+        private static void AbbonamentoContoConfig(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<AbbonamentoConto>()
+                .Property(s => s.Nome).HasMaxLength(50);
+
+            modelBuilder.Entity<AbbonamentoConto>()
+                .HasIndex(p => p.AbbonamentoId);
+
+            modelBuilder.Entity<AbbonamentoConto>()
+                        .HasOne(s => s.Abbonamento)          // Una AbbonamentoConto ha una Abbonamento
+                        .WithMany(p => p.AbbonamentoConti)    // Una Abbonamento ha molte AbbonamentoConti
+                        .HasForeignKey(s => s.AbbonamentoId) // La chiave è AbbonamentoId
+                        .OnDelete(DeleteBehavior.NoAction);
+
 
         }
 

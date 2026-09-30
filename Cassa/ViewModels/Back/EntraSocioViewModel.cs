@@ -19,7 +19,27 @@ namespace Cassa.ViewModels
         void SetPostazioneId(int id);
         void SetPosizione(string numPosizione);
 
+        Interaction<Unit, Unit> PosizioneFocus { get; }
+
         IObservable<(int postazioneId, string posizione)> EntraSocioToPostazione { get; }
+
+        EntraSocioMap BindingT { get; set; }
+        IEntraSocioAnagraficaViewModel AnagraficaViewModel { get; set; }
+        bool IsAnagraficaEnabled { get; set; }
+        string ErrorText { get; set; }
+        bool IsSocioFound { get; set; }
+        bool IsRicercaEffettuata { get; set; }
+        bool IsSocioInside { get; set; }
+        bool IsPosizioneEsistente { get; }
+        string InfoLabel { get; }
+        bool IsEntryFormBlocked { get; set; }
+        string CanEntraLabel { get; }
+        string Eta { get; set; }
+        List<EntraIngressiMap> IngressiList { get; set; }
+        EntraIngressiMap SelectedIngresso { get; set; }
+
+        ReactiveCommand<Unit, Unit> EntraCommand { get; set; }
+
     }
 
     public partial class EntraSocioViewModel : ViewModelBase, IEntraSocioViewModel
@@ -35,7 +55,7 @@ namespace Cassa.ViewModels
 
         private readonly CompositeDisposable _disposables = new();
 
-        public ReactiveCommand<Unit, Unit> EntraCommand { get; private set; }
+        public ReactiveCommand<Unit, Unit> EntraCommand { get; set; }
 
         protected override IObservable<bool> IsAnythingExecuting =>
             new[]
@@ -221,8 +241,7 @@ namespace Cassa.ViewModels
             await Task.CompletedTask;
 
         }
-
-        
+      
 
         
 
@@ -292,6 +311,13 @@ namespace Cassa.ViewModels
         {
             get => this._bindingt;
             set => this.RaiseAndSetIfChanged(ref _bindingt, value);
+        }
+
+        private string _eta;
+        public string Eta
+        {
+            get => _eta;
+            set => this.RaiseAndSetIfChanged(ref _eta, value);
         }
 
         private IEntraSocioAnagraficaViewModel _anagraficaViewModel = Locator.Current.GetService<IEntraSocioAnagraficaViewModel>();

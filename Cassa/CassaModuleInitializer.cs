@@ -108,7 +108,7 @@ namespace Cassa
             Locator.CurrentMutable.Register(() => new CassaSchedaContoView(), 
                                                 typeof(IViewFor<SchedaContoViewModel>));
 
-            Locator.CurrentMutable.Register(() => new EntraSocioView(), typeof(IViewFor<EntraSocioViewModel>));
+            Locator.CurrentMutable.Register(() => new EntraSocioView2(), typeof(IViewFor<EntraSocioViewModel>));
 
             Locator.CurrentMutable.Register(() => new CassaListaSociView(), typeof(IViewFor<CassaListaSociViewModel>));
 

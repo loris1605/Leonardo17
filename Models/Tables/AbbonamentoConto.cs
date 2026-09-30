@@ -8,6 +8,7 @@
         public int NumeroIngresso { get; set; }
         public DateTime DataIngresso { get; set; }
         public bool Entrato { get; set; }
+        public string Note { get; set; } = string.Empty;
 
         public Abbonamento? Abbonamento { get; set; }
     }

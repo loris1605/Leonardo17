@@ -14,6 +14,10 @@ namespace Cassa.ViewModels
     public interface IEntraSocioAnagraficaViewModel : IRoutableViewModel
     {
         IObservable<string> EntraSocioAnagraficaToPostazione { get; }
+        ReactiveCommand<Unit, Unit> TesseraCommand { get; }
+        ReactiveCommand<Unit, Unit> F5Command { get; }
+        ReactiveCommand<Unit, Unit> PosizioneEscCommand { get; }
+        ReactiveCommand<Unit, Unit> ApriSchedaCommand { get; }
     }
 
 

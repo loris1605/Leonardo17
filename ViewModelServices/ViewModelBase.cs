@@ -151,8 +151,8 @@ namespace ViewModels
         {
             if (_isClosing) return;
             try { await OnLoading(); }
-            catch (OperationCanceledException) { Debug.WriteLine("Loading annullato."); }
-            catch (Exception ex) { Debug.WriteLine($"ERRORE CARICAMENTO: {ex.Message}"); }
+            catch (OperationCanceledException) { Debug.WriteLine("[ERROR CATCH] Loading annullato."); }
+            catch (Exception ex) { Debug.WriteLine($"[ERROR CATCH] ERRORE CARICAMENTO: {ex.Message}"); }
         }
 
         private async Task ExecuteSaving()

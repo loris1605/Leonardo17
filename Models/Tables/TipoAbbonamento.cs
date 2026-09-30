@@ -15,6 +15,8 @@ namespace Models.Tables
         public decimal Prezzo { get; set; }
         public bool Attivo { get; set; }
 
+        public List<Abbonamento> Abbonamenti { get; set; } = new List<Abbonamento>();
+
     }
     
 }

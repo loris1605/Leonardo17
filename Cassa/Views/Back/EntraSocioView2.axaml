@@ -1,0 +1,102 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Cassa.Views.EntraSocioView2"
+             xmlns:map="clr-namespace:Cassa.ViewModels.Map;assembly=Cassa"
+             Width="800" Height="460">
+
+  <UserControl.Resources>
+    <!-- Pennelli e risorse chiave/valore -->
+    <SolidColorBrush x:Key="CardBrush" Color="#FFF7F9FB"/>
+    <SolidColorBrush x:Key="AccentBrush" Color="#1E88E5"/>
+    <SolidColorBrush x:Key="DangerBrush" Color="#D32F2F"/>
+
+    <!-- Styles come elemento diretto -->
+    
+
+    <!-- DataTemplate (aggiungi x:DataType se usi compiled bindings) -->
+    <DataTemplate x:Key="IngressoTemplate" x:DataType="map:EntraIngressiMap">
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <TextBlock Text="{Binding NomeTariffa}" FontWeight="SemiBold"/>
+        <TextBlock Text=" - " Foreground="#888"/>
+        <TextBlock Text="{Binding PrezzoTariffa}" Foreground="#444"/>
+      </StackPanel>
+    </DataTemplate>
+  </UserControl.Resources>
+
+  <UserControl.Styles>
+      <Style Selector="TextBlock.header">
+        <Setter Property="TextBlock.FontSize" Value="18"/>
+        <Setter Property="TextBlock.FontWeight" Value="Bold"/>
+        <Setter Property="TextBlock.Margin" Value="0,0,0,6"/>
+        <Setter Property="TextBlock.Foreground" Value="#222"/>
+      </Style>
+
+      <Style Selector="Border.card">
+        <Setter Property="Border.CornerRadius" Value="8"/>
+        <Setter Property="Border.Padding" Value="16"/>
+        <Setter Property="Border.Background" Value="{StaticResource CardBrush}"/>
+        <Setter Property="Border.BorderBrush" Value="#E6E6E6"/>
+        <Setter Property="Border.BorderThickness" Value="1"/>
+      </Style>
+    </UserControl.Styles>
+
+
+  <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="*">
+    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+      <TextBlock Classes="header" Text="Entra Socio" VerticalAlignment="Center"/>
+      <TextBlock Text="· Cassa" Margin="8,2,0,0" Foreground="#666" VerticalAlignment="Center"/>
+    </StackPanel>
+
+    <Border Grid.Row="1" Classes="card">
+      <Grid ColumnDefinitions="2*,3*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="10" ColumnSpacing="12">
+        <StackPanel Grid.Column="0" Spacing="8">
+          <TextBlock Text="Tessera" FontWeight="SemiBold"/>
+          <DockPanel LastChildFill="True">
+            <TextBox x:Name="TesseraTextBox" PlaceholderText="Inserisci n. tessera..." HorizontalAlignment="Stretch"/>
+            <Button x:Name="TesseraSearchButton" Content="Cerca" Margin="8,0,0,0" HorizontalAlignment="Right"/>
+          </DockPanel>
+
+          <TextBlock Text="Anagrafica" Margin="0,8,0,0" FontWeight="SemiBold"/>
+          <StackPanel Spacing="6">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBlock Text="Cognome:" Foreground="#444" Width="80"/>
+              <TextBlock x:Name="CognomeText" Text="-" FontWeight="SemiBold"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBlock Text="Nome:" Foreground="#444" Width="80"/>
+              <TextBlock x:Name="NomeText" Text="-" FontWeight="SemiBold"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBlock Text="N. Socio:" Foreground="#444" Width="80"/>
+              <TextBlock x:Name="NumeroSocioText" Text="-" FontWeight="SemiBold"/>
+            </StackPanel>
+          </StackPanel>
+        </StackPanel>
+
+        <StackPanel Grid.Column="1" Spacing="8">
+          <TextBlock Text="Posizione" FontWeight="SemiBold"/>
+          <TextBox x:Name="PosizioneTextBox" PlaceholderText="Es. A12" HorizontalAlignment="Stretch"/>
+
+          <TextBlock Text="Ingresso" Margin="0,8,0,0" FontWeight="SemiBold"/>
+          <ComboBox x:Name="IngressiComboBox" ItemTemplate="{StaticResource IngressoTemplate}" Height="36"/>
+
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0" Spacing="8">
+            <Button x:Name="ApriSchedaButton" Content="Anagrafica" />
+            <Button x:Name="EntraButton" Content="Entra" Background="{StaticResource AccentBrush}" Foreground="White" />
+          </StackPanel>
+
+          <TextBlock x:Name="InfoTextBlock" FontSize="12" Foreground="#2E7D32" Margin="0,10,0,0"/>
+          <TextBlock x:Name="ErrorTextBlock" FontSize="12" Foreground="{StaticResource DangerBrush}" Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <TextBlock Grid.Row="3" Grid.ColumnSpan="2" FontSize="12" Foreground="#666" Text="F5: virtuale | ESC: reset" HorizontalAlignment="Left" Margin="0,12,0,0"/>
+      </Grid>
+    </Border>
+
+    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+      <TextBlock x:Name="CanEntraLabelBlock" Foreground="#444" VerticalAlignment="Center"/>
+    </StackPanel>
+  </Grid>
+</UserControl>

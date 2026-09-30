@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Models.Tables
 {
@@ -11,11 +10,19 @@ namespace Models.Tables
         public int Natoil { get; set; }
         public string UniqueParam {  get; set; } = string.Empty;
 
-        public List<Socio> Soci { get; set; } = [];
+        public List<Socio> Soci { get; set; } = new List<Socio>();
        
-        public List<Scheda> Schede { get; set; } = [];
+        public Scheda? Scheda { get; set; }
 
         public Fidelity? Fidelity { get; set; }
+
+        public List<Abbonamento> Abbonamenti1 { get; set; } = new List<Abbonamento>();
+        public List<Abbonamento> Abbonamenti2 { get; set; } = new List<Abbonamento>();
+
+
+        // Proprietà aggregata di sola lettura per compatibilità; EF non la mapperà
+        [NotMapped]
+        public List<Abbonamento> Abbonamenti => Abbonamenti1.Concat(Abbonamenti2).ToList();
 
         [NotMapped]
         public string Nome
