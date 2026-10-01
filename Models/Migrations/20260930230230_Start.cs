@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Models.Migrations
 {
     /// <inheritdoc />
-    public partial class StartMigration : Migration
+    public partial class Start : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -109,6 +109,23 @@ namespace Models.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Tariffe", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TipiAbbonamento",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Nome = table.Column<string>(type: "nvarchar(25)", maxLength: 25, nullable: false),
+                    NumeroIngressi = table.Column<int>(type: "int", nullable: false),
+                    DurataGiorni = table.Column<int>(type: "int", nullable: false),
+                    Prezzo = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Attivo = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TipiAbbonamento", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -223,6 +240,41 @@ namespace Models.Migrations
                         name: "FK_Soci_People_PersonId",
                         column: x => x.PersonId,
                         principalTable: "People",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Abbonamenti",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Nome = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    TipoAbbonamentoId = table.Column<int>(type: "int", nullable: false),
+                    PersonId1 = table.Column<int>(type: "int", nullable: false),
+                    PersonId2 = table.Column<int>(type: "int", nullable: true),
+                    DataInizio = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DataFine = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Attivo = table.Column<bool>(type: "bit", nullable: false),
+                    Note = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Abbonamenti", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Abbonamenti_People_PersonId1",
+                        column: x => x.PersonId1,
+                        principalTable: "People",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Abbonamenti_People_PersonId2",
+                        column: x => x.PersonId2,
+                        principalTable: "People",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Abbonamenti_TipiAbbonamento_TipoAbbonamentoId",
+                        column: x => x.TipoAbbonamentoId,
+                        principalTable: "TipiAbbonamento",
                         principalColumn: "Id");
                 });
 
@@ -343,6 +395,29 @@ namespace Models.Migrations
                         name: "FK_Tessere_Soci_SocioId",
                         column: x => x.SocioId,
                         principalTable: "Soci",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AbbonamentoConti",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Nome = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    AbbonamentoId = table.Column<int>(type: "int", nullable: false),
+                    NumeroIngresso = table.Column<int>(type: "int", nullable: false),
+                    DataIngresso = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Entrato = table.Column<bool>(type: "bit", nullable: false),
+                    Note = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AbbonamentoConti", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AbbonamentoConti_Abbonamenti_AbbonamentoId",
+                        column: x => x.AbbonamentoId,
+                        principalTable: "Abbonamenti",
                         principalColumn: "Id");
                 });
 
@@ -546,6 +621,26 @@ namespace Models.Migrations
                 values: new object[] { -1, -1, -1 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Abbonamenti_PersonId1",
+                table: "Abbonamenti",
+                column: "PersonId1");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Abbonamenti_PersonId2",
+                table: "Abbonamenti",
+                column: "PersonId2");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Abbonamenti_TipoAbbonamentoId",
+                table: "Abbonamenti",
+                column: "TipoAbbonamentoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AbbonamentoConti_AbbonamentoId",
+                table: "AbbonamentoConti",
+                column: "AbbonamentoId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Fidelities_PersonId",
                 table: "Fidelities",
                 column: "PersonId",
@@ -676,6 +771,9 @@ namespace Models.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "AbbonamentoConti");
+
+            migrationBuilder.DropTable(
                 name: "FidelityEntries");
 
             migrationBuilder.DropTable(
@@ -703,6 +801,9 @@ namespace Models.Migrations
                 name: "Tessere");
 
             migrationBuilder.DropTable(
+                name: "Abbonamenti");
+
+            migrationBuilder.DropTable(
                 name: "Fidelities");
 
             migrationBuilder.DropTable(
@@ -722,6 +823,9 @@ namespace Models.Migrations
 
             migrationBuilder.DropTable(
                 name: "Soci");
+
+            migrationBuilder.DropTable(
+                name: "TipiAbbonamento");
 
             migrationBuilder.DropTable(
                 name: "TipiFidelity");

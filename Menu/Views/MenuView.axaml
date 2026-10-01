@@ -1,11 +1,11 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="using:Menu.ViewModels"
-             xmlns:ui="using:ControlStyles"
              xmlns:conv="using:ViewServices"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:lc="using:Views"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:ui="using:ControlStyles"
+             xmlns:vm="using:Menu.ViewModels"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
@@ -33,8 +33,7 @@
                     TitoloPagina="MENU PRINCIPALE"
                     ButtonText=" Logout "
                     ToolTipText="CAMBIO OPERATORE"
-                    ButtonForeground="White"
-                    ExitCommand="{Binding LogoutCommand}"/>
+                    ButtonForeground="White"/>
 
     <!-- NAV (LEFT) - racchiuso in MainMenu per compatibilità code-behind -->
         <Border Grid.Row="1" Margin="8" Padding="8" x:Name="MainMenu">
@@ -44,11 +43,9 @@
             <ui:UiButton x:Name="SociItem" 
                          Content="Soci" 
                          Foreground="Black"
-                         Command="{Binding SociCommand}"
                          Height="50" 
                          Margin="20,5"
-                         HorizontalAlignment="Stretch"
-                         IsVisible="{Binding AmministratoreVisible}"/>
+                         HorizontalAlignment="Stretch"/>
 
             <ui:UiButton x:Name="ConfigurazioneItem" 
                          Content="Configurazione" 

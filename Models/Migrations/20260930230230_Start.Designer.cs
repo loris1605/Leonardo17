@@ -12,8 +12,8 @@ using Models.Context;
 namespace Models.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260930103130_AbbonamentoMigration")]
-    partial class AbbonamentoMigration
+    [Migration("20260930230230_Start")]
+    partial class Start
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

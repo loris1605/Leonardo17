@@ -1,8 +1,12 @@
 using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.Templates;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using Login.ViewModels;
+using Login.ViewModels.Map;
 using ReactiveUI;
 using System.Reactive;
 using System.Reactive.Disposables;
@@ -40,6 +44,7 @@ public partial class LoginView : BaseUserControl<LoginViewModel>
                     // sicuro: vmObj non è null qui
                     var vm = vmObj!;
 
+                    
                     // 1. Gestione Focus Interaction
                     vm.PasswordFocus
                         .RegisterHandler(async interaction =>
@@ -97,11 +102,18 @@ public partial class LoginView : BaseUserControl<LoginViewModel>
                         .DisposeWith(currentVmDisposables);
 
                     // 4. BINDING REATTIVI
+                                      
+
                     this.Bind(vm, viewModel => viewModel.PasswordText, view => view.PasswordBox.Text)
                         .DisposeWith(currentVmDisposables);
 
                     this.Bind(vm, viewModel => viewModel.BindingT, view => view.OperatoreCombo.SelectedItem)
                         .DisposeWith(currentVmDisposables);
+
+
+                    this.BindCommand(vm, viewModel => viewModel.SaveCommand, view => view.EntraButton)
+                        .DisposeWith(currentVmDisposables);
+
 
                     // Assicuriamo che le sottoscrizioni legate al VM vengano rimosse
                     // quando la view viene disattivata (d è il disposable fornito da WhenActivated)

@@ -35,10 +35,16 @@ public partial class MenuView : BaseUserControl<MenuViewModel>
                     // Sicuro: vmObj non è null qui
                     var vm = vmObj!;
 
-                    
+                    #region OneWay Bindings
+
+                    this.OneWayBind(vm, v => v.AmministratoreVisible, vctrl => vctrl.SociItem)
+                        .DisposeWith(currentVmDisposables);
+
+                    #endregion
+
                     //this.OneWayBind(vm, v => v.ChiudiGiornataEnabled, vctrl => vctrl.CassaItem.IsEnabled)
                     //    .DisposeWith(currentVmDisposables);
-                    
+
                     //this.OneWayBind(vm, v => v.ApriGiornataEnabled, vctrl => vctrl.ApriGiornataItem.IsEnabled)
                     //    .DisposeWith(currentVmDisposables);
                     //this.OneWayBind(vm, v => v.ChiudiGiornataEnabled, vctrl => vctrl.ChiudiGiornataItem.IsEnabled)
@@ -50,6 +56,20 @@ public partial class MenuView : BaseUserControl<MenuViewModel>
                     //    .DisposeWith(currentVmDisposables);
                     this.OneWayBind(vm, v => v.IsMenuReady, vctrl => vctrl.MainMenu.IsVisible)
                         .DisposeWith(currentVmDisposables);
+
+
+                    #region Commands Binding
+
+                    this.BindCommand(vm, v => v.LogoutCommand, vctrl => vctrl.Title)
+                        .DisposeWith(currentVmDisposables);
+
+                    this.BindCommand(vm, v => v.SociCommand, vctrl => vctrl.SociItem)
+                        .DisposeWith(currentVmDisposables);
+
+
+                    #endregion
+
+
 
                     // Dispose del container del VM quando la view viene disattivata
                     currentVmDisposables.DisposeWith(d);
